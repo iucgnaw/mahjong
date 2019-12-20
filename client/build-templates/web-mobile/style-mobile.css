@@ -1,0 +1,127 @@
+html {
+  -ms-touch-action: none;
+}
+
+body, canvas, div {
+  display: block;
+  outline: none;
+  -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
+
+  user-select: none;
+  -moz-user-select: none;
+  -webkit-user-select: none;
+  -ms-user-select: none;
+  -khtml-user-select: none;
+  -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
+}
+
+/* Remove spin of input type number */
+input::-webkit-outer-spin-button,
+input::-webkit-inner-spin-button {
+    /* display: none; <- Crashes Chrome on hover */
+    -webkit-appearance: none;
+    margin: 0; /* <-- Apparently some margin are still there even though it's hidden */
+}
+
+body {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  padding: 0;
+  border: 0;
+  margin: 0;
+
+  cursor: default;
+  color: #888;
+  background-color: #333;
+
+  text-align: center;
+  font-family: Helvetica, Verdana, Arial, sans-serif;
+
+  display: flex;
+  flex-direction: column;
+}
+
+#Cocos2dGameContainer {
+  position: absolute;
+  margin: 0;
+  overflow: hidden;
+  left: 0px;
+  top: 0px;
+
+  display: -webkit-box;
+  -webkit-box-orient: horizontal;
+  -webkit-box-align: center;
+  -webkit-box-pack: center;
+}
+
+canvas {
+  background-color: rgba(0, 0, 0, 0);
+}
+
+a:link, a:visited {
+  color: #666;
+}
+
+a:active, a:hover {
+  color: #666;
+}
+
+p.header {
+  font-size: small;
+}
+
+p.footer {
+  font-size: x-small;
+}
+
+/* 代表默认启动图片的样式 */
+#splash {
+  position: absolute; /* 位置 */
+  top: 0; /* 距离顶部 */
+  left: 0; /* 距离左侧 */
+  width: 100%; /* 宽度百分比（相对父级） */
+  height: 100%; /* 高度百分比（相对父级） */
+  background: #171717 url(./splash.png) no-repeat center; /* 背景颜色或者是背景图片，如果不想改名字，直接将 url 索引到自定义的文件（如果要发布到服务器上，必须在构建目录内）或者直接将 url(./splash.png) 替换为你从网上找到的图片 将图片的网址填写到 url('') 中去 */
+  background-size: 40%; /* 背景图片的百分比 */
+}
+
+/* 以下样式属性自行 baidu or google */
+/* 代表默认启动进度框的样式------ 不动的框！！ */
+.progress-bar {
+    background-color: #1a1a1a;
+    position: absolute;
+    left: 25%;
+    top: 80%;
+    height: 15px;
+    padding: 5px;
+    width: 50%;
+    /*margin: 0 -175px;         */
+    border-radius: 5px;
+    box-shadow: 0 1px 5px #000 inset, 0 1px 0 #444;           
+}
+
+/* 代表默认启动进度条的样式------- 会动的条！！ */
+.progress-bar span {
+    display: block;
+    height: 100%;
+    border-radius: 3px;
+    box-shadow: 0 1px 0 rgba(255, 255, 255, .5) inset;
+    transition: width .4s ease-in-out; 
+    background-color: #34c2e3;    
+}
+
+.stripes span {
+    background-size: 30px 30px;
+    background-image: linear-gradient(135deg, rgba(255, 255, 255, .15) 25%, transparent 25%,
+                        transparent 50%, rgba(255, 255, 255, .15) 50%, rgba(255, 255, 255, .15) 75%,
+                        transparent 75%, transparent);            
+    
+    animation: animate-stripes 1s linear infinite;             
+}
+
+@keyframes animate-stripes {
+    0% {background-position: 0 0;} 100% {background-position: 60px 0;}
+}
