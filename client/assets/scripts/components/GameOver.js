@@ -145,7 +145,7 @@ cc.Class({
             var numOfMeldsTiles = numOfMelds * 3;
             //显示相关的牌
             for (var k = 0; k < userData.handTiles.length; ++k) {
-                var tile = userData.handTiles[k];
+                var tile = userData.handTiles[k].tile;
                 var n = seatView.mahjongs.children[k + numOfMeldsTiles];
                 n.active = true;
                 var sprite = n.getComponent(cc.Sprite);

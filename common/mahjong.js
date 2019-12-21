@@ -108,9 +108,10 @@ exports.getTileSuit = function (a_tile) {
 	}
 }
 
-exports.sortTiles = function (a_tiles) {
+// TOFIX should move to right file.
+exports.sortHandTiles = function (a_tiles) {
 	a_tiles.sort(function (a_tile1, a_tile2) {
-		return a_tile1 - a_tile2;
+		return a_tile1.tile - a_tile2.tile;
 	});
 }
 

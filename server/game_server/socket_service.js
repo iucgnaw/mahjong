@@ -161,16 +161,23 @@ exports.start = function (a_config, a_mgr) {
 			}, userId, true);
 		});
 
-		//出牌
+		a_socket.on("client_req_sync_handtiles", function (a_data) {
+			if (a_socket.userId == null) {
+				return;
+			}
+			var handTiles = JSON.parse(a_data);
+			a_socket.gameMgr.on_client_req_sync_handtiles(a_socket.userId, handTiles);
+		});
+
 		a_socket.on("client_req_action_discard_tile", function (a_data) {
 			if (a_socket.userId == null) {
 				return;
 			}
 			var tile = a_data;
-			a_socket.gameMgr.on_req_discard_tile(a_socket.userId, tile);
+			a_socket.gameMgr.on_client_req_action_discard_tile(a_socket.userId, tile);
 		});
 
-		// Seeal: Chow, Pong, Kong
+		// Steal: Chow, Pong, Kong
 		a_socket.on("client_req_action_steal", function (a_data) {
 			console.assert(a_socket.userId != null);
 			console.assert(a_data != null);

@@ -81,7 +81,6 @@ cc.Class({
             return 1.0;
         } else if (action.type == MJ_ACTION_DRAW_TILE) {
             //console.log("MJ_ACTION_DRAW_TILE");
-            cc.vv.gameNetMgr.on_server_resp_draw_tile(action.si, action.tile);
             cc.vv.gameNetMgr.doChangeTurn(action.si);
             return 0.5;
         } else if (action.type == MJ_ACTION_CHOW) {

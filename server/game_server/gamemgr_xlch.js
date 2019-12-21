@@ -24,7 +24,11 @@ function drawTile(a_game, a_seatIndex) {
     var tile = a_game.tilewall[a_game.tilewallPtr];
     a_game.tilewallPtr++;
     var seat = a_game.seats[a_seatIndex];
-    seat.handTiles.push(tile);
+    var handTile = {};
+    handTile.tile = tile;
+    handTile.pose = "standing";
+    handTile.face = "front";
+    seat.handTiles.push(handTile);
 
     return tile;
 }
@@ -33,19 +37,15 @@ function dealTiles(a_game) {
     // TODO Should each seat draw 4 tiles for 3 rounds, then draw 1 tile each
     var seatIndex = a_game.dealer;
     for (var idxTile = 0; idxTile < (4 * 13); ++idxTile) {
-        var handTiles = a_game.seats[seatIndex].handTiles;
-        console.assert(handTiles != null);
-
         drawTile(a_game, seatIndex);
 
         seatIndex++;
         seatIndex %= 4;
     }
-
-    drawTile(a_game, a_game.dealer);
+    drawTile(a_game, a_game.dealer); // Draw last tile for dealer
 
     for (var idxSeat = 0; idxSeat < a_game.seats.length; ++idxSeat) {
-        m_mahjong.sortTiles(a_game.seats[idxSeat].handTiles);
+        m_mahjong.sortHandTiles(a_game.seats[idxSeat].handTiles);
     }
 
     a_game.turn = a_game.dealer;
@@ -69,15 +69,17 @@ function doDrawTile(a_game) {
     if (tile == -1) {
         doGameOver(a_game, seatTurn.userId);
         return;
-    } else {
-        m_userMgr.broadcastMsg("server_brc_tilewall_remaining",
-            (a_game.tilewall.length - a_game.tilewallPtr),
-            seatTurn.userId,
-            true);
     }
 
     seatTurn.fsmPlayerState = m_mahjong.MJ_PLAYER_STATE_FULL_HAND;
-    m_userMgr.sendMsg(seatTurn.userId, "server_resp_draw_tile", tile);
+
+    var game = a_game;
+    // Sync game
+    for (var idxSeat = 0; idxSeat < game.seats.length; ++idxSeat) {
+        var gameForClient = {};
+        copyGameForClient(gameForClient, game, game.seats[idxSeat].userId);
+        m_userMgr.sendMsg(game.seats[idxSeat].userId, "server_push_game_sync", gameForClient);
+    }
 }
 
 function doGameOver(a_game, a_userId, a_forceEnd) {
@@ -99,8 +101,7 @@ function doGameOver(a_game, a_userId, a_forceEnd) {
             endInfo = [];
             for (var i = 0; i < room.seats.length; ++i) {
                 var seat = room.seats[i];
-                endInfo.push({
-                });
+                endInfo.push({});
             }
         }
 
@@ -209,31 +210,6 @@ exports.setReady = function (a_userId, a_callback) {
             exports.begin(roomId);
         }
     } else { // Existing game
-        // var data = {
-        //     tilewallRemaining: (game.tilewall.length - game.tilewallPtr),
-        //     dealer: game.dealer,
-        //     turn: game.turn,
-
-        //     seats: [],
-        // };
-        // for (var i = 0; i < game.seats.length; ++i) {
-        //     var gameSeat = game.seats[i];
-        //     var dataSeat = {};
-
-        //     if (gameSeat.userId == a_userId) {
-        //         dataSeat.handTiles = gameSeat.handTiles;
-        //     } else {
-        //         dataSeat.handTiles = null;
-        //     }
-        //     dataSeat.discardedTiles = gameSeat.discardedTiles;
-        //     dataSeat.melds = gameSeat.melds;
-        //     dataSeat.huinfo = gameSeat.huinfo;
-
-        //     data.seats.push(dataSeat);
-        // }
-
-        // m_userMgr.sendMsg(a_userId, "server_push_game_sync", data);
-
         var gameForClient = {};
         copyGameForClient(gameForClient, game, a_userId);
         m_userMgr.sendMsg(a_userId, "server_push_game_sync", gameForClient);
@@ -284,8 +260,8 @@ function construct_game_base_info(a_game) {
         tilewall: a_game.tilewall,
         seats: new Array(4)
     }
-    for (var i = 0; i < 4; ++i) {
-        baseInfo.seats[i] = a_game.seats[i].handTiles;
+    for (var i = 0; i < baseInfo.seats.length; ++i) {
+        baseInfo.seats[i] = a_game.seats[i].handTiles; // TOFIX, seats != seats[].handTiles
     }
     a_game.baseInfoJson = JSON.stringify(baseInfo);
 }
@@ -369,7 +345,22 @@ exports.begin = function (a_roomId) {
     }
 };
 
-exports.on_req_discard_tile = function (a_userId, a_tile) {
+exports.on_client_req_sync_handtiles = function (a_userId, a_handTiles) {
+    var seat = g_seatByUserId[a_userId];
+    console.assert(seat != null);
+    var game = seat.game;
+
+    seat.handTiles = a_handTiles;
+
+    // Sync game
+    for (var idxSeat = 0; idxSeat < game.seats.length; ++idxSeat) {
+        var gameForClient = {};
+        copyGameForClient(gameForClient, game, game.seats[idxSeat].userId);
+        m_userMgr.sendMsg(game.seats[idxSeat].userId, "server_push_game_sync", gameForClient);
+    }
+};
+
+exports.on_client_req_action_discard_tile = function (a_userId, a_tile) {
     a_tile = Number.parseInt(a_tile);
     var seat = g_seatByUserId[a_userId];
     console.assert(seat != null);
@@ -383,13 +374,19 @@ exports.on_req_discard_tile = function (a_userId, a_tile) {
     }
 
     // Remove tile from hands
-    var tileIndex = seat.handTiles.indexOf(a_tile);
-    if (tileIndex == -1) {
+    var idxTileToRemove = -1;
+    for (var idxTile = 0; idxTile < seat.handTiles.length; idxTile++) {
+        if (seat.handTiles[idxTile].tile == a_tile) {
+            idxTileToRemove = idxTile;
+            break;
+        }
+    }
+    if (idxTileToRemove == -1) {
         m_userMgr.sendMsg(a_userId, "server_push_message", "Can't find tile: " + a_tile + " in hands: " + seat.handTiles);
         return;
     }
-    seat.handTiles.splice(tileIndex, 1);
-    m_mahjong.sortTiles(seat.handTiles);
+    seat.handTiles.splice(idxTileToRemove, 1);
+    m_mahjong.sortHandTiles(seat.handTiles);
 
     seat.discardedTiles.push(a_tile);
 
@@ -434,13 +431,19 @@ exports.on_client_req_action_steal = function (a_userId, a_actionAndSelectedTile
 
             message = "server_brc_set_aside"
 
-            // Remove selected tiles from hand tiles, and move to honor tiles
-            for (var idxTile = 0; idxTile < seat.selectedTiles.tiles.length; ++idxTile) {
-                var tilePosition = seat.handTiles.indexOf(seat.selectedTiles.tiles[idxTile]);
-                console.assert(tilePosition != -1);
-                seat.handTiles.splice(tilePosition, 1);
-                seat.honorTiles.push(seat.selectedTiles.tiles[idxTile]);
+            // Copy lying tiles to honor tiles
+            for (var idxTile = 0; idxTile < seat.handTiles.length; idxTile++) {
+                if (seat.handTiles[idxTile].pose == "lying") {
+                    seat.honorTiles.push(seat.handTiles[idxTile].tile);
+                }
             }
+            // Remove lying tiles from hand tiles
+            for (var idxTile = seat.handTiles.length - 1; idxTile >= 0; idxTile--) {
+                if (seat.handTiles[idxTile].pose == "lying") {
+                    seat.handTiles.splice(idxTile, 1);
+                }
+            }
+
             seat.selectedTiles = null;
             break;
 
@@ -558,7 +561,7 @@ exports.on_client_req_action_win = function (a_userId) {
 
     if (game.qiangGangContext != null) { // Means Robbing Kong Win, handle the seat being Rob Kong Win
     } else if (false) { // No discarding tile, means Self Draw Win
-        winTile = seat.handTiles.pop();
+        winTile = seat.handTiles.pop().tile;
         tile = winTile;
         winData.tile = winTile;
 
@@ -589,12 +592,13 @@ function copyGameForClient(a_gameForClient, a_game, a_userId) {
     for (var idxSeat = 0; idxSeat < a_game.seats.length; ++idxSeat) {
         var seat = {};
 
-        if (a_game.seats[idxSeat].userId == a_userId) {
-            seat.handTiles = a_game.seats[idxSeat].handTiles;
-        } else {
-            seat.handTiles = [];
-            for (var idxTile = 0; idxTile < a_game.seats[idxSeat].handTiles.length; idxTile++) {
-                seat.handTiles[idxTile] = m_mahjong.MJ_TILE_INVALID;
+        // seat.handTiles = a_game.seats[idxSeat].handTiles;
+        seat.handTiles = JSON.parse(JSON.stringify(a_game.seats[idxSeat].handTiles));
+        if (a_game.seats[idxSeat].userId != a_userId) { // Invalidize handTiles
+            for (var idxTile = 0; idxTile < seat.handTiles.length; idxTile++) {
+                if (seat.handTiles[idxTile].pose == "standing") { // and only invalidize stading ones
+                    seat.handTiles[idxTile].tile = m_mahjong.MJ_TILE_INVALID;
+                }
             }
         }
         seat.honorTiles = a_game.seats[idxSeat].honorTiles;
@@ -657,56 +661,33 @@ exports.on_client_req_action_pass = function (a_userId) {
         if ((seat.fsmPlayerState == m_mahjong.MJ_PLAYER_STATE_DISCARDING_TILE) ||
             (seat.fsmPlayerState == m_mahjong.MJ_PLAYER_STATE_BEING_TARGETED)) {
             seat.fsmPlayerState = m_mahjong.MJ_PLAYER_STATE_IDLE;
-        } else if (seat.fsmPlayerState == m_mahjong.MJ_PLAYER_STATE_CHOWING) {
-            // Steal tile from turn player
-            var tileStealing = game.seats[game.turn].discardedTiles.pop();
+        } else if ((seat.fsmPlayerState == m_mahjong.MJ_PLAYER_STATE_CHOWING) ||
+            (seat.fsmPlayerState == m_mahjong.MJ_PLAYER_STATE_PONGING) ||
+            (seat.fsmPlayerState == m_mahjong.MJ_PLAYER_STATE_KONGING)) {
+            var meld = {
+                type: "",
+                tiles: [],
+            };
 
-            // Remove selected tiles from hand tiles, and move to meld
-            for (var idxTile = 0; idxTile < seat.selectedTiles.tiles.length; ++idxTile) {
-                var tilePosition = seat.handTiles.indexOf(seat.selectedTiles.tiles[idxTile]);
-                console.assert(tilePosition != -1);
-                seat.handTiles.splice(tilePosition, 1);
+            // Copy lying tiles to meld
+            for (var idxTile = 0; idxTile < seat.handTiles.length; idxTile++) {
+                if (seat.handTiles[idxTile].pose == "lying") {
+                    meld.tiles.push(seat.handTiles[idxTile].tile);
+                }
             }
-            seat.selectedTiles.tiles.push(tileStealing);
-
-            seat.melds.push(seat.selectedTiles);
-            seat.selectedTiles = null;
-
-            seat.fsmPlayerState = m_mahjong.MJ_PLAYER_STATE_FULL_HAND;
-
-            nextTurnIndex = seat.seatIndex;
-        } else if (seat.fsmPlayerState == m_mahjong.MJ_PLAYER_STATE_PONGING) {
-            // Steal tile from turn player
-            var tileStealing = game.seats[game.turn].discardedTiles.pop();
-
-            // Remove selected tiles from hand tiles, and move to meld
-            for (var idxTile = 0; idxTile < seat.selectedTiles.tiles.length; ++idxTile) {
-                var tilePosition = seat.handTiles.indexOf(seat.selectedTiles.tiles[idxTile]);
-                console.assert(tilePosition != -1);
-                seat.handTiles.splice(tilePosition, 1);
+            // Remove lying tiles from hand tiles
+            for (var idxTile = seat.handTiles.length - 1; idxTile >= 0; idxTile--) {
+                if (seat.handTiles[idxTile].pose == "lying") {
+                    seat.handTiles.splice(idxTile, 1);
+                }
             }
-            seat.selectedTiles.tiles.push(tileStealing);
 
-            seat.melds.push(seat.selectedTiles);
-            seat.selectedTiles = null;
-
-            seat.fsmPlayerState = m_mahjong.MJ_PLAYER_STATE_FULL_HAND;
-
-            nextTurnIndex = seat.seatIndex;
-        } else if (seat.fsmPlayerState == m_mahjong.MJ_PLAYER_STATE_KONGING) {
-            // Steal tile from turn player
+            // Steal tile from turn player, and move to meld
             var tileStealing = game.seats[game.turn].discardedTiles.pop();
+            meld.tiles.push(tileStealing);
 
-            // Remove selected tiles from hand tiles, and move to meld
-            for (var idxTile = 0; idxTile < seat.selectedTiles.tiles.length; ++idxTile) {
-                var tilePosition = seat.handTiles.indexOf(seat.selectedTiles.tiles[idxTile]);
-                console.assert(tilePosition != -1);
-                seat.handTiles.splice(tilePosition, 1);
-            }
-            seat.selectedTiles.tiles.push(tileStealing);
-
-            seat.melds.push(seat.selectedTiles);
-            seat.selectedTiles = null;
+            // Push meld
+            seat.melds.push(meld);
 
             seat.fsmPlayerState = m_mahjong.MJ_PLAYER_STATE_FULL_HAND;
 

@@ -299,10 +299,6 @@ cc.Class({
             self.on_server_brc_discarding_tile(seatIndex, tile);
         });
 
-        cc.vv.net.addHandler("server_resp_draw_tile", function (a_data) {
-            self.on_server_resp_draw_tile(self.seatIndex, a_data);
-        });
-
         cc.vv.net.addHandler("server_brc_player_pass", function (data) {
             var userId = data.userId;
             var seatIndex = self.getSeatIndexByUserId(userId);
@@ -372,17 +368,6 @@ cc.Class({
         var seat = this.seats[seatIndex];
         seat.discardedTiles.push(tile);
         this.dispatchEvent("event_server_brc_nobody_thinking", seat);
-    },
-
-    on_server_resp_draw_tile: function (a_seatIndex, a_tile) {
-        var seat = this.seats[a_seatIndex];
-        if (seat.handTiles) {
-            seat.handTiles.push(a_tile);
-            this.dispatchEvent("event_server_resp_draw_tile", {
-                seatIndex: a_seatIndex,
-                tile: a_tile
-            });
-        }
     },
 
     on_server_brc_discarding_tile: function (a_seatIndex, a_tile) {
