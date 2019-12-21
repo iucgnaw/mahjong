@@ -12,6 +12,7 @@ cc.Class({
         seatIndex: -1,
         seats: null,
         turn: -1,
+        jokerTile: m_mahjong.MJ_TILE_INVALID,
         dealer: -1,
 
         isOver: false,
@@ -235,6 +236,7 @@ cc.Class({
             self.tilewallRemaining = a_data.tilewallRemaining;
             self.dealer = a_data.dealer;
             self.turn = a_data.turn;
+            self.jokerTile = a_data.jokerTile;
 
             for (var i = 0; i < a_data.seats.length; ++i) {
                 var seat = self.seats[i];

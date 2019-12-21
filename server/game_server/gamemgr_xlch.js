@@ -36,7 +36,16 @@ function drawTile(a_game, a_seatIndex) {
 function dealTiles(a_game) {
     // TODO Should each seat draw 4 tiles for 3 rounds, then draw 1 tile each
     var seatIndex = a_game.dealer;
-    for (var idxTile = 0; idxTile < (4 * 13); ++idxTile) {
+    for (var idxRound = 0; idxRound < 12; ++idxRound) {
+        drawTile(a_game, seatIndex);
+        drawTile(a_game, seatIndex);
+        drawTile(a_game, seatIndex);
+        drawTile(a_game, seatIndex);
+
+        seatIndex++;
+        seatIndex %= 4;
+    }
+    for (var idxRound = 0; idxRound < 4; ++idxRound) {
         drawTile(a_game, seatIndex);
 
         seatIndex++;
@@ -49,6 +58,17 @@ function dealTiles(a_game) {
     }
 
     a_game.turn = a_game.dealer;
+
+    var jokerTile;
+    while (true) {
+        var dicesNumber = m_mahjong.toss2Dices();
+        jokerTile = a_game.tilewall[(a_game.tilewall.length - 1) - ((dicesNumber - 1) * 2)];
+        if ((m_mahjong.getTileSuit(jokerTile) != m_mahjong.MJ_TILE_SUIT_HONOR) &&
+            (m_mahjong.getTileSuit(jokerTile) != m_mahjong.MJ_TILE_SUIT_INVALID)) {
+            break;
+        }
+    }
+    a_game.jokerTile = jokerTile;
 }
 
 function changeTurn(a_game, a_seatIndex) {
@@ -289,6 +309,8 @@ exports.begin = function (a_roomId) {
         seats: new Array(4), // TODO: use constant
 
         turn: 0,
+
+        jokerTile: m_mahjong.MJ_TILE_INVALID,
 
         actionList: [],
     };
@@ -587,6 +609,7 @@ function copyGameForClient(a_gameForClient, a_game, a_userId) {
     a_gameForClient.tilewallRemaining = a_game.tilewall.length - a_game.tilewallPtr;
     a_gameForClient.dealer = a_game.dealer;
     a_gameForClient.turn = a_game.turn;
+    a_gameForClient.jokerTile = a_game.jokerTile;
 
     a_gameForClient.seats = [];
     for (var idxSeat = 0; idxSeat < a_game.seats.length; ++idxSeat) {

@@ -91,20 +91,20 @@ exports.getTileName = function (a_tile) {
 }
 
 exports.getTileSuit = function (a_tile) {
-	if (a_tile >= MJ_TILE_DOT_1 && a_tile <= MJ_TILE_DOT_9) {
-		return MJ_TILE_SUIT_DOT;
-	} else if (a_tile >= MJ_TILE_BAMBOO_1 && a_tile <= MJ_TILE_BAMBOO_9) {
-		return MJ_TILE_SUIT_BAMBOO;
-	} else if (a_tile >= MJ_TILE_CHARACTER_1 && a_tile <= MJ_TILE_CHARACTER_9) {
-		return MJ_TILE_SUIT_CHARACTER;
-	} else if (a_tile >= MJ_TILE_WIND_1_EAST && a_tile <= MJ_TILE_WIND_4_NORTH) {
-		return MJ_TILE_SUIT_WIND;
-	} else if (a_tile >= MJ_TILE_DRAGON_1_RED && a_tile <= MJ_TILE_DRAGON_3_WHITE) {
-		return MJ_TILE_SUIT_DRAGON;
-	} else if (a_tile >= MJ_TILE_SEASON_1_SPRING && a_tile <= MJ_TILE_FLOWER_4_CHRYSANTHEMUM) {
-		return MJ_TILE_SUIT_HONOR;
+	if (a_tile >= exports.MJ_TILE_DOT_1 && a_tile <= exports.MJ_TILE_DOT_9) {
+		return exports.MJ_TILE_SUIT_DOT;
+	} else if (a_tile >= exports.MJ_TILE_BAMBOO_1 && a_tile <= exports.MJ_TILE_BAMBOO_9) {
+		return exports.MJ_TILE_SUIT_BAMBOO;
+	} else if (a_tile >= exports.MJ_TILE_CHARACTER_1 && a_tile <= exports.MJ_TILE_CHARACTER_9) {
+		return exports.MJ_TILE_SUIT_CHARACTER;
+	} else if (a_tile >= exports.MJ_TILE_WIND_1_EAST && a_tile <= exports.MJ_TILE_WIND_4_NORTH) {
+		return exports.MJ_TILE_SUIT_WIND;
+	} else if (a_tile >= exports.MJ_TILE_DRAGON_1_RED && a_tile <= exports.MJ_TILE_DRAGON_3_WHITE) {
+		return exports.MJ_TILE_SUIT_DRAGON;
+	} else if (a_tile >= exports.MJ_TILE_SEASON_1_SPRING && a_tile <= exports.MJ_TILE_FLOWER_4_CHRYSANTHEMUM) {
+		return exports.MJ_TILE_SUIT_HONOR;
 	} else {
-		return MJ_TILE_SUIT_INVALID;
+		return exports.MJ_TILE_SUIT_INVALID;
 	}
 }
 
@@ -139,6 +139,14 @@ exports.shuffleTilewall = function (a_tilewall) {
 		a_tilewall[idxTileForwardRandom] = a_tilewall[idxTileBackward];
 		a_tilewall[idxTileBackward] = tileSwap;
 	}
+}
+
+exports.tossDice = function () {
+	return (Math.floor(Math.random() * 6 + 1));
+}
+
+exports.toss2Dices = function () {
+	return exports.tossDice() + exports.tossDice();
 }
 
 // module.exports = {

@@ -305,9 +305,9 @@ cc.Class({
         }
 
         var sideNames = ["nodeSideBottom", "nodeSideRight", "nodeSideTop", "nodeSideLeft"];
-        var nodeGame = this.node.getChildByName("nodeTable");
+        var nodeTable = this.node.getChildByName("nodeTable");
         for (var idxSide = 0; idxSide < sideNames.length; ++idxSide) {
-            var nodeSide = nodeGame.getChildByName(sideNames[idxSide]);
+            var nodeSide = nodeTable.getChildByName(sideNames[idxSide]);
             var nodeHandTiles = nodeSide.getChildByName("nodeHandTiles");
             for (var idxTile = 0; idxTile < nodeHandTiles.childrenCount; ++idxTile) {
                 var nodeTile = nodeHandTiles.getChildByName("nodeTile" + idxTile);
@@ -345,6 +345,13 @@ cc.Class({
                 }
                 this.refreshSeatTiles(seat);
             }
+        }
+
+        if (cc.vv.gameNetMgr.jokerTile != m_mahjong.MJ_TILE_INVALID) {
+            var nodeJokerTile = nodeTable.getChildByName("nodeJokerTile");
+            var sprite = nodeJokerTile.getComponent(cc.Sprite);
+            sprite.spriteFrame = cc.vv.mahjongmgr.getSpriteFrameByTile("_front_standing_bottom", cc.vv.gameNetMgr.jokerTile);
+            nodeJokerTile.active = true;
         }
     },
 
@@ -421,7 +428,7 @@ cc.Class({
                     sprite.spriteFrame = cc.vv.mahjongmgr.getSpriteFrameByTile(prefixString, handTiles[idxTile].tile);
                     if (sideString == "nodeSideBottom") {
                         sprite.node.y += 10;
-                    }else if (sideString == "nodeSideRight") {
+                    } else if (sideString == "nodeSideRight") {
                         sprite.node.x -= 20;
                     } else if (sideString == "nodeSideTop") {
                         sprite.node.y -= 35;
