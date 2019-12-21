@@ -88040,7 +88040,6 @@
     "nodePrepare": {
       "__id__": 8
     },
-    "_spriteHandTiles": [],
     "_labelTilewallRemaining": null,
     "_labelGameCount": null,
     "_nodeWinningTilesAll": [],
