@@ -16,7 +16,6 @@ cc.Class({
 
         _labelTilewallRemaining: null,
         _labelGameCount: null,
-        _nodeWinningTilesAll: [],
         _nodeMeldsAll: [],
         _nodeHonorTilesAll: [],
         _animationAll: [],
@@ -95,9 +94,6 @@ cc.Class({
             var nodeHonorTiles = nodeSide.getChildByName("nodeHonorTiles");
             this._nodeHonorTilesAll.push(nodeHonorTiles);
 
-            var nodeWinningTiles = nodeSide.getChildByName("nodeWinningTiles");
-            this._nodeWinningTilesAll.push(nodeWinningTiles);
-
             this._animationAll.push(nodeSide.getChildByName("nodeAnimation").getComponent(cc.Animation));
         }
     },
@@ -133,20 +129,10 @@ cc.Class({
         });
 
         this.node.on("event_server_brc_win", function (a_data) {
-            //如果不是玩家自己，则将玩家的牌都放倒
             var seatIndex = a_data.seatIndex;
             var localIndex = cc.vv.gameNetMgr.getLocalIndex(seatIndex);
-            var hupai = self._nodeWinningTilesAll[localIndex];
-            hupai.active = true;
-
-            var seat = cc.vv.gameNetMgr.seats[seatIndex];
-            seat.hued = true;
-            hupai.getChildByName("sprHu").active = true;
-            hupai.getChildByName("sprZimo").active = false;
-            self.initHupai(localIndex, a_data.hupai);
 
             self.playActionAnimation(localIndex, "action_win");
-
             cc.vv.audioMgr.playSfx("mahjong/action/action_win.mp3");
         });
 
@@ -288,22 +274,6 @@ cc.Class({
             }
         }
 
-        for (var i = 0; i < cc.vv.gameNetMgr.seats.length; ++i) {
-            var seat = cc.vv.gameNetMgr.seats[i];
-            var localIndex = cc.vv.gameNetMgr.getLocalIndex(i);
-            var hupai = this._nodeWinningTilesAll[localIndex];
-            hupai.active = seat.hued;
-
-            if (seat.huinfo) {
-                for (var idxTile = 0; idxTile < seat.huinfo.length; ++idxTile) {
-                    var info = seat.huinfo[idxTile];
-                    if (info.ishupai) {
-                        this.initHupai(localIndex, info.tile);
-                    }
-                }
-            }
-        }
-
         var sideNames = ["nodeSideBottom", "nodeSideRight", "nodeSideTop", "nodeSideLeft"];
         var nodeTable = this.node.getChildByName("nodeTable");
         for (var idxSide = 0; idxSide < sideNames.length; ++idxSide) {
@@ -322,6 +292,7 @@ cc.Class({
             var nodeSeat = nodeSide.getChildByName("nodeSeat");
             var nodePlayerName = nodeSeat.getChildByName("nodePlayerName");
             var labelPlayerName = nodePlayerName.getComponent(cc.Label);
+            var seat = cc.vv.gameNetMgr.seats[idxSide];
             if (seat.fsmPlayerState) {
                 labelPlayerName.string = seat.fsmPlayerState;
             }

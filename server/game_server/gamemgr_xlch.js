@@ -217,7 +217,7 @@ exports.setReady = function (a_userId, a_callback) {
     m_roomMgr.setReady(a_userId, true);
 
     var game = g_games[roomId];
-    if (game == null) { // Non-existing game
+    if (game == null) { // Non-exist game
         if (room.seats.length == 4) {
             for (var i = 0; i < room.seats.length; ++i) {
                 var gameSeat = room.seats[i];
@@ -229,7 +229,7 @@ exports.setReady = function (a_userId, a_callback) {
             //4个人到齐了，并且都准备好了，则开始新的一局
             exports.begin(roomId);
         }
-    } else { // Existing game
+    } else { // Exist game
         var gameForClient = {};
         copyGameForClient(gameForClient, game, a_userId);
         m_userMgr.sendMsg(a_userId, "server_push_game_sync", gameForClient);
@@ -557,44 +557,12 @@ exports.on_client_req_action_steal = function (a_userId, a_actionAndSelectedTile
 exports.on_client_req_action_win = function (a_userId) {
     var seat = g_seatByUserId[a_userId];
     console.assert(seat != null);
-
     var seatIndex = seat.seatIndex;
     var game = seat.game;
 
-    //标记为和牌
-    var isSelfDraw = false;
-
     var turnSeat = game.seats[game.turn];
 
-    var winData = {
-        ishupai: true,
-        tile: -1,
-        action: null,
-        isQiangGangHu: false,
-        target: -1,
-        fan: 0,
-        pattern: null,
-        isHaiDiHu: false,
-        isTianHu: false,
-        isDiHu: false,
-    };
-
     var tile = -1;
-
-    if (game.qiangGangContext != null) { // Means Robbing Kong Win, handle the seat being Rob Kong Win
-    } else if (false) { // No discarding tile, means Self Draw Win
-        winTile = seat.handTiles.pop().tile;
-        tile = winTile;
-        winData.tile = winTile;
-
-        isSelfDraw = true;
-    } else { // Means Fired Win
-        winData.tile = winTile;
-
-        var action = "hu";
-
-        winData.target = game.turn;
-    }
 
     //通知前端，有人和牌了
     m_userMgr.broadcastMsg("server_brc_win", {
@@ -602,7 +570,17 @@ exports.on_client_req_action_win = function (a_userId) {
         hupai: tile
     }, seat.userId, true);
 
-    doGameOver(game, turnSeat.userId);
+    for (var idxTile = 0; idxTile < seat.handTiles.length; idxTile++) {
+        seat.handTiles[idxTile].pose = "lying";
+    }
+
+    // Sync game
+    for (var idxSeat = 0; idxSeat < game.seats.length; ++idxSeat) {
+        var gameForClient = {};
+        copyGameForClient(gameForClient, game, game.seats[idxSeat].userId);
+        m_userMgr.sendMsg(game.seats[idxSeat].userId, "server_push_game_sync", gameForClient);
+    }
+    // doGameOver(game, turnSeat.userId);
 };
 
 function copyGameForClient(a_gameForClient, a_game, a_userId) {
