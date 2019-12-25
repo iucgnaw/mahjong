@@ -26,7 +26,6 @@ cc.Class({
         this.addComponent("TimePointer");
         this.addComponent("GameResult");
         this.addComponent("Chat");
-        this.addComponent("Folds");
         this.addComponent("ReplayCtrl");
         this.addComponent("PopupMgr");
         this.addComponent("ReConnect");
@@ -82,6 +81,12 @@ cc.Class({
                         nodeTile._rotationDegree = 270;
                     }
                 }
+            }
+
+            var nodeDiscardedTiles = nodeSide.getChildByName("nodeDiscardedTiles");
+            for (var idxTile = 0; idxTile < nodeDiscardedTiles.childrenCount; ++idxTile) {
+                var nodeTile = nodeDiscardedTiles.getChildByName("nodeTile" + idxTile);
+                nodeTile.active = false;
             }
 
             this._animationAll.push(nodeSide.getChildByName("nodeAnimation").getComponent(cc.Animation));
@@ -256,14 +261,19 @@ cc.Class({
                 nodeTile.active = false;
             }
 
+            var nodeDiscardedTiles = nodeSide.getChildByName("nodeDiscardedTiles");
+            for (var idxTile = 0; idxTile < nodeDiscardedTiles.childrenCount; ++idxTile) {
+                var nodeTile = nodeDiscardedTiles.getChildByName("nodeTile" + idxTile);
+                nodeTile.active = false;
+            }
+
             var nodeSeat = nodeSide.getChildByName("nodeSeat");
-            var nodePlayerName = nodeSeat.getChildByName("nodePlayerName");
-            var labelPlayerName = nodePlayerName.getComponent(cc.Label);
+            var nodeScore = nodeSeat.getChildByName("score");
+            var labelScore = nodeScore.getComponent(cc.Label);
             var natualIndex = cc.vv.gameNetMgr.getNatualIndex(idxSide);
             var seat = cc.vv.gameNetMgr.seats[natualIndex];
             if (seat.fsmPlayerState) {
-                labelPlayerName.string = seat.fsmPlayerState;
-                console.log("idxSide: " + idxSide + ", natualIndex: " + natualIndex + ", sideNames[idxSide]: " + sideNames[idxSide] + ", seat.fsmPlayerState: " + seat.fsmPlayerState);
+                labelScore.string = seat.fsmPlayerState;
             }
         }
 
@@ -382,6 +392,18 @@ cc.Class({
             for (var idxTile = meldTilesNum + handTiles.length; idxTile < nodeHandTiles.childrenCount; ++idxTile) {
                 var nodeTile = nodeHandTiles.getChildByName("nodeTile" + idxTile);
                 nodeTile.active = null;
+            }
+        }
+
+        if (a_seat.discardedTiles != null) {
+            var discardedTiles = a_seat.discardedTiles;
+            var nodeDiscardedTiles = nodeSide.getChildByName("nodeDiscardedTiles");
+
+            for (var idxTile = 0; idxTile < discardedTiles.length; ++idxTile) {
+                var nodeTile = nodeDiscardedTiles.getChildByName("nodeTile" + idxTile);
+                var sprite = nodeTile.getComponent(cc.Sprite);
+                sprite.spriteFrame = cc.vv.mahjongmgr.getSpriteFrameByTile(prefixString, discardedTiles[idxTile]);
+                nodeTile.active = true; // Show this tile
             }
         }
 
