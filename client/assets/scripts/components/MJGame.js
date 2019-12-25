@@ -96,14 +96,6 @@ cc.Class({
         //初始化事件监听器
         var self = this;
 
-        this.node.on("event_server_push_hand_tiles", function (a_data) {
-            self.refreshSeatTiles(cc.vv.gameNetMgr.seats[cc.vv.gameNetMgr.seatIndex]);
-        });
-
-        this.node.on("event_server_brc_hand_begin", function (a_data) {
-            self.on_event_server_push_game_sync();
-        });
-
         this.node.on("event_server_push_game_sync", function (a_data) {
             self.on_event_server_push_game_sync();
         });

@@ -213,30 +213,6 @@ cc.Class({
             self.dispatchEvent("event_seat_update", seat);
         });
 
-        cc.vv.net.addHandler("server_push_hand_tiles", function (a_data) {
-            self.seats[self.seatIndex].handTiles = a_data;
-
-            for (var idxSeat = 0; idxSeat < self.seats.length; ++idxSeat) {
-                if (self.seats[idxSeat].honorTiles == null) {
-                    self.seats[idxSeat].honorTiles = [];
-                }
-                if (self.seats[idxSeat].discardedTiles == null) {
-                    self.seats[idxSeat].discardedTiles = [];
-                }
-                if (self.seats[idxSeat].melds == null) {
-                    self.seats[idxSeat].melds = [];
-                }
-                self.seats[idxSeat].ready = false;
-            }
-            self.dispatchEvent("event_server_push_hand_tiles");
-        });
-
-        cc.vv.net.addHandler("server_brc_hand_begin", function (data) {
-            self.dealer = data;
-            self.turn = self.dealer;
-            self.dispatchEvent("event_server_brc_hand_begin");
-        });
-
         cc.vv.net.addHandler("server_push_game_sync", function (a_data) {
             self.tilewallRemaining = a_data.tilewallRemaining;
             self.dealer = a_data.dealer;

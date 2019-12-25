@@ -84,11 +84,6 @@ cc.Class({
             self.initSingleSeat(data);
         });
 
-        this.node.on("event_server_brc_hand_begin", function (data) {
-            self.refreshBtns();
-            self.initSeats();
-        });
-
         this.node.on("event_server_brc_hand_count", function (data) {
             self.refreshBtns();
         });

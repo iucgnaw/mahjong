@@ -30,10 +30,6 @@ cc.Class({
 
         var self = this;
 
-        this.node.on("event_server_brc_hand_begin", function (data) {
-            self.initPointer();
-        });
-
         this.node.on("event_server_brc_change_turn", function (data) {
             self.initPointer();
             self._time = 10;

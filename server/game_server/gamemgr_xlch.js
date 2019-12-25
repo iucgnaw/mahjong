@@ -376,9 +376,7 @@ exports.begin = function (a_roomId) {
     for (var idxSeat = 0; idxSeat < roomSeats.length; ++idxSeat) {
         var seat = roomSeats[idxSeat];
 
-        m_userMgr.sendMsg(seat.userId, "server_push_hand_tiles", game.seats[idxSeat].handTiles);
-        m_userMgr.sendMsg(seat.userId, "server_brc_hand_count", room.gameIndex);
-        m_userMgr.sendMsg(seat.userId, "server_brc_hand_begin", game.dealer);
+        // m_userMgr.sendMsg(seat.userId, "server_brc_hand_count", room.gameIndex);
 
         seat.fsmPlayerState = m_mahjong.MJ_PLAYER_STATE_IDLE;
     }

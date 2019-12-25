@@ -59,9 +59,6 @@ cc.Class({
 
     initEventHandler: function () {
         var self = this;
-        this.node.on("event_server_brc_hand_begin", function (a_data) {
-            self.refreshDiscardedTilesAll();
-        });
 
         this.node.on("event_server_push_game_sync", function (a_data) {
             self.refreshDiscardedTilesAll();
