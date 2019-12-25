@@ -151,7 +151,6 @@ cc.Class({
         this._scriptTableSeats[localIndex].setOffline(isOffline);
         this._scriptTableSeats[localIndex].setID(a_seat.userId);
         this._scriptTableSeats[localIndex].voiceMsg(false);
-        this._scriptTableSeats[localIndex].refreshXuanPaiState();
     },
 
     onBtnSettingsClicked: function () {

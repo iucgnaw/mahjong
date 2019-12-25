@@ -225,6 +225,14 @@ exports.start = function (a_config, a_mgr) {
 			a_socket.gameMgr.on_client_req_action_draw_tile(a_socket.userId);
 		});
 
+		//
+		a_socket.on("client_req_action_backdraw_tile", function (a_data) {
+			if (a_socket.userId == null) {
+				return;
+			}
+			a_socket.gameMgr.on_client_req_action_backdraw_tile(a_socket.userId);
+		});
+
 		//聊天
 		a_socket.on("client_req_chat", function (a_data) {
 			if (a_socket.userId == null) {

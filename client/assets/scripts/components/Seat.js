@@ -35,8 +35,6 @@ cc.Class({
         this._labelPlayerName = this.node.getChildByName("nodePlayerName").getComponent(cc.Label);
         this._labelPlayerScore = this.node.getChildByName("score").getComponent(cc.Label);
         this._nodeVoiceMsg = this.node.getChildByName("nodeVoiceMsg");
-        this._xuanpai = this.node.getChildByName("xuanpai");
-        this.refreshXuanPaiState();
 
         if (this._nodeVoiceMsg) {
             this._nodeVoiceMsg.active = false;
@@ -195,29 +193,6 @@ cc.Class({
     voiceMsg: function (show) {
         if (this._nodeVoiceMsg) {
             this._nodeVoiceMsg.active = show;
-        }
-    },
-
-    refreshXuanPaiState: function () {
-        if (this._xuanpai == null) {
-            return;
-        }
-
-        this._xuanpai.active = cc.vv.gameNetMgr.isHuanSanZhang;
-        if (cc.vv.gameNetMgr.isHuanSanZhang == false) {
-            return;
-        }
-
-        this._xuanpai.getChildByName("xz").active = false;
-        this._xuanpai.getChildByName("xd").active = false;
-
-        var seat = cc.vv.gameNetMgr.getSeatByID(this._userId);
-        if (seat) {
-            // if (seat.huanpais == null) {
-            //     this._xuanpai.getChildByName("xz").active = true;
-            // } else {
-            //     this._xuanpai.getChildByName("xd").active = true;
-            // }
         }
     },
 

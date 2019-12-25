@@ -17,12 +17,27 @@ var MJ_ACTION_WIN_SELFDRAW = 6;
 var MJ_ACTION_CHOW = 7;
 
 function drawTile(a_game, a_seatIndex) {
-    if (a_game.tilewallPtr == a_game.tilewall.length) { // No more tile in Tiles Wall
-        return -1;
+    if (a_game.tilewall.length <= 0) { // No more tile in Tiles Wall
+        return m_mahjong.MJ_TILE_INVALID;
     }
 
-    var tile = a_game.tilewall[a_game.tilewallPtr];
-    a_game.tilewallPtr++;
+    var tile = a_game.tilewall.shift();
+    var seat = a_game.seats[a_seatIndex];
+    var handTile = {};
+    handTile.tile = tile;
+    handTile.pose = "standing";
+    handTile.face = "front";
+    seat.handTiles.push(handTile);
+
+    return tile;
+}
+
+function backdrawTile(a_game, a_seatIndex) {
+    if (a_game.tilewall.length <= 0) { // No more tile in Tiles Wall
+        return m_mahjong.MJ_TILE_INVALID;
+    }
+
+    var tile = a_game.tilewall.pop();
     var seat = a_game.seats[a_seatIndex];
     var handTile = {};
     handTile.tile = tile;
@@ -84,14 +99,31 @@ function changeTurn(a_game, a_seatIndex) {
 function doDrawTile(a_game) {
     var seatTurn = a_game.seats[a_game.turn];
     var tile = drawTile(a_game, a_game.turn);
-
-    //牌摸完了，结束
     if (tile == -1) {
         doGameOver(a_game, seatTurn.userId);
         return;
     }
 
     seatTurn.fsmPlayerState = m_mahjong.MJ_PLAYER_STATE_FULL_HAND;
+
+    var game = a_game;
+    // Sync game
+    for (var idxSeat = 0; idxSeat < game.seats.length; ++idxSeat) {
+        var gameForClient = {};
+        copyGameForClient(gameForClient, game, game.seats[idxSeat].userId);
+        m_userMgr.sendMsg(game.seats[idxSeat].userId, "server_push_game_sync", gameForClient);
+    }
+}
+
+function doBackdrawTile(a_game) {
+    var seatTurn = a_game.seats[a_game.turn];
+    var tile = backdrawTile(a_game, a_game.turn);
+    if (tile == -1) {
+        doGameOver(a_game, seatTurn.userId);
+        return;
+    }
+
+    // seatTurn.fsmPlayerState = m_mahjong.MJ_PLAYER_STATE_FULL_HAND;
 
     var game = a_game;
     // Sync game
@@ -303,8 +335,7 @@ exports.begin = function (a_roomId) {
 
         dealer: room.nextDealer,
 
-        tilewall: new Array(144), // TODO: use constant
-        tilewallPtr: 0,
+        tilewall: [], // TODO: use constant
 
         seats: new Array(4), // TODO: use constant
 
@@ -338,7 +369,6 @@ exports.begin = function (a_roomId) {
 
     //洗牌
     m_mahjong.shuffleTilewall(game.tilewall);
-    game.tilewallPtr = 0;
 
     //发牌
     dealTiles(game);
@@ -347,7 +377,6 @@ exports.begin = function (a_roomId) {
         var seat = roomSeats[idxSeat];
 
         m_userMgr.sendMsg(seat.userId, "server_push_hand_tiles", game.seats[idxSeat].handTiles);
-        m_userMgr.sendMsg(seat.userId, "server_brc_tilewall_remaining", (game.tilewall.length - game.tilewallPtr));
         m_userMgr.sendMsg(seat.userId, "server_brc_hand_count", room.gameIndex);
         m_userMgr.sendMsg(seat.userId, "server_brc_hand_begin", game.dealer);
 
@@ -408,6 +437,10 @@ exports.on_client_req_action_discard_tile = function (a_userId, a_tile) {
         return;
     }
     seat.handTiles.splice(idxTileToRemove, 1);
+    for (var idxTile = 0; idxTile < seat.handTiles.length; idxTile++) {
+        seat.handTiles[idxTile].pose = "standing";
+    }
+
     m_mahjong.sortHandTiles(seat.handTiles);
 
     seat.discardedTiles.push(a_tile);
@@ -584,7 +617,7 @@ exports.on_client_req_action_win = function (a_userId) {
 };
 
 function copyGameForClient(a_gameForClient, a_game, a_userId) {
-    a_gameForClient.tilewallRemaining = a_game.tilewall.length - a_game.tilewallPtr;
+    a_gameForClient.tilewallRemaining = a_game.tilewall.length;
     a_gameForClient.dealer = a_game.dealer;
     a_gameForClient.turn = a_game.turn;
     a_gameForClient.jokerTile = a_game.jokerTile;
@@ -716,7 +749,6 @@ exports.on_client_req_action_draw_tile = function (a_userId) {
     var seat = g_seatByUserId[a_userId];
     console.assert(seat != null);
 
-    var seatIndex = seat.seatIndex;
     var game = seat.game;
 
     if (seat.fsmPlayerState != m_mahjong.MJ_PLAYER_STATE_GET_TURN) {
@@ -727,6 +759,29 @@ exports.on_client_req_action_draw_tile = function (a_userId) {
     doDrawTile(game);
 
     seat.fsmPlayerState = m_mahjong.MJ_PLAYER_STATE_FULL_HAND;
+
+    // Sync game
+    for (var idxSeat = 0; idxSeat < game.seats.length; ++idxSeat) {
+        var gameForClient = {};
+        copyGameForClient(gameForClient, game, game.seats[idxSeat].userId);
+        m_userMgr.sendMsg(game.seats[idxSeat].userId, "server_push_game_sync", gameForClient);
+    }
+};
+
+exports.on_client_req_action_backdraw_tile = function (a_userId) {
+    var seat = g_seatByUserId[a_userId];
+    console.assert(seat != null);
+
+    var game = seat.game;
+
+    // if (seat.fsmPlayerState != m_mahjong.MJ_PLAYER_STATE_GET_TURN) {
+    //     m_userMgr.sendMsg(a_userId, "server_push_message", "Can't [Backdraw Tile] on state: " + seat.fsmPlayerState);
+    //     return;
+    // }
+
+    doBackdrawTile(game);
+
+    // seat.fsmPlayerState = m_mahjong.MJ_PLAYER_STATE_FULL_HAND;
 
     // Sync game
     for (var idxSeat = 0; idxSeat < game.seats.length; ++idxSeat) {

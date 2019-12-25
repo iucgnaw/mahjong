@@ -81,9 +81,14 @@ cc.Class({
         return this.seats[this.seatIndex];
     },
 
-    getLocalIndex: function (a_seatIndex) {
-        var localIndex = (a_seatIndex - this.seatIndex + 4) % 4;
+    getLocalIndex: function (a_natualIndex) {
+        var localIndex = (a_natualIndex - this.seatIndex + 4) % 4;
         return localIndex;
+    },
+
+    getNatualIndex: function (a_localIndex) {
+        var natualIndex = (a_localIndex + this.seatIndex) % 4;
+        return natualIndex;
     },
 
     prepareReplay: function (a_room, a_detailOfGame) {
@@ -283,11 +288,6 @@ cc.Class({
             for (var i = 0; i < self.seats.length; ++i) {
                 self.dispatchEvent("event_seat_update", self.seats[i]);
             }
-        });
-
-        cc.vv.net.addHandler("server_brc_tilewall_remaining", function (a_data) {
-            self.tilewallRemaining = a_data;
-            self.dispatchEvent("event_server_brc_tilewall_remaining", a_data);
         });
 
         cc.vv.net.addHandler("server_brc_win", function (a_data) {

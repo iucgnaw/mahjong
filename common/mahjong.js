@@ -60,20 +60,20 @@ var g_arrayTileName = [
 	"season_1_spring", "season_2_summer", "season_3_autumn", "season_4_winter", "flower_1_plum", "flower_2_orchid", "flower_3_bamboo", "flower_4_chrysanthemum"
 ];
 
-exports.MJ_PLAYER_STATE_IDLE = "Idle";
-exports.MJ_PLAYER_STATE_GET_TURN = "Get Turn";
-exports.MJ_PLAYER_STATE_FULL_HAND = "Full Hand";
-exports.MJ_PLAYER_STATE_DISCARDING_TILE = "Discarding Tile";
-exports.MJ_PLAYER_STATE_BEING_TARGETED = "Being Targeted";
-exports.MJ_PLAYER_STATE_THINKING_ON_DISCARDING_TILE = "Thinking on Discarding Tile";
-exports.MJ_PLAYER_STATE_CHOWING = "Chowing";
-exports.MJ_PLAYER_STATE_THINKING_ON_CHOWING = "Thinking on Chowing";
-exports.MJ_PLAYER_STATE_PONGING = "Ponging";
-exports.MJ_PLAYER_STATE_THINKING_ON_PONGING = "Thinking on Ponging";
-exports.MJ_PLAYER_STATE_KONGING = "Konging";
-exports.MJ_PLAYER_STATE_THINKING_ON_KONGING = "Thinking on Konging";
-exports.MJ_PLAYER_STATE_WINING = "Wining";
-exports.MJ_PLAYER_STATE_THINKING_ON_WINING = "Thinking on Wining";
+exports.MJ_PLAYER_STATE_IDLE = "空闲";
+exports.MJ_PLAYER_STATE_GET_TURN = "获得Turn";
+exports.MJ_PLAYER_STATE_FULL_HAND = "满手牌";
+exports.MJ_PLAYER_STATE_DISCARDING_TILE = "出牌中";
+exports.MJ_PLAYER_STATE_BEING_TARGETED = "被瞄上";
+exports.MJ_PLAYER_STATE_THINKING_ON_DISCARDING_TILE = "思考已出牌";
+exports.MJ_PLAYER_STATE_CHOWING = "吃中";
+exports.MJ_PLAYER_STATE_THINKING_ON_CHOWING = "考虑吃中";
+exports.MJ_PLAYER_STATE_PONGING = "碰中";
+exports.MJ_PLAYER_STATE_THINKING_ON_PONGING = "考虑碰中";
+exports.MJ_PLAYER_STATE_KONGING = "杠中";
+exports.MJ_PLAYER_STATE_THINKING_ON_KONGING = "考虑杠中";
+exports.MJ_PLAYER_STATE_WINING = "胡中";
+exports.MJ_PLAYER_STATE_THINKING_ON_WINING = "考虑胡中";
 
 exports.MJ_ACTION_BACKDRAW = "Backdraw";
 exports.MJ_ACTION_CHOW = "Chow";

@@ -14,10 +14,7 @@ cc.Class({
             type: cc.Node
         },
 
-        _labelTilewallRemaining: null,
         _labelGameCount: null,
-        _nodeMeldsAll: [],
-        _nodeHonorTilesAll: [],
         _animationAll: [],
     },
 
@@ -52,9 +49,6 @@ cc.Class({
     initView: function () {
         var nodeTable = this.node.getChildByName("nodeTable");
 
-        this._labelTilewallRemaining = nodeTable.getChildByName("nodeTilewallRemaining").getComponent(cc.Label);
-        this._labelTilewallRemaining.string = "剩余" + cc.vv.gameNetMgr.tilewallRemaining + "张";
-
         this._labelGameCount = nodeTable.getChildByName("nodeGameCount").getComponent(cc.Label);
         this._labelGameCount.string = "" + cc.vv.gameNetMgr.gameIndex + "/" + cc.vv.gameNetMgr.maxHandCount + "局";
 
@@ -62,8 +56,8 @@ cc.Class({
         nodeJokerTile.active = false;
 
         var sideNames = ["nodeSideBottom", "nodeSideRight", "nodeSideTop", "nodeSideLeft"];
-        for (var i = 0; i < sideNames.length; ++i) {
-            var nodeSide = nodeTable.getChildByName(sideNames[i]);
+        for (var idxSide = 0; idxSide < sideNames.length; idxSide++) {
+            var nodeSide = nodeTable.getChildByName(sideNames[idxSide]);
 
             var nodeHandTiles = nodeSide.getChildByName("nodeHandTiles");
             for (var idxTile = 0; idxTile < nodeHandTiles.childrenCount; ++idxTile) {
@@ -78,7 +72,6 @@ cc.Class({
             }
 
             var nodeMelds = nodeSide.getChildByName("nodeMelds");
-            this._nodeMeldsAll.push(nodeMelds);
             for (var idxMeld = 0; idxMeld < nodeMelds.childrenCount; ++idxMeld) {
                 var nodeMeld = nodeMelds.getChildByName("nodeMeld" + idxMeld);
                 for (var idxTile = 0; idxTile < nodeMeld.childrenCount; ++idxTile) {
@@ -90,9 +83,6 @@ cc.Class({
                     }
                 }
             }
-
-            var nodeHonorTiles = nodeSide.getChildByName("nodeHonorTiles");
-            this._nodeHonorTilesAll.push(nodeHonorTiles);
 
             this._animationAll.push(nodeSide.getChildByName("nodeAnimation").getComponent(cc.Animation));
         }
@@ -134,10 +124,6 @@ cc.Class({
 
             self.playActionAnimation(localIndex, "action_win");
             cc.vv.audioMgr.playSfx("mahjong/action/action_win.mp3");
-        });
-
-        this.node.on("event_server_brc_tilewall_remaining", function (a_data) {
-            self._labelTilewallRemaining.string = "剩余" + cc.vv.gameNetMgr.tilewallRemaining + "张";
         });
 
         this.node.on("event_server_brc_hand_count", function (a_data) {
@@ -237,47 +223,36 @@ cc.Class({
         });
     },
 
-    initHupai: function (a_localIndex, a_tile) {
-        var _nodeHonorTiles = this._nodeHonorTilesAll[a_localIndex];
-        for (var idxTile = 0; idxTile < _nodeHonorTiles.childrenCount; ++idxTile) {
-            var nodeTile = _nodeHonorTiles.getChildByName("nodeTile" + idxTile);
-            if (nodeTile.active == false) {
-                var prefixString = cc.vv.mahjongmgr.getPrefixStringTileFrontLying(a_localIndex);
-                nodeTile.getComponent(cc.Sprite).spriteFrame = cc.vv.mahjongmgr.getSpriteFrameByTile(prefixString, a_tile);
-                nodeTile.active = true;
-                break;
-            }
-        }
-    },
-
     playActionAnimation: function (a_index, a_name) {
         this._animationAll[a_index].node.active = true;
         this._animationAll[a_index].play(a_name);
     },
 
     on_event_server_push_game_sync: function () {
-        for (var idxSeat = 0; idxSeat < this._nodeMeldsAll.length; ++idxSeat) {
-            for (var idxMeld = 0; idxMeld < this._nodeMeldsAll[idxSeat].childrenCount; ++idxMeld) {
-                var nodeMeld = this._nodeMeldsAll[idxSeat].getChildByName("nodeMeld" + idxMeld);
+        var nodeTable = this.node.getChildByName("nodeTable");
+
+        nodeTable.getChildByName("nodeTilewallRemaining").getComponent(cc.Label).string = "剩余" + cc.vv.gameNetMgr.tilewallRemaining + "张";
+
+        var sideNames = ["nodeSideBottom", "nodeSideRight", "nodeSideTop", "nodeSideLeft"];
+        for (var idxSide = 0; idxSide < sideNames.length; idxSide++) {
+            var nodeSide = nodeTable.getChildByName(sideNames[idxSide]);
+
+            var nodeMelds = nodeSide.getChildByName("nodeMelds");
+            for (var idxMeld = 0; idxMeld < nodeMelds.childrenCount; ++idxMeld) {
+                var nodeMeld = nodeMelds.getChildByName("nodeMeld" + idxMeld);
                 nodeMeld.active = false;
                 for (var idxTile = 0; idxTile < nodeMeld.childrenCount; ++idxTile) {
                     var nodeTile = nodeMeld.getChildByName("nodeTile" + idxTile);
                     nodeTile.active = false;
                 }
             }
-        }
 
-        for (var idxSeat = 0; idxSeat < this._nodeHonorTilesAll.length; ++idxSeat) {
-            for (var idxTile = 0; idxTile < this._nodeHonorTilesAll[idxSeat].childrenCount; ++idxTile) {
-                var nodeTile = this._nodeHonorTilesAll[idxSeat].getChildByName("nodeTile" + idxTile);
+            var nodeHonorTiles = nodeSide.getChildByName("nodeHonorTiles");
+            for (var idxTile = 0; idxTile < nodeHonorTiles.childrenCount; ++idxTile) {
+                var nodeTile = nodeHonorTiles.getChildByName("nodeTile" + idxTile);
                 nodeTile.active = false;
             }
-        }
 
-        var sideNames = ["nodeSideBottom", "nodeSideRight", "nodeSideTop", "nodeSideLeft"];
-        var nodeTable = this.node.getChildByName("nodeTable");
-        for (var idxSide = 0; idxSide < sideNames.length; ++idxSide) {
-            var nodeSide = nodeTable.getChildByName(sideNames[idxSide]);
             var nodeHandTiles = nodeSide.getChildByName("nodeHandTiles");
             for (var idxTile = 0; idxTile < nodeHandTiles.childrenCount; ++idxTile) {
                 var nodeTile = nodeHandTiles.getChildByName("nodeTile" + idxTile);
@@ -292,9 +267,11 @@ cc.Class({
             var nodeSeat = nodeSide.getChildByName("nodeSeat");
             var nodePlayerName = nodeSeat.getChildByName("nodePlayerName");
             var labelPlayerName = nodePlayerName.getComponent(cc.Label);
-            var seat = cc.vv.gameNetMgr.seats[idxSide];
+            var natualIndex = cc.vv.gameNetMgr.getNatualIndex(idxSide);
+            var seat = cc.vv.gameNetMgr.seats[natualIndex];
             if (seat.fsmPlayerState) {
                 labelPlayerName.string = seat.fsmPlayerState;
+                console.log("idxSide: " + idxSide + ", natualIndex: " + natualIndex + ", sideNames[idxSide]: " + sideNames[idxSide] + ", seat.fsmPlayerState: " + seat.fsmPlayerState);
             }
         }
 
