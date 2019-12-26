@@ -49,11 +49,11 @@ cc.Class({
     showResult: function (seat, info, isZuiJiaPaoShou) {
         seat.node.getChildByName("zuijiapaoshou").active = isZuiJiaPaoShou;
 
-        seat.node.getChildByName("zimocishu").getComponent(cc.Label).string = info.numzimo;
-        seat.node.getChildByName("jiepaocishu").getComponent(cc.Label).string = info.numjiepao;
-        seat.node.getChildByName("dianpaocishu").getComponent(cc.Label).string = info.numdianpao;
-        seat.node.getChildByName("angangcishu").getComponent(cc.Label).string = info.numangang;
-        seat.node.getChildByName("minggangcishu").getComponent(cc.Label).string = info.numminggang;
+        // seat.node.getChildByName("zimocishu").getComponent(cc.Label).string = info.numzimo;
+        // seat.node.getChildByName("jiepaocishu").getComponent(cc.Label).string = info.numjiepao;
+        // seat.node.getChildByName("dianpaocishu").getComponent(cc.Label).string = info.numdianpao;
+        // seat.node.getChildByName("angangcishu").getComponent(cc.Label).string = info.numangang;
+        // seat.node.getChildByName("minggangcishu").getComponent(cc.Label).string = info.numminggang;
         // seat.node.getChildByName("chajiaocishu").getComponent(cc.Label).string = info.numchadajiao;
     },
 
@@ -67,10 +67,10 @@ cc.Class({
             if (seat.score > maxscore) {
                 maxscore = seat.score;
             }
-            if (endinfo[i].numdianpao > maxdianpao) {
-                maxdianpao = endinfo[i].numdianpao;
-                dianpaogaoshou = i;
-            }
+            // if (endinfo[i].numdianpao > maxdianpao) {
+            //     maxdianpao = endinfo[i].numdianpao;
+            //     dianpaogaoshou = i;
+            // }
         }
 
         for (var i = 0; i < seats.length; ++i) {

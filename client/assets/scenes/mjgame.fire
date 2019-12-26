@@ -41,8 +41,8 @@
     },
     "_scale": {
       "__type__": "cc.Vec3",
-      "x": 0.4671440972222222,
-      "y": 0.4671440972222222,
+      "x": 0.4837796359017782,
+      "y": 0.4837796359017782,
       "z": 1
     },
     "_quat": {
@@ -73142,7 +73142,7 @@
   },
   {
     "__type__": "cc.Node",
-    "_name": "name",
+    "_name": "nodePlayerName",
     "_objFlags": 0,
     "_parent": {
       "__id__": 1616
@@ -75436,7 +75436,7 @@
   },
   {
     "__type__": "cc.Node",
-    "_name": "name",
+    "_name": "nodePlayerName",
     "_objFlags": 0,
     "_parent": {
       "__id__": 1669
@@ -77732,7 +77732,7 @@
   },
   {
     "__type__": "cc.Node",
-    "_name": "name",
+    "_name": "nodePlayerName",
     "_objFlags": 0,
     "_parent": {
       "__id__": 1722
@@ -80028,7 +80028,7 @@
   },
   {
     "__type__": "cc.Node",
-    "_name": "name",
+    "_name": "nodePlayerName",
     "_objFlags": 0,
     "_parent": {
       "__id__": 1775

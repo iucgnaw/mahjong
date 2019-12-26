@@ -92,7 +92,7 @@ cc.Class({
         }
 
         if (this._labelPlayerScore != null) {
-            this._labelPlayerScore.string = this._score;
+            // this._labelPlayerScore.string = this._score;
         }
 
         if (this._nddayingjia != null) {
