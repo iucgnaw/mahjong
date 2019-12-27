@@ -291,23 +291,23 @@ cc.Class({
         });
 
         cc.vv.net.addHandler("server_brc_set_aside", function (a_data) {
-            var seatIndex = self.getSeatIndexByUserId(a_data.userId);
-            self.on_server_brc_set_aside(seatIndex, a_data.selectedTiles);
+            var seatIndex = self.getSeatIndexByUserId(a_data);
+            self.on_server_brc_set_aside(seatIndex, null);
         });
 
         cc.vv.net.addHandler("server_brc_chowing", function (a_data) {
-            var seatIndex = self.getSeatIndexByUserId(a_data.userId);
-            self.on_server_brc_chowing(seatIndex, a_data.selectedTiles);
+            var seatIndex = self.getSeatIndexByUserId(a_data);
+            self.on_server_brc_chowing(seatIndex, null);
         });
 
         cc.vv.net.addHandler("server_brc_ponging", function (a_data) {
-            var seatIndex = self.getSeatIndexByUserId(a_data.userId);
-            self.on_server_brc_ponging(seatIndex, a_data.selectedTiles);
+            var seatIndex = self.getSeatIndexByUserId(a_data);
+            self.on_server_brc_ponging(seatIndex, null);
         });
 
         cc.vv.net.addHandler("server_brc_konging", function (a_data) {
-            var seatIndex = self.getSeatIndexByUserId(a_data.userId);
-            self.on_server_brc_konging(seatIndex, a_data.selectedTiles);
+            var seatIndex = self.getSeatIndexByUserId(a_data);
+            self.on_server_brc_konging(seatIndex, null);
         });
 
         cc.vv.net.addHandler("server_brc_chat", function (data) {
@@ -357,40 +357,28 @@ cc.Class({
         });
     },
 
-    on_server_brc_set_aside: function (a_seatIndex, a_selectedTiles) {
+    on_server_brc_set_aside: function (a_seatIndex, a_data) {
         var seat = this.seats[a_seatIndex];
 
-        this.dispatchEvent("event_server_brc_set_aside", {
-            seat: seat,
-            selectedTiles: a_selectedTiles
-        });
+        this.dispatchEvent("event_server_brc_set_aside", seat);
     },
 
-    on_server_brc_chowing: function (a_seatIndex, a_selectedTiles) {
+    on_server_brc_chowing: function (a_seatIndex, a_data) {
         var seat = this.seats[a_seatIndex];
 
-        this.dispatchEvent("event_server_brc_chowing", {
-            seat: seat,
-            selectedTiles: a_selectedTiles
-        });
+        this.dispatchEvent("event_server_brc_chowing", seat);
     },
 
-    on_server_brc_ponging: function (a_seatIndex, a_selectedTiles) {
+    on_server_brc_ponging: function (a_seatIndex, a_data) {
         var seat = this.seats[a_seatIndex];
 
-        this.dispatchEvent("event_server_brc_ponging", {
-            seat: seat,
-            selectedTiles: a_selectedTiles
-        });
+        this.dispatchEvent("event_server_brc_ponging", seat);
     },
 
-    on_server_brc_konging: function (a_seatIndex, a_selectedTiles) {
+    on_server_brc_konging: function (a_seatIndex, a_data) {
         var seat = this.seats[a_seatIndex];
 
-        this.dispatchEvent("event_server_brc_konging", {
-            seat: seat,
-            selectedTiles: a_selectedTiles
-        });
+        this.dispatchEvent("event_server_brc_konging", seat);
     },
 
     doWin: function (data) {

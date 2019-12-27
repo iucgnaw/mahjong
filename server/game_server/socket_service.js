@@ -181,24 +181,10 @@ exports.start = function (a_config, a_mgr) {
 		a_socket.on("client_req_action_steal", function (a_data) {
 			console.assert(a_socket.userId != null);
 			console.assert(a_data != null);
-			console.assert(typeof (a_data) == "string");
 
-			var actionAndSelectedTiles = JSON.parse(a_data);
+			var action = a_data;
 
-			a_socket.gameMgr.on_client_req_action_steal(a_socket.userId, actionAndSelectedTiles);
-		});
-
-		//杠
-		a_socket.on("client_req_kong", function (a_data) {
-			console.assert(a_socket.userId != null);
-			console.assert(a_data != null);
-
-			var meld;
-			if (typeof (a_data) == "string") {
-				meld = JSON.parse(a_data);
-			}
-
-			a_socket.gameMgr.on_client_req_kong(a_socket.userId, meld);
+			a_socket.gameMgr.on_client_req_action_steal(a_socket.userId, action);
 		});
 
 		//胡

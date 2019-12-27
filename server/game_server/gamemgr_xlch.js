@@ -465,20 +465,17 @@ exports.on_client_req_action_discard_tile = function (a_userId, a_tile) {
     }
 };
 
-exports.on_client_req_action_steal = function (a_userId, a_actionAndSelectedTiles) {
+exports.on_client_req_action_steal = function (a_userId, a_action) {
     var seat = g_seatByUserId[a_userId];
     console.assert(seat != null);
     var game = seat.game;
     var message;
 
-    // Store selected tiles info for future process
-    seat.selectedTiles = a_actionAndSelectedTiles.selectedTiles;
-
-    switch (a_actionAndSelectedTiles.action) {
+    switch (a_action) {
         case m_mahjong.MJ_ACTION_SET_ASIDE:
             if ((seat.fsmPlayerState != m_mahjong.MJ_PLAYER_STATE_GET_TURN) &&
                 (seat.fsmPlayerState != m_mahjong.MJ_PLAYER_STATE_FULL_HAND)) {
-                m_userMgr.sendMsg(a_userId, "server_push_message", "Can't [" + a_actionAndSelectedTiles.action + "] on state: " + seat.fsmPlayerState);
+                m_userMgr.sendMsg(a_userId, "server_push_message", "Can't [" + a_action + "] on state: " + seat.fsmPlayerState);
                 return;
             }
 
@@ -496,13 +493,11 @@ exports.on_client_req_action_steal = function (a_userId, a_actionAndSelectedTile
                     seat.handTiles.splice(idxTile, 1);
                 }
             }
-
-            seat.selectedTiles = null;
             break;
 
         case m_mahjong.MJ_ACTION_CHOW:
             if (seat.fsmPlayerState != m_mahjong.MJ_PLAYER_STATE_THINKING_ON_DISCARDING_TILE) {
-                m_userMgr.sendMsg(a_userId, "server_push_message", "Can't [" + a_actionAndSelectedTiles.action + "] on state: " + seat.fsmPlayerState);
+                m_userMgr.sendMsg(a_userId, "server_push_message", "Can't [" + a_action + "] on state: " + seat.fsmPlayerState);
                 return;
             }
 
@@ -525,7 +520,7 @@ exports.on_client_req_action_steal = function (a_userId, a_actionAndSelectedTile
         case m_mahjong.MJ_ACTION_PONG:
             if ((seat.fsmPlayerState != m_mahjong.MJ_PLAYER_STATE_THINKING_ON_DISCARDING_TILE) &&
                 (seat.fsmPlayerState != m_mahjong.MJ_PLAYER_STATE_THINKING_ON_CHOWING)) {
-                m_userMgr.sendMsg(a_userId, "server_push_message", "Can't [" + a_actionAndSelectedTiles.action + "] on state: " + seat.fsmPlayerState);
+                m_userMgr.sendMsg(a_userId, "server_push_message", "Can't [" + a_action + "] on state: " + seat.fsmPlayerState);
                 return;
             }
 
@@ -549,7 +544,7 @@ exports.on_client_req_action_steal = function (a_userId, a_actionAndSelectedTile
         case m_mahjong.MJ_ACTION_KONG:
             if ((seat.fsmPlayerState != m_mahjong.MJ_PLAYER_STATE_THINKING_ON_DISCARDING_TILE) &&
                 (seat.fsmPlayerState != m_mahjong.MJ_PLAYER_STATE_THINKING_ON_CHOWING)) {
-                m_userMgr.sendMsg(a_userId, "server_push_message", "Can't [" + a_actionAndSelectedTiles.action + "] on state: " + seat.fsmPlayerState);
+                m_userMgr.sendMsg(a_userId, "server_push_message", "Can't [" + a_action + "] on state: " + seat.fsmPlayerState);
                 return;
             }
 
@@ -572,10 +567,7 @@ exports.on_client_req_action_steal = function (a_userId, a_actionAndSelectedTile
     }
 
     // Tell clients
-    m_userMgr.broadcastMsg(message, {
-        userId: seat.userId,
-        selectedTiles: a_actionAndSelectedTiles.selectedTiles
-    }, seat.userId, true);
+    m_userMgr.broadcastMsg(message, seat.userId, seat.userId, true);
 
     // Sync game
     for (var idxSeat = 0; idxSeat < game.seats.length; ++idxSeat) {

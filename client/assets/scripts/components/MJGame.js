@@ -163,7 +163,7 @@ cc.Class({
         });
 
         this.node.on("event_server_brc_set_aside", function (a_data) {
-            var seat = a_data.seat;
+            var seat = a_data;
             if (seat.seatIndex == cc.vv.gameNetMgr.seatIndex) {
                 self.refreshSeatTiles(cc.vv.gameNetMgr.seats[cc.vv.gameNetMgr.seatIndex]);
             } else {
@@ -176,7 +176,7 @@ cc.Class({
         });
 
         this.node.on("event_server_brc_chowing", function (a_data) {
-            var seat = a_data.seat;
+            var seat = a_data;
             if (seat.seatIndex == cc.vv.gameNetMgr.seatIndex) {
                 self.refreshSeatTiles(cc.vv.gameNetMgr.seats[cc.vv.gameNetMgr.seatIndex]);
             } else {
@@ -189,7 +189,7 @@ cc.Class({
         });
 
         this.node.on("event_server_brc_ponging", function (a_data) {
-            var seat = a_data.seat;
+            var seat = a_data;
             if (seat.seatIndex == cc.vv.gameNetMgr.seatIndex) {
                 self.refreshSeatTiles(cc.vv.gameNetMgr.seats[cc.vv.gameNetMgr.seatIndex]);
             } else {
@@ -201,8 +201,8 @@ cc.Class({
             cc.vv.audioMgr.playSfx("mahjong/action/action_pong.mp3");
         });
 
-        this.node.on("event_server_brc_konging", function (a_data) { // Mainly draw hands
-            var seat = a_data.seat;
+        this.node.on("event_server_brc_konging", function (a_data) {
+            var seat = a_data;
             if (seat.seatIndex == cc.vv.gameNetMgr.seatIndex) {
                 self.refreshSeatTiles(cc.vv.gameNetMgr.seats[cc.vv.gameNetMgr.seatIndex]);
             } else {
@@ -440,10 +440,7 @@ cc.Class({
                     return;
                 }
 
-                var actionAndSelectedTiles = {
-                    action: m_mahjong.MJ_ACTION_SET_ASIDE,
-                };
-                cc.vv.net.send("client_req_action_steal", actionAndSelectedTiles);
+                cc.vv.net.send("client_req_action_steal", m_mahjong.MJ_ACTION_SET_ASIDE);
                 break;
 
             case "nodeActionBackdraw":
@@ -484,10 +481,7 @@ cc.Class({
                 }
                 selectedTiles.type = "meld_chow";
 
-                var actionAndSelectedTiles = {
-                    action: m_mahjong.MJ_ACTION_CHOW,
-                };
-                cc.vv.net.send("client_req_action_steal", actionAndSelectedTiles);
+                cc.vv.net.send("client_req_action_steal", m_mahjong.MJ_ACTION_CHOW);
                 break;
 
             case "nodeActionPong":
@@ -497,10 +491,7 @@ cc.Class({
                 }
                 selectedTiles.type = "meld_pong";
 
-                var actionAndSelectedTiles = {
-                    action: m_mahjong.MJ_ACTION_PONG,
-                };
-                cc.vv.net.send("client_req_action_steal", actionAndSelectedTiles);
+                cc.vv.net.send("client_req_action_steal", m_mahjong.MJ_ACTION_PONG);
                 break;
 
             case "nodeActionKong":
@@ -515,10 +506,7 @@ cc.Class({
                     return;
                 }
 
-                var actionAndSelectedTiles = {
-                    action: m_mahjong.MJ_ACTION_KONG,
-                };
-                cc.vv.net.send("client_req_action_steal", actionAndSelectedTiles);
+                cc.vv.net.send("client_req_action_steal", m_mahjong.MJ_ACTION_KONG);
                 break;
 
             case "nodeActionWin":
