@@ -189,9 +189,8 @@ exports.start = function (a_config, a_mgr) {
 
 		//胡
 		a_socket.on("client_req_action_win", function (a_data) {
-			if (a_socket.userId == null) {
-				return;
-			}
+			console.assert(a_socket.userId != null);
+
 			a_socket.gameMgr.on_client_req_action_win(a_socket.userId);
 		});
 

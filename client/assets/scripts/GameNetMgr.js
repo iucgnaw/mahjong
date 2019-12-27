@@ -266,10 +266,6 @@ cc.Class({
             }
         });
 
-        cc.vv.net.addHandler("server_brc_win", function (a_data) {
-            self.doWin(a_data);
-        });
-
         cc.vv.net.addHandler("server_brc_discarding_tile", function (a_data) {
             var userId = a_data.userId;
             var tile = a_data.tile;
@@ -307,7 +303,15 @@ cc.Class({
 
         cc.vv.net.addHandler("server_brc_konging", function (a_data) {
             var seatIndex = self.getSeatIndexByUserId(a_data);
+
             self.on_server_brc_konging(seatIndex, null);
+        });
+
+        cc.vv.net.addHandler("server_brc_winning", function (a_userId) {
+            var seatIndex = self.getSeatIndexByUserId(a_userId);
+            var seat = self.seats[seatIndex];
+
+            self.dispatchEvent("event_server_brc_winning", seat);
         });
 
         cc.vv.net.addHandler("server_brc_chat", function (data) {
@@ -379,10 +383,6 @@ cc.Class({
         var seat = this.seats[a_seatIndex];
 
         this.dispatchEvent("event_server_brc_konging", seat);
-    },
-
-    doWin: function (data) {
-        this.dispatchEvent("event_server_brc_win", data);
     },
 
     doChangeTurn: function (a_seatIndex) {

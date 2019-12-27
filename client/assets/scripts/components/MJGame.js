@@ -115,14 +115,6 @@ cc.Class({
             alert("服务器消息：\r\n" + a_data);
         });
 
-        this.node.on("event_server_brc_win", function (a_data) {
-            var seatIndex = a_data.seatIndex;
-            var localIndex = cc.vv.gameNetMgr.getLocalIndex(seatIndex);
-
-            self.playActionAnimation(localIndex, "action_win");
-            cc.vv.audioMgr.playSfx("mahjong/action/action_win.mp3");
-        });
-
         this.node.on("event_server_brc_hand_count", function (a_data) {
             self._labelGameCount.string = "" + cc.vv.gameNetMgr.gameIndex + "/" + cc.vv.gameNetMgr.maxHandCount + "局";
         });
@@ -201,8 +193,8 @@ cc.Class({
             cc.vv.audioMgr.playSfx("mahjong/action/action_pong.mp3");
         });
 
-        this.node.on("event_server_brc_konging", function (a_data) {
-            var seat = a_data;
+        this.node.on("event_server_brc_konging", function (a_seat) {
+            var seat = a_seat;
             if (seat.seatIndex == cc.vv.gameNetMgr.seatIndex) {
                 self.refreshSeatTiles(cc.vv.gameNetMgr.seats[cc.vv.gameNetMgr.seatIndex]);
             } else {
@@ -212,6 +204,14 @@ cc.Class({
             var localIndex = cc.vv.gameNetMgr.getLocalIndex(seat.seatIndex);
             self.playActionAnimation(localIndex, "action_kong");
             cc.vv.audioMgr.playSfx("mahjong/action/action_kong.mp3");
+        });
+
+        this.node.on("event_server_brc_winning", function (a_seat) {
+            var seat = a_seat;
+            var localIndex = cc.vv.gameNetMgr.getLocalIndex(seat.seatIndex);
+
+            self.playActionAnimation(localIndex, "action_win");
+            cc.vv.audioMgr.playSfx("mahjong/action/action_win.mp3");
         });
 
         this.node.on("event_login_result", function () {

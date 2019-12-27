@@ -583,15 +583,8 @@ exports.on_client_req_action_win = function (a_userId) {
     var seatIndex = seat.seatIndex;
     var game = seat.game;
 
-    var turnSeat = game.seats[game.turn];
-
-    var tile = -1;
-
     //通知前端，有人和牌了
-    m_userMgr.broadcastMsg("server_brc_win", {
-        seatIndex: seatIndex,
-        hupai: tile
-    }, seat.userId, true);
+    m_userMgr.broadcastMsg("server_brc_winning", seat.userId, seat.userId, true);
 
     for (var idxTile = 0; idxTile < seat.handTiles.length; idxTile++) {
         seat.handTiles[idxTile].pose = "lying";
@@ -603,6 +596,7 @@ exports.on_client_req_action_win = function (a_userId) {
         copyGameForClient(gameForClient, game, game.seats[idxSeat].userId);
         m_userMgr.sendMsg(game.seats[idxSeat].userId, "server_push_game_sync", gameForClient);
     }
+    // var turnSeat = game.seats[game.turn];
     // doGameOver(game, turnSeat.userId);
 };
 
