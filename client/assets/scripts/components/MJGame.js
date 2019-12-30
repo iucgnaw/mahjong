@@ -9,11 +9,6 @@ cc.Class({
             type: cc.Node
         },
 
-        nodePrepare: {
-            default: null,
-            type: cc.Node
-        },
-
         _labelGameCount: null,
         _animationAll: [],
     },
@@ -22,7 +17,6 @@ cc.Class({
         cc.vv.utils.fitCanvasWithFrame();
 
         this.addComponent("GameOver");
-        this.addComponent("MJRoom");
         this.addComponent("TimePointer");
         this.addComponent("GameResult");
         this.addComponent("Chat");
@@ -37,7 +31,6 @@ cc.Class({
         this.initEventHandlers();
 
         this.nodeTable.active = false;
-        this.nodePrepare.active = true;
         this.on_event_server_push_game_sync();
 
         cc.vv.audioMgr.playBgm("bgFight.mp3");
@@ -125,7 +118,6 @@ cc.Class({
 
         this.node.on("event_server_brc_hand_end", function (a_data) {
             self.nodeTable.active = false;
-            self.nodePrepare.active = true;
         });
 
         this.node.on("event_server_brc_discarding_tile", function (a_data) {
@@ -220,7 +212,6 @@ cc.Class({
 
         this.node.on("event_login_result", function () {
             self.nodeTable.active = false;
-            self.nodePrepare.active = true;
         });
     },
 
@@ -280,8 +271,6 @@ cc.Class({
                 labelScore.string = seat.fsmPlayerState;
             }
         }
-
-        this.nodePrepare.active = false;
 
         this.nodeTable.active = true;
 
@@ -517,6 +506,10 @@ cc.Class({
                 cc.vv.net.send("client_req_action_win");
                 break;
         }
+    },
+
+    onBtnSettingsClicked: function () {
+        cc.vv.popupMgr.showSettings();
     },
 
     // called every frame, uncomment this function to activate update callback
