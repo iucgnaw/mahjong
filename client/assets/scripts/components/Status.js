@@ -40,8 +40,5 @@ cc.Class({
             nodeRtt.getComponent(cc.Label).string = "RTT: N/A";
             nodeRtt.color = this._colorRed;
         }
-
-        var nodeBatteryPercent = this._status.getChildByName("nodeBatteryPercent");
-        nodeBatteryPercent.scaleX = cc.vv.anysdkMgr.getBatteryPercent();
     },
 });
