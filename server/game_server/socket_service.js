@@ -266,10 +266,8 @@ exports.start = function (a_config, a_mgr) {
 			}, a_socket.userId, true);
 		});
 
-		//语音使用SDK不出现在这里
-
 		//退出房间
-		a_socket.on("client_req_exit", function (a_data) {
+		a_socket.on("client_req_exit_room", function (a_data) {
 			var userId = a_socket.userId;
 			if (userId == null) {
 				return;
@@ -301,22 +299,19 @@ exports.start = function (a_config, a_mgr) {
 		});
 
 		//解散房间
-		a_socket.on("client_req_dismiss_room", function (a_data) {
+		a_socket.on("client_req_close_room", function (a_data) {
 			var userId = a_socket.userId;
 			if (userId == null) {
 				return;
 			}
-
 			var roomId = m_roomMgr.getRoomIdByUserId(userId);
 			if (roomId == null) {
 				return;
 			}
-
 			//如果游戏已经开始，则不可以
 			if (a_socket.gameMgr.hasBegan(roomId)) {
 				return;
 			}
-
 			//如果不是房主，则不能解散房间
 			if (m_roomMgr.isCreator(roomId, userId) == false) {
 				return;
@@ -331,53 +326,43 @@ exports.start = function (a_config, a_mgr) {
 		//解散房间
 		a_socket.on("client_req_propose_dismiss_room", function (a_data) {
 			var userId = a_socket.userId;
-			console.log(1);
 			if (userId == null) {
-				console.log(2);
 				return;
 			}
-
 			var roomId = m_roomMgr.getRoomIdByUserId(userId);
 			if (roomId == null) {
-				console.log(3);
 				return;
 			}
-
 			//如果游戏未开始，则不可以
 			if (a_socket.gameMgr.hasBegan(roomId) == false) {
-				console.log(4);
 				return;
 			}
 
-			var ret = a_socket.gameMgr.dissolveRequest(roomId, userId);
-			if (ret != null) {
-				var dismissRequest = ret.dismissRequest;
+			var room = a_socket.gameMgr.dissolveRequest(roomId, userId);
+			if (room != null) {
+				var dismissRequest = room.dismissRequest;
 				var timeRemaining = (dismissRequest.endTime - Date.now()) / 1000;
 				var a_data = {
 					time: timeRemaining,
 					states: dismissRequest.states
 				}
-				console.log(5);
 				m_userMgr.broadcastMsg("server_brc_propose_dismiss_room", a_data, userId, true);
 			}
-			console.log(6);
 		});
 
 		a_socket.on("client_req_accept_dismiss_room", function (a_data) {
 			var userId = a_socket.userId;
-
 			if (userId == null) {
 				return;
 			}
-
 			var roomId = m_roomMgr.getRoomIdByUserId(userId);
 			if (roomId == null) {
 				return;
 			}
 
-			var ret = a_socket.gameMgr.dissolveAgree(roomId, userId, true);
-			if (ret != null) {
-				var dismissRequest = ret.dismissRequest;
+			var room = a_socket.gameMgr.dissolveAgree(roomId, userId, true);
+			if (room != null) {
+				var dismissRequest = room.dismissRequest;
 				var timeRemaining = (dismissRequest.endTime - Date.now()) / 1000;
 				var a_data = {
 					time: timeRemaining,
@@ -401,18 +386,16 @@ exports.start = function (a_config, a_mgr) {
 
 		a_socket.on("client_req_action_reject_dismiss_room", function (a_data) {
 			var userId = a_socket.userId;
-
 			if (userId == null) {
 				return;
 			}
-
 			var roomId = m_roomMgr.getRoomIdByUserId(userId);
 			if (roomId == null) {
 				return;
 			}
 
-			var ret = a_socket.gameMgr.dissolveAgree(roomId, userId, false);
-			if (ret != null) {
+			var room = a_socket.gameMgr.dissolveAgree(roomId, userId, false);
+			if (room != null) {
 				m_userMgr.broadcastMsg("server_brc_reject_dismiss_room", {}, userId, true);
 			}
 		});

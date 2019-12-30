@@ -801,57 +801,53 @@ exports.doDissolve = function (a_roomId) {
 };
 
 exports.dissolveRequest = function (a_roomId, a_userId) {
-    var roomInfo = m_roomMgr.getRoomById(a_roomId);
-    if (roomInfo == null) {
+    var room = m_roomMgr.getRoomById(a_roomId);
+    if (room == null) {
         return null;
     }
-
-    if (roomInfo.dismissRequest != null) {
+    if (room.dismissRequest != null) {
         return null;
     }
-
     var seatIndex = m_roomMgr.getSeatIndexByUserId(a_userId);
     if (seatIndex == null) {
         return null;
     }
 
-    roomInfo.dismissRequest = {
+    room.dismissRequest = {
         // endTime: Date.now() + 30000,
-        endTime: Date.now() + 2000, // TOFIX: Temporarily change it to 2 seconds
+        endTime: Date.now() + 10000, // TOFIX: Temporarily change the time
         states: [false, false, false, false]
     };
-    roomInfo.dismissRequest.states[seatIndex] = true;
+    room.dismissRequest.states[seatIndex] = true;
 
     g_dismissList.push(a_roomId);
 
-    return roomInfo;
+    return room;
 };
 
 exports.dissolveAgree = function (a_roomId, a_userId, a_agree) {
-    var roomInfo = m_roomMgr.getRoomById(a_roomId);
-    if (roomInfo == null) {
+    var room = m_roomMgr.getRoomById(a_roomId);
+    if (room == null) {
         return null;
     }
-
-    if (roomInfo.dismissRequest == null) {
+    if (room.dismissRequest == null) {
         return null;
     }
-
     var seatIndex = m_roomMgr.getSeatIndexByUserId(a_userId);
     if (seatIndex == null) {
         return null;
     }
 
     if (a_agree) {
-        roomInfo.dismissRequest.states[seatIndex] = true;
+        room.dismissRequest.states[seatIndex] = true;
     } else {
-        roomInfo.dismissRequest = null;
+        room.dismissRequest = null;
         var idx = g_dismissList.indexOf(a_roomId);
         if (idx != -1) {
             g_dismissList.splice(idx, 1);
         }
     }
-    return roomInfo;
+    return room;
 };
 
 function update() {

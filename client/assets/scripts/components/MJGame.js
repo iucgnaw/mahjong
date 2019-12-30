@@ -46,6 +46,10 @@ cc.Class({
     },
 
     initView: function () {
+        var nodeInfo = this.node.getChildByName("nodeInfo");
+        var labelRoomNum = nodeInfo.getChildByName("nodeRoomNum").getComponent(cc.Label);
+        labelRoomNum.string = "房间号：" + cc.vv.gameNetMgr.roomId;
+
         var nodeTable = this.node.getChildByName("nodeTable");
 
         this._labelGameCount = nodeTable.getChildByName("nodeGameCount").getComponent(cc.Label);

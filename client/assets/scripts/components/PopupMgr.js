@@ -80,6 +80,9 @@ cc.Class({
         } else if (btnName == "btn_reject") {
             cc.vv.net.send("client_req_action_reject_dismiss_room");
         } else if (btnName == "btn_sqjsfj") {
+            // TOFIX should merge these
+            cc.vv.net.send("client_req_close_room");
+            cc.vv.net.send("client_req_exit_room");
             cc.vv.net.send("client_req_propose_dismiss_room");
         }
     },

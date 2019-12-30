@@ -44,9 +44,10 @@ cc.Class({
 
         this.refreshBtns();
 
-        this._labelRoomNum = cc.find("Canvas/nodeInfo/nodeRoom/nodeRoomNum").getComponent(cc.Label);
-        this._labelTime = cc.find("Canvas/nodeInfo/nodeTime").getComponent(cc.Label);
-        this._labelRoomNum.string = cc.vv.gameNetMgr.roomId;
+        // this._labelRoomNum = cc.find("Canvas/nodeInfo/nodeRoom/nodeRoomNum").getComponent(cc.Label);
+        // this._labelRoomNum.string = cc.vv.gameNetMgr.roomId;
+
+        // this._labelTime = cc.find("Canvas/nodeInfo/nodeTime").getComponent(cc.Label);
         var nodeGame = this.node.getChildByName("nodeTable");
         var sideStrings = ["nodeSideBottom", "nodeSideRight", "nodeSideTop", "nodeSideLeft"];
         for (var i = 0; i < sideStrings.length; ++i) {
@@ -62,10 +63,10 @@ cc.Class({
     },
 
     refreshBtns: function () {
-        var prepare = this.node.getChildByName("nodePrepare");
-        var btnExit = prepare.getChildByName("btnExit");
-        var btnDispress = prepare.getChildByName("btnDissolve");
-        var btnWeichat = prepare.getChildByName("btnWeichat");
+        var nodePrepare = this.node.getChildByName("nodePrepare");
+        var btnExit = nodePrepare.getChildByName("btnExit");
+        var btnDispress = nodePrepare.getChildByName("btnDissolve");
+        var btnWeichat = nodePrepare.getChildByName("btnWeichat");
         var isIdle = cc.vv.gameNetMgr.gameIndex == 0;
 
         btnExit.active = !cc.vv.gameNetMgr.isTableOwner() && isIdle;
@@ -170,12 +171,12 @@ cc.Class({
 
     onBtnDissolveClicked: function () {
         cc.vv.alert.show("解散房间", "解散房间不扣房卡，是否确定解散？", function () {
-            cc.vv.net.send("client_req_dismiss_room");
+            cc.vv.net.send("client_req_close_room");
         }, true);
     },
 
     onBtnExit: function () {
-        cc.vv.net.send("client_req_exit");
+        cc.vv.net.send("client_req_exit_room");
     },
 
     playVoice: function () {
@@ -200,17 +201,17 @@ cc.Class({
 
     // called every frame, uncomment this function to activate update callback
     update: function (dt) {
-        var minutes = Math.floor(Date.now() / 1000 / 60);
-        if (this._lastMinute != minutes) {
-            this._lastMinute = minutes;
-            var date = new Date();
-            var h = date.getHours();
-            h = h < 10 ? "0" + h : h;
+        // var minutes = Math.floor(Date.now() / 1000 / 60);
+        // if (this._lastMinute != minutes) {
+        //     this._lastMinute = minutes;
+        //     var date = new Date();
+        //     var h = date.getHours();
+        //     h = h < 10 ? "0" + h : h;
 
-            var m = date.getMinutes();
-            m = m < 10 ? "0" + m : m;
-            this._labelTime.string = "" + h + ":" + m;
-        }
+        //     var m = date.getMinutes();
+        //     m = m < 10 ? "0" + m : m;
+        //     this._labelTime.string = "" + h + ":" + m;
+        // }
 
 
         if (this._lastPlayTime != null) {
