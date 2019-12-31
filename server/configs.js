@@ -1,4 +1,4 @@
-﻿var HALL_IP = "game.iucgnaw.com"; //如果非本机访问，这里要变
+﻿var HALL_IP = "game.iucgnaw.com";
 var HALL_CLIENT_PORT = 11110;
 var HALL_ROOM_PORT = 11111;
 
@@ -11,8 +11,8 @@ exports.mysql = function () {
 	return {
 		HOST: "127.0.0.1",
 		USER: "root",
-		PSWD: "Qwer!234", //如果连接失败，请检查这里
-		DB: "Mahjong", //如果连接失败，请检查这里
+		PSWD: "Qwer!234",
+		DB: "mahjong",
 		PORT: 3306,
 	}
 }

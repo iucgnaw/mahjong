@@ -180,23 +180,16 @@ cc.Class({
 
         cc.vv.net.addHandler("brc_player_join", function (data) {
             var seatIndex = data.seatIndex;
-            var needCheckIp = false;
             if (self.seats[seatIndex].userId > 0) {
                 self.seats[seatIndex].online = true;
                 if (self.seats[seatIndex].ip != data.ip) {
                     self.seats[seatIndex].ip = data.ip;
-                    needCheckIp = true;
                 }
             } else {
                 data.online = true;
                 self.seats[seatIndex] = data;
-                needCheckIp = true;
             }
             self.dispatchEvent("event_player_join", self.seats[seatIndex]);
-
-            if (needCheckIp) {
-                self.dispatchEvent("event_check_ip", self.seats[seatIndex]);
-            }
         });
 
         cc.vv.net.addHandler("server_brc_player_status_change", function (data) {
@@ -259,7 +252,7 @@ cc.Class({
                 self.isOver = true;
                 self.dispatchEvent("event_server_brc_match_end", data.endinfo);
             }
-            
+
             self.reset();
             for (var i = 0; i < self.seats.length; ++i) {
                 self.dispatchEvent("event_seat_update", self.seats[i]);
@@ -312,18 +305,6 @@ cc.Class({
             var seat = self.seats[seatIndex];
 
             self.dispatchEvent("event_server_brc_winning", seat);
-        });
-
-        cc.vv.net.addHandler("server_brc_chat", function (data) {
-            self.dispatchEvent("event_chat", data);
-        });
-
-        cc.vv.net.addHandler("server_brc_quick_chat", function (data) {
-            self.dispatchEvent("event_quick_chat", data);
-        });
-
-        cc.vv.net.addHandler("server_brc_emoji", function (data) {
-            self.dispatchEvent("event_emoji", data);
         });
 
         cc.vv.net.addHandler("server_brc_propose_dismiss_room", function (data) {
@@ -395,22 +376,23 @@ cc.Class({
         cc.vv.net.ip = data.ip + ":" + data.port;
         var self = this;
 
-        var onConnectOK = function () {
+        var onConnectSucceeded = function () {
             var sd = {
                 token: data.token,
                 roomid: data.roomid,
                 time: data.time,
                 sign: data.sign,
             };
-            cc.vv.net.send("login", sd);
+            cc.vv.net.send("client_req_login", sd);
         };
 
         var onConnectFailed = function () {
             console.error("Connect failed.");
             cc.vv.wc.hide();
         };
+
         cc.vv.wc.show("正在进入房间");
-        cc.vv.net.connect(onConnectOK, onConnectFailed);
+        cc.vv.net.connect(onConnectSucceeded, onConnectFailed);
     }
 
     // called every frame, uncomment this function to activate update callback

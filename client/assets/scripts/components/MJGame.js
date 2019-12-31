@@ -19,11 +19,9 @@ cc.Class({
         this.addComponent("GameOver");
         this.addComponent("TimePointer");
         this.addComponent("GameResult");
-        this.addComponent("Chat");
         this.addComponent("ReplayCtrl");
         this.addComponent("PopupMgr");
         this.addComponent("ReConnect");
-        this.addComponent("UserInfoShow");
         this.addComponent("Status");
 
         this.initView();
@@ -96,6 +94,41 @@ cc.Class({
 
         //初始化事件监听器
         var self = this;
+
+        this.node.on("event_player_join", function (a_seat) {
+            var localIndex = cc.vv.gameNetMgr.getLocalIndex(a_seat.seatIndex);
+            var isOffline = !a_seat.online;
+            var isZhuang = a_seat.seatIndex == cc.vv.gameNetMgr.dealer;
+
+            var nodeTable = self.node.getChildByName("nodeTable");
+            var sideNames = ["nodeSideBottom", "nodeSideRight", "nodeSideTop", "nodeSideLeft"];
+            var nodeSide = nodeTable.getChildByName(sideNames[localIndex]);
+            var nodeSeat = nodeSide.getChildByName("nodeSeat");
+            var scriptSeat = nodeSeat.getComponent("Seat");
+
+            scriptSeat.setInfo(a_seat.name, a_seat.score);
+            scriptSeat.setDealer(isZhuang);
+            scriptSeat.setOffline(isOffline);
+            scriptSeat.setID(a_seat.userId);
+        });
+
+        // TOFIX same function as above
+        this.node.on("event_seat_update", function (a_seat) {
+            var localIndex = cc.vv.gameNetMgr.getLocalIndex(a_seat.seatIndex);
+            var isOffline = !a_seat.online;
+            var isZhuang = a_seat.seatIndex == cc.vv.gameNetMgr.dealer;
+
+            var nodeTable = self.node.getChildByName("nodeTable");
+            var sideNames = ["nodeSideBottom", "nodeSideRight", "nodeSideTop", "nodeSideLeft"];
+            var nodeSide = nodeTable.getChildByName(sideNames[localIndex]);
+            var nodeSeat = nodeSide.getChildByName("nodeSeat");
+            var scriptSeat = nodeSeat.getComponent("Seat");
+
+            scriptSeat.setInfo(a_seat.name, a_seat.score);
+            scriptSeat.setDealer(isZhuang);
+            scriptSeat.setOffline(isOffline);
+            scriptSeat.setID(a_seat.userId);
+        });
 
         this.node.on("event_server_push_game_sync", function (a_data) {
             self.on_event_server_push_game_sync();

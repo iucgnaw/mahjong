@@ -30,7 +30,7 @@ exports.start = function (a_config, a_mgr) {
 	httpServer.listen(g_config.CLIENT_PORT);
 
 	g_io.sockets.on("connection", function (a_socket) {
-		a_socket.on("login", function (a_data) {
+		a_socket.on("client_req_login", function (a_data) {
 			a_data = JSON.parse(a_data);
 			if (a_socket.userId != null) {
 				//已经登录过的就忽略
@@ -93,8 +93,8 @@ exports.start = function (a_config, a_mgr) {
 
 			var userData = null;
 			var seats = [];
-			for (var i = 0; i < roomInfo.seats.length; ++i) {
-				var seat = roomInfo.seats[i];
+			for (var idxSeat = 0; idxSeat < roomInfo.seats.length; ++idxSeat) {
+				var seat = roomInfo.seats[idxSeat];
 				var online = false;
 				if (seat.userId > 0) {
 					online = m_userMgr.isOnline(seat.userId);
@@ -107,11 +107,11 @@ exports.start = function (a_config, a_mgr) {
 					name: seat.name,
 					online: online,
 					ready: seat.ready,
-					seatIndex: i
+					seatIndex: idxSeat
 				});
 
 				if (userId == seat.userId) {
-					userData = seats[i];
+					userData = seats[idxSeat];
 				}
 			}
 
@@ -216,42 +216,6 @@ exports.start = function (a_config, a_mgr) {
 				return;
 			}
 			a_socket.gameMgr.on_client_req_action_backdraw_tile(a_socket.userId);
-		});
-
-		//聊天
-		a_socket.on("client_req_chat", function (a_data) {
-			if (a_socket.userId == null) {
-				return;
-			}
-			var chatContent = a_data;
-			m_userMgr.broadcastMsg("server_brc_chat", {
-				sender: a_socket.userId,
-				content: chatContent
-			}, a_socket.userId, true);
-		});
-
-		//快速聊天
-		a_socket.on("client_req_quick_chat", function (a_data) {
-			if (a_socket.userId == null) {
-				return;
-			}
-			var chatId = a_data;
-			m_userMgr.broadcastMsg("server_brc_quick_chat", {
-				sender: a_socket.userId,
-				content: chatId
-			}, a_socket.userId, true);
-		});
-
-		//表情
-		a_socket.on("client_req_emoji", function (a_data) {
-			if (a_socket.userId == null) {
-				return;
-			}
-			var phizId = a_data;
-			m_userMgr.broadcastMsg("server_brc_emoji", {
-				sender: a_socket.userId,
-				content: phizId
-			}, a_socket.userId, true);
 		});
 
 		//退出房间

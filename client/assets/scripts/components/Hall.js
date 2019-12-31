@@ -58,10 +58,6 @@ cc.Class({
 
         var imgLoader = this.sprHeadImg.node.getComponent("ImageLoader");
         imgLoader.setUserID(cc.vv.userMgr.userId);
-        cc.vv.utils.addClickEvent(this.sprHeadImg.node, this.node, "Hall", "onBtnClicked");
-
-
-        this.addComponent("UserInfoShow");
 
         this.initButtonHandler("Canvas/right_bottom/btn_shezhi");
         this.initButtonHandler("Canvas/right_bottom/btn_help");

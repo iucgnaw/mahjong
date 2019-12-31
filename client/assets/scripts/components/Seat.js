@@ -4,16 +4,10 @@ cc.Class({
     properties: {
         _imagePlayerIcon: null,
         _nodeDealer: null,
-        _ready: null,
         _offline: null,
         _labelPlayerName: null,
         _labelPlayerScore: null,
-        _scoreBg: null,
         _nddayingjia: null,
-
-        _chatBubble: null,
-        _emoji: null,
-        _lastChatTime: -1,
 
         _userName: "",
         _score: 0,
@@ -38,25 +32,11 @@ cc.Class({
             cc.vv.utils.addClickEvent(this._imagePlayerIcon, this.node, "Seat", "onIconClicked");
         }
 
-
         this._offline = this.node.getChildByName("nodeOffline");
-
-        // this._ready = this.node.getChildByName("ready");
 
         this._nodeDealer = this.node.getChildByName("nodeDealer");
 
-        // this._scoreBg = this.node.getChildByName("Z_money_frame");
         this._nddayingjia = this.node.getChildByName("dayingjia");
-
-        this._chatBubble = this.node.getChildByName("nodeChatBubble");
-        if (this._chatBubble != null) {
-            this._chatBubble.active = false;
-        }
-
-        this._emoji = this.node.getChildByName("emoji");
-        if (this._emoji != null) {
-            this._emoji.active = false;
-        }
 
         this.refresh();
 
@@ -97,10 +77,6 @@ cc.Class({
             this._offline.active = this._isOffline && this._userName != "";
         }
 
-        // if (this._ready) {
-        //     this._ready.active = this._isReady && (cc.vv.gameNetMgr.gameIndex > 0);
-        // }
-
         if (this._nodeDealer) {
             this._nodeDealer.active = this._isZhuang;
         }
@@ -116,10 +92,6 @@ cc.Class({
         }
         this._dayingjia = dayingjia;
 
-        // if (this._scoreBg != null) {
-        //     this._scoreBg.active = this._score != null;
-        // }
-
         if (this._labelPlayerScore != null) {
             this._labelPlayerScore.node.active = this._score != null;
         }
@@ -133,13 +105,6 @@ cc.Class({
             this._nodeDealer.active = value;
         }
     },
-
-    // setReady: function (isReady) {
-    //     this._isReady = isReady;
-    //     if (this._ready) {
-    //         this._ready.active = this._isReady && (cc.vv.gameNetMgr.gameIndex > 0);
-    //     }
-    // },
 
     setID: function (id) {
         var idNode = this.node.getChildByName("id");
@@ -161,38 +126,7 @@ cc.Class({
         }
     },
 
-    chat: function (content) {
-        if (this._chatBubble == null || this._emoji == null) {
-            return;
-        }
-        this._emoji.active = false;
-        this._chatBubble.active = true;
-        this._chatBubble.getComponent(cc.Label).string = content;
-        this._chatBubble.getChildByName("nodeChatBubbleLabel").getComponent(cc.Label).string = content;
-        this._lastChatTime = 3;
-    },
-
-    emoji: function (emoji) {
-        //emoji = JSON.parse(emoji);
-        if (this._emoji == null || this._emoji == null) {
-            return;
-        }
-        console.log(emoji);
-        this._chatBubble.active = false;
-        this._emoji.active = true;
-        this._emoji.getComponent(cc.Animation).play(emoji);
-        this._lastChatTime = 3;
-    },
-
     // called every frame, uncomment this function to activate update callback
     update: function (dt) {
-        if (this._lastChatTime > 0) {
-            this._lastChatTime -= dt;
-            if (this._lastChatTime < 0) {
-                this._chatBubble.active = false;
-                this._emoji.active = false;
-                this._emoji.getComponent(cc.Animation).stop();
-            }
-        }
     },
 });
