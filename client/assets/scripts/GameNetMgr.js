@@ -335,10 +335,6 @@ cc.Class({
             self.dissoveData = null;
             self.dispatchEvent("event_reject_dismiss_room", data);
         });
-
-        cc.vv.net.addHandler("server_brc_voice_message", function (data) {
-            self.dispatchEvent("event_voice_message", data);
-        });
     },
 
     on_server_brc_player_pass: function (a_seatIndex) {

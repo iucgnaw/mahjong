@@ -242,18 +242,6 @@ exports.start = function (a_config, a_mgr) {
 			}, a_socket.userId, true);
 		});
 
-		//语音聊天
-		a_socket.on("client_req_voice_message", function (a_data) {
-			if (a_socket.userId == null) {
-				return;
-			}
-			console.log(a_data.length);
-			m_userMgr.broadcastMsg("server_brc_voice_message", {
-				sender: a_socket.userId,
-				content: a_data
-			}, a_socket.userId, true);
-		});
-
 		//表情
 		a_socket.on("client_req_emoji", function (a_data) {
 			if (a_socket.userId == null) {

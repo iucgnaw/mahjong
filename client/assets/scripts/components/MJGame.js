@@ -23,7 +23,6 @@ cc.Class({
         this.addComponent("ReplayCtrl");
         this.addComponent("PopupMgr");
         this.addComponent("ReConnect");
-        this.addComponent("Voice");
         this.addComponent("UserInfoShow");
         this.addComponent("Status");
 

@@ -41,10 +41,6 @@ function initMgr() {
     cc.vv.anysdkMgr = new AnysdkMgr();
     cc.vv.anysdkMgr.init();
 
-    var VoiceMgr = require("VoiceMgr");
-    cc.vv.voiceMgr = new VoiceMgr();
-    cc.vv.voiceMgr.init();
-
     var AudioMgr = require("AudioMgr");
     cc.vv.audioMgr = new AudioMgr();
     cc.vv.audioMgr.init();

@@ -10,7 +10,6 @@ cc.Class({
         _labelPlayerScore: null,
         _scoreBg: null,
         _nddayingjia: null,
-        _nodeVoiceMsg: null,
 
         _chatBubble: null,
         _emoji: null,
@@ -34,11 +33,6 @@ cc.Class({
         this._imagePlayerIcon = this.node.getChildByName("nodePlayerIcon").getComponent("ImageLoader");
         this._labelPlayerName = this.node.getChildByName("nodePlayerName").getComponent(cc.Label);
         this._labelPlayerScore = this.node.getChildByName("score").getComponent(cc.Label);
-        this._nodeVoiceMsg = this.node.getChildByName("nodeVoiceMsg");
-
-        if (this._nodeVoiceMsg) {
-            this._nodeVoiceMsg.active = false;
-        }
 
         if (this._imagePlayerIcon && this._imagePlayerIcon.getComponent(cc.Button)) {
             cc.vv.utils.addClickEvent(this._imagePlayerIcon, this.node, "Seat", "onIconClicked");
@@ -47,11 +41,11 @@ cc.Class({
 
         this._offline = this.node.getChildByName("nodeOffline");
 
-        this._ready = this.node.getChildByName("ready");
+        // this._ready = this.node.getChildByName("ready");
 
         this._nodeDealer = this.node.getChildByName("nodeDealer");
 
-        this._scoreBg = this.node.getChildByName("Z_money_frame");
+        // this._scoreBg = this.node.getChildByName("Z_money_frame");
         this._nddayingjia = this.node.getChildByName("dayingjia");
 
         this._chatBubble = this.node.getChildByName("nodeChatBubble");
@@ -103,9 +97,9 @@ cc.Class({
             this._offline.active = this._isOffline && this._userName != "";
         }
 
-        if (this._ready) {
-            this._ready.active = this._isReady && (cc.vv.gameNetMgr.gameIndex > 0);
-        }
+        // if (this._ready) {
+        //     this._ready.active = this._isReady && (cc.vv.gameNetMgr.gameIndex > 0);
+        // }
 
         if (this._nodeDealer) {
             this._nodeDealer.active = this._isZhuang;
@@ -122,9 +116,9 @@ cc.Class({
         }
         this._dayingjia = dayingjia;
 
-        if (this._scoreBg != null) {
-            this._scoreBg.active = this._score != null;
-        }
+        // if (this._scoreBg != null) {
+        //     this._scoreBg.active = this._score != null;
+        // }
 
         if (this._labelPlayerScore != null) {
             this._labelPlayerScore.node.active = this._score != null;
@@ -140,12 +134,12 @@ cc.Class({
         }
     },
 
-    setReady: function (isReady) {
-        this._isReady = isReady;
-        if (this._ready) {
-            this._ready.active = this._isReady && (cc.vv.gameNetMgr.gameIndex > 0);
-        }
-    },
+    // setReady: function (isReady) {
+    //     this._isReady = isReady;
+    //     if (this._ready) {
+    //         this._ready.active = this._isReady && (cc.vv.gameNetMgr.gameIndex > 0);
+    //     }
+    // },
 
     setID: function (id) {
         var idNode = this.node.getChildByName("id");
@@ -188,12 +182,6 @@ cc.Class({
         this._emoji.active = true;
         this._emoji.getComponent(cc.Animation).play(emoji);
         this._lastChatTime = 3;
-    },
-
-    voiceMsg: function (show) {
-        if (this._nodeVoiceMsg) {
-            this._nodeVoiceMsg.active = show;
-        }
     },
 
     // called every frame, uncomment this function to activate update callback
