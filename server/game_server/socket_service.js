@@ -36,10 +36,6 @@ exports.start = function (a_config, a_mgr) {
 				//已经登录过的就忽略
 				return;
 			}
-			// var token = loginInfo.token;
-			// var roomId = loginInfo.roomId;
-			// var time = loginInfo.time;
-			// var sign = loginInfo.sign;
 
 			//检查参数合法性
 			if (loginInfo.token == null || loginInfo.roomId == null || loginInfo.sign == null || loginInfo.time == null) {

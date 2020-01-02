@@ -41,8 +41,8 @@
     },
     "_scale": {
       "__type__": "cc.Vec3",
-      "x": 0.54217529296875,
-      "y": 0.54217529296875,
+      "x": 0.54373779296875,
+      "y": 0.54373779296875,
       "z": 1
     },
     "_quat": {
@@ -7776,7 +7776,7 @@
       "__id__": 2
     },
     "component": "MJGame",
-    "handler": "onClickedTile",
+    "handler": "onHandTileClicked",
     "customEventData": ""
   },
   {
@@ -7936,7 +7936,7 @@
       "__id__": 2
     },
     "component": "MJGame",
-    "handler": "onClickedTile",
+    "handler": "onHandTileClicked",
     "customEventData": ""
   },
   {
@@ -8096,7 +8096,7 @@
       "__id__": 2
     },
     "component": "MJGame",
-    "handler": "onClickedTile",
+    "handler": "onHandTileClicked",
     "customEventData": ""
   },
   {
@@ -8256,7 +8256,7 @@
       "__id__": 2
     },
     "component": "MJGame",
-    "handler": "onClickedTile",
+    "handler": "onHandTileClicked",
     "customEventData": ""
   },
   {
@@ -8416,7 +8416,7 @@
       "__id__": 2
     },
     "component": "MJGame",
-    "handler": "onClickedTile",
+    "handler": "onHandTileClicked",
     "customEventData": ""
   },
   {
@@ -8576,7 +8576,7 @@
       "__id__": 2
     },
     "component": "MJGame",
-    "handler": "onClickedTile",
+    "handler": "onHandTileClicked",
     "customEventData": ""
   },
   {
@@ -8736,7 +8736,7 @@
       "__id__": 2
     },
     "component": "MJGame",
-    "handler": "onClickedTile",
+    "handler": "onHandTileClicked",
     "customEventData": ""
   },
   {
@@ -8896,7 +8896,7 @@
       "__id__": 2
     },
     "component": "MJGame",
-    "handler": "onClickedTile",
+    "handler": "onHandTileClicked",
     "customEventData": ""
   },
   {
@@ -9056,7 +9056,7 @@
       "__id__": 2
     },
     "component": "MJGame",
-    "handler": "onClickedTile",
+    "handler": "onHandTileClicked",
     "customEventData": ""
   },
   {
@@ -9216,7 +9216,7 @@
       "__id__": 2
     },
     "component": "MJGame",
-    "handler": "onClickedTile",
+    "handler": "onHandTileClicked",
     "customEventData": ""
   },
   {
@@ -9376,7 +9376,7 @@
       "__id__": 2
     },
     "component": "MJGame",
-    "handler": "onClickedTile",
+    "handler": "onHandTileClicked",
     "customEventData": ""
   },
   {
@@ -9536,7 +9536,7 @@
       "__id__": 2
     },
     "component": "MJGame",
-    "handler": "onClickedTile",
+    "handler": "onHandTileClicked",
     "customEventData": ""
   },
   {
@@ -9696,7 +9696,7 @@
       "__id__": 2
     },
     "component": "MJGame",
-    "handler": "onClickedTile",
+    "handler": "onHandTileClicked",
     "customEventData": ""
   },
   {
@@ -9856,7 +9856,7 @@
       "__id__": 2
     },
     "component": "MJGame",
-    "handler": "onClickedTile",
+    "handler": "onHandTileClicked",
     "customEventData": ""
   },
   {
@@ -10173,7 +10173,7 @@
     "_position": {
       "__type__": "cc.Vec3",
       "x": -45,
-      "y": 45,
+      "y": 0,
       "z": 0
     },
     "_scale": {
@@ -10262,7 +10262,7 @@
     "_position": {
       "__type__": "cc.Vec3",
       "x": 45,
-      "y": 45,
+      "y": 0,
       "z": 0
     },
     "_scale": {
@@ -10442,7 +10442,7 @@
     "_position": {
       "__type__": "cc.Vec3",
       "x": 0,
-      "y": -63,
+      "y": 63,
       "z": 0
     },
     "_scale": {
@@ -10493,7 +10493,7 @@
   },
   {
     "__type__": "cc.Node",
-    "_name": "score",
+    "_name": "nodePlayerScore",
     "_objFlags": 0,
     "_parent": {
       "__id__": 213
@@ -10528,7 +10528,7 @@
     "_position": {
       "__type__": "cc.Vec3",
       "x": 0,
-      "y": -95,
+      "y": -63,
       "z": 0
     },
     "_scale": {
@@ -10593,8 +10593,8 @@
     "_userId": null,
     "_userName": "",
     "_score": null,
-    "_isOffline": false,
     "_isDealer": false,
+    "_isOffline": false,
     "_id": "2b6+McKuVBN5MHnp0Ot55Y"
   },
   {
@@ -17483,7 +17483,7 @@
     "_position": {
       "__type__": "cc.Vec3",
       "x": 45,
-      "y": 45,
+      "y": 0,
       "z": 0
     },
     "_scale": {
@@ -17574,7 +17574,7 @@
     "_position": {
       "__type__": "cc.Vec3",
       "x": -45,
-      "y": 45,
+      "y": 0,
       "z": 0
     },
     "_scale": {
@@ -17752,7 +17752,7 @@
     "_position": {
       "__type__": "cc.Vec3",
       "x": 0,
-      "y": -63,
+      "y": 63,
       "z": 0
     },
     "_scale": {
@@ -17803,7 +17803,7 @@
   },
   {
     "__type__": "cc.Node",
-    "_name": "score",
+    "_name": "nodePlayerScore",
     "_objFlags": 0,
     "_parent": {
       "__id__": 368
@@ -17838,7 +17838,7 @@
     "_position": {
       "__type__": "cc.Vec3",
       "x": 0,
-      "y": -95,
+      "y": -63,
       "z": 0
     },
     "_scale": {
@@ -17903,8 +17903,8 @@
     "_userId": null,
     "_userName": "",
     "_score": null,
-    "_isOffline": false,
     "_isDealer": false,
+    "_isOffline": false,
     "_id": "6fXmbTSIVFW5omL2L7nVIY"
   },
   {
@@ -24731,7 +24731,7 @@
   },
   {
     "__type__": "cc.Node",
-    "_name": "score",
+    "_name": "nodePlayerScore",
     "_objFlags": 0,
     "_parent": {
       "__id__": 522
@@ -24766,7 +24766,7 @@
     "_position": {
       "__type__": "cc.Vec3",
       "x": 0,
-      "y": -95,
+      "y": -63,
       "z": 0
     },
     "_scale": {
@@ -24941,7 +24941,7 @@
     "_position": {
       "__type__": "cc.Vec3",
       "x": 0,
-      "y": -63,
+      "y": 63,
       "z": 0
     },
     "_scale": {
@@ -25027,7 +25027,7 @@
     "_position": {
       "__type__": "cc.Vec3",
       "x": 45,
-      "y": 45,
+      "y": 0,
       "z": 0
     },
     "_scale": {
@@ -25118,7 +25118,7 @@
     "_position": {
       "__type__": "cc.Vec3",
       "x": -45,
-      "y": 45,
+      "y": 0,
       "z": 0
     },
     "_scale": {
@@ -25186,8 +25186,8 @@
     "_userId": null,
     "_userName": "",
     "_score": null,
-    "_isOffline": false,
     "_isDealer": false,
+    "_isOffline": false,
     "_id": "b5nVjV37dBErm9ySrIuT0P"
   },
   {
@@ -32052,7 +32052,7 @@
     "_position": {
       "__type__": "cc.Vec3",
       "x": 45,
-      "y": 45,
+      "y": 0,
       "z": 0
     },
     "_scale": {
@@ -32143,7 +32143,7 @@
     "_position": {
       "__type__": "cc.Vec3",
       "x": -45,
-      "y": 45,
+      "y": 0,
       "z": 0
     },
     "_scale": {
@@ -32321,7 +32321,7 @@
     "_position": {
       "__type__": "cc.Vec3",
       "x": 0,
-      "y": -63,
+      "y": 63,
       "z": 0
     },
     "_scale": {
@@ -32372,7 +32372,7 @@
   },
   {
     "__type__": "cc.Node",
-    "_name": "score",
+    "_name": "nodePlayerScore",
     "_objFlags": 0,
     "_parent": {
       "__id__": 676
@@ -32407,7 +32407,7 @@
     "_position": {
       "__type__": "cc.Vec3",
       "x": 0,
-      "y": -95,
+      "y": -63,
       "z": 0
     },
     "_scale": {
@@ -32472,8 +32472,8 @@
     "_userId": null,
     "_userName": "",
     "_score": null,
-    "_isOffline": false,
     "_isDealer": false,
+    "_isOffline": false,
     "_id": "2co11yiZRC16szRYZgIRsX"
   },
   {
@@ -32914,7 +32914,7 @@
       "__id__": 2
     },
     "component": "MJGame",
-    "handler": "onClickAction",
+    "handler": "onActionClicked",
     "customEventData": ""
   },
   {
@@ -33072,7 +33072,7 @@
       "__id__": 2
     },
     "component": "MJGame",
-    "handler": "onClickAction",
+    "handler": "onActionClicked",
     "customEventData": ""
   },
   {
@@ -33230,7 +33230,7 @@
       "__id__": 2
     },
     "component": "MJGame",
-    "handler": "onClickAction",
+    "handler": "onActionClicked",
     "customEventData": ""
   },
   {
@@ -33388,7 +33388,7 @@
       "__id__": 2
     },
     "component": "MJGame",
-    "handler": "onClickAction",
+    "handler": "onActionClicked",
     "customEventData": ""
   },
   {
@@ -33546,7 +33546,7 @@
       "__id__": 2
     },
     "component": "MJGame",
-    "handler": "onClickAction",
+    "handler": "onActionClicked",
     "customEventData": ""
   },
   {
@@ -33704,7 +33704,7 @@
       "__id__": 2
     },
     "component": "MJGame",
-    "handler": "onClickAction",
+    "handler": "onActionClicked",
     "customEventData": ""
   },
   {
@@ -33862,7 +33862,7 @@
       "__id__": 2
     },
     "component": "MJGame",
-    "handler": "onClickAction",
+    "handler": "onActionClicked",
     "customEventData": ""
   },
   {
@@ -34020,7 +34020,7 @@
       "__id__": 2
     },
     "component": "MJGame",
-    "handler": "onClickAction",
+    "handler": "onActionClicked",
     "customEventData": ""
   },
   {
@@ -34178,7 +34178,7 @@
       "__id__": 2
     },
     "component": "MJGame",
-    "handler": "onClickAction",
+    "handler": "onActionClicked",
     "customEventData": ""
   },
   {
@@ -34336,7 +34336,7 @@
       "__id__": 2
     },
     "component": "MJGame",
-    "handler": "onClickAction",
+    "handler": "onActionClicked",
     "customEventData": ""
   },
   {
@@ -35579,7 +35579,7 @@
       "__id__": 2
     },
     "component": "MJGame",
-    "handler": "onBtnSettingsClicked",
+    "handler": "onBtnSettingClicked",
     "customEventData": ""
   },
   {
@@ -40926,7 +40926,7 @@
   },
   {
     "__type__": "cc.Node",
-    "_name": "score",
+    "_name": "nodePlayerScore",
     "_objFlags": 0,
     "_parent": {
       "__id__": 892
@@ -43535,7 +43535,7 @@
   },
   {
     "__type__": "cc.Node",
-    "_name": "score",
+    "_name": "nodePlayerScore",
     "_objFlags": 0,
     "_parent": {
       "__id__": 949
@@ -46144,7 +46144,7 @@
   },
   {
     "__type__": "cc.Node",
-    "_name": "score",
+    "_name": "nodePlayerScore",
     "_objFlags": 0,
     "_parent": {
       "__id__": 1006
@@ -48753,7 +48753,7 @@
   },
   {
     "__type__": "cc.Node",
-    "_name": "score",
+    "_name": "nodePlayerScore",
     "_objFlags": 0,
     "_parent": {
       "__id__": 1063
@@ -52399,7 +52399,7 @@
   },
   {
     "__type__": "cc.Node",
-    "_name": "score",
+    "_name": "nodePlayerScore",
     "_objFlags": 0,
     "_parent": {
       "__id__": 1129
@@ -53786,7 +53786,7 @@
     "_userName": "",
     "_score": null,
     "_isDealer": false,
-    "_userId": null,
+    "_isOffline": false,
     "_id": "b4n53Xa4RGvYFsnVXj/UEX"
   },
   {
@@ -54686,7 +54686,7 @@
   },
   {
     "__type__": "cc.Node",
-    "_name": "score",
+    "_name": "nodePlayerScore",
     "_objFlags": 0,
     "_parent": {
       "__id__": 1182
@@ -56072,8 +56072,8 @@
     "_userId": null,
     "_userName": "",
     "_score": null,
-    "_isOffline": false,
     "_isDealer": false,
+    "_isOffline": false,
     "_id": "f3KdKfJ49BnoUGZTKOu5Np"
   },
   {
@@ -56973,7 +56973,7 @@
   },
   {
     "__type__": "cc.Node",
-    "_name": "score",
+    "_name": "nodePlayerScore",
     "_objFlags": 0,
     "_parent": {
       "__id__": 1235
@@ -58359,8 +58359,8 @@
     "_userId": null,
     "_userName": "",
     "_score": null,
-    "_isOffline": false,
     "_isDealer": false,
+    "_isOffline": false,
     "_id": "99MHW1EQ1Ks6+IbBk+7Mzi"
   },
   {
@@ -59260,7 +59260,7 @@
   },
   {
     "__type__": "cc.Node",
-    "_name": "score",
+    "_name": "nodePlayerScore",
     "_objFlags": 0,
     "_parent": {
       "__id__": 1288
@@ -60646,8 +60646,8 @@
     "_userId": null,
     "_userName": "",
     "_score": null,
+    "_isDealer": false,
     "_isOffline": false,
-    "_userId": null,
     "_id": "d9fuh38xVPYID5YRcmXtLc"
   },
   {
@@ -63121,9 +63121,6 @@
       "__id__": 2
     },
     "_enabled": true,
-    "nodeTable": {
-      "__id__": 8
-    },
     "_labelGameCount": null,
     "_animationAll": [],
     "_id": "36oB3HgoJBsaD9IboOzgTj"

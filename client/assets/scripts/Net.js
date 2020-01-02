@@ -84,7 +84,6 @@ var Global = cc.Class({
             });
             this.lastRecieveTime = Date.now();
             var self = this;
-            // console.log(1);
             if (!self.isPinging) {
                 self.isPinging = true;
 

@@ -131,7 +131,6 @@ cc.Class({
             } else {
                 console.error(a_loginResult.errmsg);
             }
-            self.dispatchEvent("event_server_resp_login_result");
         });
 
         cc.vv.net.addHandler("server_push_login_finished", function (data) {

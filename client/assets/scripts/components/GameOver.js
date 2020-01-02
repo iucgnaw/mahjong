@@ -45,7 +45,7 @@ cc.Class({
             seatView.username = nodeSeatX.getChildByName("username").getComponent(cc.Label);
             seatView.reason = nodeSeatX.getChildByName("reason").getComponent(cc.Label);
 
-            seatView.score = nodeSeatX.getChildByName("score").getComponent(cc.Label);
+            seatView.score = nodeSeatX.getChildByName("nodePlayerScore").getComponent(cc.Label);
             seatView.hu = nodeSeatX.getChildByName("hu");
             seatView.mahjongs = nodeSeatX.getChildByName("tile");
             seatView.nodeDealer = nodeSeatX.getChildByName("nodeDealer");

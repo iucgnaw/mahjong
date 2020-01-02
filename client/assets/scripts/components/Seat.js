@@ -24,7 +24,7 @@ cc.Class({
 
         this._scriptImageLoder = this.node.getChildByName("nodePlayerIcon").getComponent("ImageLoader");
         this._labelPlayerName = this.node.getChildByName("nodePlayerName").getComponent(cc.Label);
-        this._labelPlayerScore = this.node.getChildByName("score").getComponent(cc.Label);
+        this._labelPlayerScore = this.node.getChildByName("nodePlayerScore").getComponent(cc.Label);
         this._nodeOffline = this.node.getChildByName("nodeOffline");
         this._nodeDealer = this.node.getChildByName("nodeDealer");
 
