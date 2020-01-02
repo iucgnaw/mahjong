@@ -118,10 +118,10 @@ cc.Class({
 
     initHandlers: function () {
         var self = this;
-        cc.vv.net.addHandler("server_resp_login_result", function (data) {
-            if (data.errcode === 0) {
-                var data = data.data;
-                self.roomId = data.roomid;
+        cc.vv.net.addHandler("server_resp_login_result", function (a_loginResult) {
+            if (a_loginResult.errcode === 0) {
+                var data = a_loginResult.data;
+                self.roomId = data.roomId;
                 self.conf = data.conf;
                 self.maxHandCount = data.conf.maxHandCount;
                 self.gameIndex = data.gameIndex;
@@ -129,9 +129,9 @@ cc.Class({
                 self.seatIndex = self.getSeatIndexByUserId(cc.vv.userMgr.userId);
                 self.isOver = false;
             } else {
-                console.error(data.errmsg);
+                console.error(a_loginResult.errmsg);
             }
-            self.dispatchEvent("event_login_result");
+            self.dispatchEvent("event_server_resp_login_result");
         });
 
         cc.vv.net.addHandler("server_push_login_finished", function (data) {
@@ -139,7 +139,7 @@ cc.Class({
                 cc.vv.net.ping();
                 cc.vv.wc.hide();
             });
-            self.dispatchEvent("event_login_finished");
+            self.dispatchEvent("event_server_push_login_finished");
         });
 
         cc.vv.net.addHandler("server_push_exit_result", function (data) {
@@ -154,7 +154,7 @@ cc.Class({
             if (seat != null) {
                 seat.userId = 0;
                 seat.name = "";
-                self.dispatchEvent("event_seat_update", seat);
+                self.dispatchEvent("event_update_seat_status", seat);
             }
         });
 
@@ -178,7 +178,7 @@ cc.Class({
             }
         });
 
-        cc.vv.net.addHandler("brc_player_join", function (data) {
+        cc.vv.net.addHandler("server_brc_player_join", function (data) {
             var seatIndex = data.seatIndex;
             if (self.seats[seatIndex].userId > 0) {
                 self.seats[seatIndex].online = true;
@@ -189,21 +189,21 @@ cc.Class({
                 data.online = true;
                 self.seats[seatIndex] = data;
             }
-            self.dispatchEvent("event_player_join", self.seats[seatIndex]);
+            self.dispatchEvent("event_update_seat_status", self.seats[seatIndex]);
         });
 
         cc.vv.net.addHandler("server_brc_player_status_change", function (data) {
             var userId = data.userId;
             var seat = self.getSeatByID(userId);
             seat.online = data.online;
-            self.dispatchEvent("event_seat_update", seat);
+            self.dispatchEvent("event_update_seat_status", seat);
         });
 
         cc.vv.net.addHandler("server_brc_player_ready", function (data) {
             var userId = data.userId;
             var seat = self.getSeatByID(userId);
             seat.ready = data.ready;
-            self.dispatchEvent("event_seat_update", seat);
+            self.dispatchEvent("event_update_seat_status", seat);
         });
 
         cc.vv.net.addHandler("server_push_game_sync", function (a_data) {
@@ -255,7 +255,7 @@ cc.Class({
 
             self.reset();
             for (var i = 0; i < self.seats.length; ++i) {
-                self.dispatchEvent("event_seat_update", self.seats[i]);
+                self.dispatchEvent("event_update_seat_status", self.seats[i]);
             }
         });
 
@@ -379,7 +379,7 @@ cc.Class({
         var onConnectSucceeded = function () {
             var sd = {
                 token: data.token,
-                roomid: data.roomid,
+                roomId: data.roomId,
                 time: data.time,
                 sign: data.sign,
             };

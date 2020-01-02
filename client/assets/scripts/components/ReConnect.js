@@ -47,7 +47,7 @@ cc.Class({
             fnTestServerOn();
         };
 
-        this.node.on("event_login_finished", function () {
+        this.node.on("event_server_push_login_finished", function () {
             cc.vv.wc.hide();
             self.node.on("disconnect", fn);
         });

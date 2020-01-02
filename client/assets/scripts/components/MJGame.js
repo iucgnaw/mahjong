@@ -95,39 +95,39 @@ cc.Class({
         //初始化事件监听器
         var self = this;
 
-        this.node.on("event_player_join", function (a_seat) {
-            var localIndex = cc.vv.gameNetMgr.getLocalIndex(a_seat.seatIndex);
-            var isOffline = !a_seat.online;
-            var isZhuang = a_seat.seatIndex == cc.vv.gameNetMgr.dealer;
+        this.node.on("event_update_seat_status", function (a_seat) {
+            // var localIndex = cc.vv.gameNetMgr.getLocalIndex(a_seat.seatIndex);
+            // var isOffline = !a_seat.online;
+            // var isDealer = a_seat.seatIndex == cc.vv.gameNetMgr.dealer;
 
-            var nodeTable = self.node.getChildByName("nodeTable");
+            // var nodeTable = self.node.getChildByName("nodeTable");
+            // var sideNames = ["nodeSideBottom", "nodeSideRight", "nodeSideTop", "nodeSideLeft"];
+            // var nodeSide = nodeTable.getChildByName(sideNames[localIndex]);
+            // var nodeSeat = nodeSide.getChildByName("nodeSeat");
+            // var scriptSeat = nodeSeat.getComponent("Seat");
+
+            // scriptSeat.setUser_Name_Score(a_seat.name, a_seat.score);
+            // scriptSeat.setDealer(isDealer);
+            // scriptSeat.setOffline(isOffline);
+            // scriptSeat.setUser_Id_Image(a_seat.userId);
+
             var sideNames = ["nodeSideBottom", "nodeSideRight", "nodeSideTop", "nodeSideLeft"];
-            var nodeSide = nodeTable.getChildByName(sideNames[localIndex]);
-            var nodeSeat = nodeSide.getChildByName("nodeSeat");
-            var scriptSeat = nodeSeat.getComponent("Seat");
+            for (var idxSeat = 0; idxSeat < cc.vv.gameNetMgr.seats.length; ++idxSeat) {
+                var seat = cc.vv.gameNetMgr.seats[idxSeat];
+                var localIndex = cc.vv.gameNetMgr.getLocalIndex(seat.seatIndex);
+                var isOffline = !seat.online;
+                var isDealer = seat.seatIndex == cc.vv.gameNetMgr.dealer;
 
-            scriptSeat.setInfo(a_seat.name, a_seat.score);
-            scriptSeat.setDealer(isZhuang);
-            scriptSeat.setOffline(isOffline);
-            scriptSeat.setID(a_seat.userId);
-        });
+                var nodeTable = self.node.getChildByName("nodeTable");
+                var nodeSide = nodeTable.getChildByName(sideNames[localIndex]);
+                var nodeSeat = nodeSide.getChildByName("nodeSeat");
+                var scriptSeat = nodeSeat.getComponent("Seat");
 
-        // TOFIX same function as above
-        this.node.on("event_seat_update", function (a_seat) {
-            var localIndex = cc.vv.gameNetMgr.getLocalIndex(a_seat.seatIndex);
-            var isOffline = !a_seat.online;
-            var isZhuang = a_seat.seatIndex == cc.vv.gameNetMgr.dealer;
-
-            var nodeTable = self.node.getChildByName("nodeTable");
-            var sideNames = ["nodeSideBottom", "nodeSideRight", "nodeSideTop", "nodeSideLeft"];
-            var nodeSide = nodeTable.getChildByName(sideNames[localIndex]);
-            var nodeSeat = nodeSide.getChildByName("nodeSeat");
-            var scriptSeat = nodeSeat.getComponent("Seat");
-
-            scriptSeat.setInfo(a_seat.name, a_seat.score);
-            scriptSeat.setDealer(isZhuang);
-            scriptSeat.setOffline(isOffline);
-            scriptSeat.setID(a_seat.userId);
+                scriptSeat.setUser_Name_Score(seat.name, seat.score);
+                scriptSeat.setDealer(isDealer);
+                scriptSeat.setOffline(isOffline);
+                scriptSeat.setUser_Id_Image(seat.userId);
+            }
         });
 
         this.node.on("event_server_push_game_sync", function (a_data) {
@@ -242,7 +242,7 @@ cc.Class({
             cc.vv.audioMgr.playSfx("mahjong/action/action_win.mp3");
         });
 
-        this.node.on("event_login_result", function () {
+        this.node.on("event_server_resp_login_result", function () {
             self.nodeTable.active = false;
         });
     },

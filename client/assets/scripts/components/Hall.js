@@ -56,8 +56,8 @@ cc.Class({
             cc.vv.userMgr.enterRoom(roomId);
         }
 
-        var imgLoader = this.sprHeadImg.node.getComponent("ImageLoader");
-        imgLoader.setUserID(cc.vv.userMgr.userId);
+        var scriptImageLoder = this.sprHeadImg.node.getComponent("ImageLoader");
+        scriptImageLoder.setUserID(cc.vv.userMgr.userId);
 
         this.initButtonHandler("Canvas/right_bottom/btn_shezhi");
         this.initButtonHandler("Canvas/right_bottom/btn_help");
@@ -171,8 +171,6 @@ cc.Class({
             this.helpWin.active = true;
         } else if (event.target.name == "btn_xiaoxi") {
             this.xiaoxiWin.active = true;
-        } else if (event.target.name == "head") {
-            cc.vv.userinfoShow.show(cc.vv.userMgr.userName, cc.vv.userMgr.userId, this.sprHeadImg, cc.vv.userMgr.sex, cc.vv.userMgr.ip);
         }
     },
 

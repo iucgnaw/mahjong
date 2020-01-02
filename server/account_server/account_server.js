@@ -66,7 +66,7 @@ app.get("/register", function (req, res) {
 			});
 		} else {
 			fnFailed();
-			console.log("account has been used.");
+			// console.log("account has been used.");
 		}
 	});
 });
@@ -181,7 +181,7 @@ app.get("/wechat_auth", function (req, res) {
 	if (code == null || code == "" || os == null || os == "") {
 		return;
 	}
-	console.log(os);
+	// console.log(os);
 	get_access_token(code, os, function (suc, data) {
 		if (suc) {
 			var access_token = data.access_token;
@@ -244,7 +244,7 @@ app.get("/image", function (req, res) {
 
 
 	var safe = url.search("https://") == 0;
-	console.log(url);
+	// console.log(url);
 	var ret = http.getSync(url, null, safe, "binary");
 	if (!ret.type || !ret.data) {
 		http.send(res, 1, "invalid url", true);

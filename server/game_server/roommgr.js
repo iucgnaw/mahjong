@@ -20,7 +20,7 @@ function generateRoomId() {
 }
 
 function constructRoomFromDb(a_dbData) {
-	var roomInfo = {
+	var room = {
 		uuid: a_dbData.uuid,
 		id: a_dbData.id,
 		gameIndex: a_dbData.num_of_turns,
@@ -30,12 +30,12 @@ function constructRoomFromDb(a_dbData) {
 		conf: JSON.parse(a_dbData.base_info)
 	};
 
-	roomInfo.gameMgr = require("./gamemgr_xlch");
+	room.gameMgr = require("./gamemgr_xlch");
 
-	var roomId = roomInfo.id;
+	var roomId = room.id;
 
-	for (var i = 0; i < roomInfo.seats.length; ++i) {
-		var seat = roomInfo.seats[i] = {};
+	for (var i = 0; i < room.seats.length; ++i) {
+		var seat = room.seats[i] = {};
 		seat.userId = a_dbData["user_id" + i];
 		seat.score = a_dbData["user_score" + i];
 		seat.name = a_dbData["user_name" + i];
@@ -49,9 +49,9 @@ function constructRoomFromDb(a_dbData) {
 			};
 		}
 	}
-	g_rooms[roomId] = roomInfo;
+	g_rooms[roomId] = room;
 	g_totalRooms++;
-	return roomInfo;
+	return room;
 }
 
 exports.createRoom = function (a_creator, a_roomConf, a_gems, a_ip, a_port, a_callback) {
@@ -104,7 +104,7 @@ exports.createRoom = function (a_creator, a_roomConf, a_gems, a_ip, a_port, a_ca
 						delete g_creatingRooms[roomId];
 						if (uuid != null) {
 							roomInfo.uuid = uuid;
-							console.log(uuid);
+							// console.log(uuid);
 							g_rooms[roomId] = roomInfo;
 							g_totalRooms++;
 							a_callback(0, roomId);

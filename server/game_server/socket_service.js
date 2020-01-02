@@ -1,14 +1,14 @@
 var m_crypto = require("../utils/crypto");
 var m_db = require("../utils/db");
-var g_express = require("express");
+var m_express = require("express");
 
-var g_tokenMgr = require("./tokenmgr");
+var m_tokenMgr = require("./tokenmgr");
 var m_roomMgr = require("./roommgr");
 var m_userMgr = require("./usermgr");
-var g_http = require("../utils/http");
-var g_io = null;
+var m_http = require("../utils/http");
+var m_socket_io = null;
 
-var g_app = g_express();
+var g_app = m_express();
 
 //设置跨域访问
 g_app.all("*", function (a_req, a_res, a_next) {
@@ -17,7 +17,7 @@ g_app.all("*", function (a_req, a_res, a_next) {
 	a_res.header("Access-Control-Allow-Methods", "PUT,POST,GET,DELETE,OPTIONS");
 	a_res.header("X-Powered-By", " 3.2.1")
 	a_res.header("Content-Type", "application/json;charset=utf-8");
-	g_http.send(a_res, 0, "ok", {});
+	m_http.send(a_res, 0, "ok", {});
 });
 
 var g_config = null;
@@ -26,30 +26,23 @@ exports.start = function (a_config, a_mgr) {
 	g_config = a_config;
 
 	var httpServer = require("http").createServer(g_app);
-	g_io = require("socket.io")(httpServer);
+	m_socket_io = require("socket.io")(httpServer);
 	httpServer.listen(g_config.CLIENT_PORT);
 
-	g_io.sockets.on("connection", function (a_socket) {
-		a_socket.on("client_req_login", function (a_data) {
-			a_data = JSON.parse(a_data);
+	m_socket_io.sockets.on("connection", function (a_socket) {
+		a_socket.on("client_req_login", function (a_loginInfo) {
+			var loginInfo = JSON.parse(a_loginInfo);
 			if (a_socket.userId != null) {
 				//已经登录过的就忽略
 				return;
 			}
-			var token = a_data.token;
-			var roomId = a_data.roomid;
-			var time = a_data.time;
-			var sign = a_data.sign;
-
-			console.log(roomId);
-			console.log(token);
-			console.log(time);
-			console.log(sign);
-
+			// var token = loginInfo.token;
+			// var roomId = loginInfo.roomId;
+			// var time = loginInfo.time;
+			// var sign = loginInfo.sign;
 
 			//检查参数合法性
-			if (token == null || roomId == null || sign == null || time == null) {
-				console.log("errcode: 1, invalid parameters.");
+			if (loginInfo.token == null || loginInfo.roomId == null || loginInfo.sign == null || loginInfo.time == null) {
 				a_socket.emit("server_resp_login_result", {
 					errcode: 1,
 					errmsg: "invalid parameters."
@@ -58,9 +51,8 @@ exports.start = function (a_config, a_mgr) {
 			}
 
 			//检查参数是否被篡改
-			var md5 = m_crypto.md5(roomId + token + time + g_config.ROOM_PRI_KEY);
-			if (md5 != sign) {
-				console.log("errcode: 2, login failed. invalid sign!");
+			var md5 = m_crypto.md5(loginInfo.roomId + loginInfo.token + loginInfo.time + g_config.ROOM_PRI_KEY);
+			if (md5 != loginInfo.sign) {
 				a_socket.emit("server_resp_login_result", {
 					errcode: 2,
 					errmsg: "login failed. invalid sign!"
@@ -69,8 +61,7 @@ exports.start = function (a_config, a_mgr) {
 			}
 
 			//检查token是否有效
-			if (g_tokenMgr.isTokenValid(token) == false) {
-				console.log("errcode: 3, token expired.");
+			if (m_tokenMgr.isTokenValid(loginInfo.token) == false) {
 				a_socket.emit("server_resp_login_result", {
 					errcode: 3,
 					errmsg: "token expired."
@@ -79,22 +70,21 @@ exports.start = function (a_config, a_mgr) {
 			}
 
 			//检查房间合法性
-			var userId = g_tokenMgr.getUserID(token);
+			var userId = m_tokenMgr.getUserID(loginInfo.token);
 			var roomId = m_roomMgr.getRoomIdByUserId(userId);
 
 			m_userMgr.bind(userId, a_socket);
 			a_socket.userId = userId;
 
 			//返回房间信息
-			var roomInfo = m_roomMgr.getRoomById(roomId);
-
+			var room = m_roomMgr.getRoomById(roomId);
 			var seatIndex = m_roomMgr.getSeatIndexByUserId(userId);
-			roomInfo.seats[seatIndex].ip = a_socket.handshake.address;
+			room.seats[seatIndex].ip = a_socket.handshake.address;
 
-			var userData = null;
+			var dataSeat = null;
 			var seats = [];
-			for (var idxSeat = 0; idxSeat < roomInfo.seats.length; ++idxSeat) {
-				var seat = roomInfo.seats[idxSeat];
+			for (var idxSeat = 0; idxSeat < room.seats.length; ++idxSeat) {
+				var seat = room.seats[idxSeat];
 				var online = false;
 				if (seat.userId > 0) {
 					online = m_userMgr.isOnline(seat.userId);
@@ -102,50 +92,50 @@ exports.start = function (a_config, a_mgr) {
 
 				seats.push({
 					userId: seat.userId,
+					name: seat.name,
 					ip: seat.ip,
 					score: seat.score,
-					name: seat.name,
 					online: online,
 					ready: seat.ready,
 					seatIndex: idxSeat
 				});
 
 				if (userId == seat.userId) {
-					userData = seats[idxSeat];
+					dataSeat = seats[idxSeat];
 				}
 			}
 
 			//通知前端
-			var result = {
+			var loginResult = {
 				errcode: 0,
 				errmsg: "ok",
 				data: {
-					roomid: roomInfo.id,
-					conf: roomInfo.conf,
-					gameIndex: roomInfo.gameIndex,
+					roomId: room.id,
+					conf: room.conf,
+					gameIndex: room.gameIndex,
 					seats: seats
 				}
 			};
-			a_socket.emit("server_resp_login_result", result);
+			a_socket.emit("server_resp_login_result", loginResult);
 
 			//通知其它客户端
-			m_userMgr.broadcastMsg("brc_player_join", userData, userId, false);
+			m_userMgr.broadcastMsg("server_brc_player_join", dataSeat, userId, false);
 
-			a_socket.gameMgr = roomInfo.gameMgr;
+			a_socket.gameMgr = room.gameMgr;
 
 			//玩家上线，强制设置为TRUE
 			a_socket.gameMgr.setReady(userId);
 
 			a_socket.emit("server_push_login_finished");
 
-			if (roomInfo.dismissRequest != null) {
-				var dismissRequest = roomInfo.dismissRequest;
+			if (room.dismissRequest != null) {
+				var dismissRequest = room.dismissRequest;
 				var timeRemaining = (dismissRequest.endTime - Date.now()) / 1000;
-				var a_data = {
+				var dismissData = {
 					time: timeRemaining,
 					states: dismissRequest.states
 				}
-				m_userMgr.sendMsg(userId, "server_brc_propose_dismiss_room", a_data);
+				m_userMgr.sendMsg(userId, "server_brc_propose_dismiss_room", dismissData);
 			}
 		});
 

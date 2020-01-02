@@ -251,8 +251,8 @@ exports.setReady = function (a_userId, a_callback) {
     var game = g_games[roomId];
     if (game == null) { // Non-exist game
         if (room.seats.length == 4) {
-            for (var i = 0; i < room.seats.length; ++i) {
-                var gameSeat = room.seats[i];
+            for (var idxSeat = 0; idxSeat < room.seats.length; ++idxSeat) {
+                var gameSeat = room.seats[idxSeat];
                 if (gameSeat.ready == false ||
                     m_userMgr.isOnline(gameSeat.userId) == false) {
                     return;
@@ -857,7 +857,7 @@ function update() {
         var roomInfo = m_roomMgr.getRoomById(roomId);
         if (roomInfo != null && roomInfo.dismissRequest != null) {
             if (Date.now() > roomInfo.dismissRequest.endTime) {
-                console.log("delete room and games");
+                // console.log("delete room and games");
                 exports.doDissolve(roomId);
                 g_dismissList.splice(i, 1);
             }

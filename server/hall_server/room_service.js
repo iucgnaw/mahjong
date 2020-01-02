@@ -35,7 +35,7 @@ app.get("/register_gs", function (req, res) {
 			info.httpPort != httpPort ||
 			info.ip != ip
 		) {
-			console.log("duplicate gsid:" + id + ",addr:" + ip + "(" + httpPort + ")");
+			// console.log("duplicate gsid:" + id + ", addr:" + ip + "(" + httpPort + ")");
 			http.send(res, 1, "duplicate gsid:" + id);
 			return;
 		}
@@ -110,7 +110,7 @@ exports.createRoom = function (account, userId, roomConf, fnCallback) {
 				//console.log(data);
 				if (ret) {
 					if (data.errcode == 0) {
-						fnCallback(0, data.roomid);
+						fnCallback(0, data.roomId);
 					} else {
 						fnCallback(data.errcode, null);
 					}
@@ -128,14 +128,14 @@ exports.enterRoom = function (userId, name, roomId, fnCallback) {
 	var reqdata = {
 		userId: userId,
 		name: name,
-		roomid: roomId
+		roomId: roomId
 	};
 	reqdata.sign = crypto.md5(userId + name + roomId + config.ROOM_PRI_KEY);
 
 	var checkRoomIsRuning = function (serverinfo, roomId, callback) {
 		var sign = crypto.md5(roomId + config.ROOM_PRI_KEY);
 		http.get(serverinfo.ip, serverinfo.httpPort, "/is_room_runing", {
-			roomid: roomId,
+			roomId: roomId,
 			sign: sign
 		}, function (ret, data) {
 			if (ret) {
@@ -152,7 +152,7 @@ exports.enterRoom = function (userId, name, roomId, fnCallback) {
 
 	var enterRoomReq = function (serverinfo) {
 		http.get(serverinfo.ip, serverinfo.httpPort, "/enter_room", reqdata, function (ret, data) {
-			console.log(data);
+			// console.log(data);
 			if (ret) {
 				if (data.errcode == 0) {
 					db.set_room_id_of_user(userId, roomId, function (ret) {

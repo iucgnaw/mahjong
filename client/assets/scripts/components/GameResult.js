@@ -79,8 +79,8 @@ cc.Class({
             if (seat.score > 0) {
                 isBigwin = seat.score == maxscore;
             }
-            this._scriptGameResultSeats[i].setInfo(seat.name, seat.score, isBigwin);
-            this._scriptGameResultSeats[i].setID(seat.userId);
+            this._scriptGameResultSeats[i].setUser_Name_Score(seat.name, seat.score);
+            this._scriptGameResultSeats[i].setUser_Id_Image(seat.userId);
             var isZuiJiaPaoShou = dianpaogaoshou == i;
             this.showResult(this._scriptGameResultSeats[i], endinfo[i], isZuiJiaPaoShou);
         }

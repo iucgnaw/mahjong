@@ -24,8 +24,8 @@ app.all("*", function (req, res, next) {
 app.get("/get_server_info", function (req, res) {
 	var serverId = req.query.serverid;
 	var sign = req.query.sign;
-	console.log(serverId);
-	console.log(sign);
+	// console.log(serverId);
+	// console.log(sign);
 	if (serverId != config.SERVER_ID || sign == null) {
 		http.send(res, 1, "invalid parameters");
 		return;
@@ -61,7 +61,7 @@ app.get("/create_room", function (req, res) {
 
 	var md5 = crypto.md5(userId + conf + gems + config.ROOM_PRI_KEY);
 	if (md5 != req.query.sign) {
-		console.log("invalid reuqest.");
+		// console.log("invalid reuqest.");
 		http.send(res, 1, "sign check failed.");
 		return;
 	}
@@ -73,7 +73,7 @@ app.get("/create_room", function (req, res) {
 			return;
 		} else {
 			http.send(res, 0, "ok", {
-				roomid: roomId
+				roomId: roomId
 			});
 		}
 	});
@@ -82,7 +82,7 @@ app.get("/create_room", function (req, res) {
 app.get("/enter_room", function (req, res) {
 	var userId = parseInt(req.query.userId);
 	var name = req.query.name;
-	var roomId = req.query.roomid;
+	var roomId = req.query.roomId;
 	var sign = req.query.sign;
 	if (userId == null || roomId == null || sign == null) {
 		http.send(res, 1, "invalid parameters");
@@ -90,8 +90,8 @@ app.get("/enter_room", function (req, res) {
 	}
 
 	var md5 = crypto.md5(userId + name + roomId + config.ROOM_PRI_KEY);
-	console.log(req.query);
-	console.log(md5);
+	// console.log(req.query);
+	// console.log(md5);
 	if (md5 != sign) {
 		http.send(res, 2, "sign check failed.");
 		return;
@@ -116,7 +116,7 @@ app.get("/enter_room", function (req, res) {
 });
 
 app.get("/is_room_runing", function (req, res) {
-	var roomId = req.query.roomid;
+	var roomId = req.query.roomId;
 	var sign = req.query.sign;
 	if (roomId == null || sign == null) {
 		http.send(res, 1, "invalid parameters");
@@ -152,7 +152,6 @@ function update() {
 					serverIp = data.ip;
 				}
 			} else {
-				//
 				lastTickTime = 0;
 			}
 		});

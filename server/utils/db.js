@@ -150,7 +150,7 @@ exports.get_user_data = function (a_account, a_callback) {
         return;
     }
 
-    var sql = 'SELECT userId,account,name,lv,exp,coins,gems,roomid FROM t_users WHERE account = "' + a_account + '"';
+    var sql = 'SELECT userId,account,name,lv,exp,coins,gems,roomId FROM t_users WHERE account = "' + a_account + '"';
     query(sql, function (a_err, a_rows, a_fields) {
         if (a_err) {
             a_callback(null);
@@ -173,7 +173,7 @@ exports.get_user_data_by_userid = function (a_userId, a_callback) {
         return;
     }
 
-    var sql = 'SELECT userId,account,name,lv,exp,coins,gems,roomid FROM t_users WHERE userId = ' + a_userId;
+    var sql = 'SELECT userId,account,name,lv,exp,coins,gems,roomId FROM t_users WHERE userId = ' + a_userId;
     query(sql, function (a_error, a_rows, a_fields) {
         if (a_error) {
             a_callback(null);
@@ -198,7 +198,7 @@ exports.add_user_gems = function (a_userId, a_gems, a_callback) {
     }
 
     var sql = 'UPDATE t_users SET gems = gems +' + a_gems + ' WHERE userId = ' + a_userId;
-    console.log(sql);
+    // console.log(sql);
     query(sql, function (a_error, a_rows, a_fields) {
         if (a_error) {
             console.error(a_error);
@@ -271,7 +271,7 @@ exports.update_user_history = function (a_userId, a_history, a_callback) {
     }
 
     a_history = JSON.stringify(a_history);
-    var sql = 'UPDATE t_users SET roomid = null, history = \'' + a_history + '\' WHERE userId = "' + a_userId + '"';
+    var sql = 'UPDATE t_users SET roomId = null, history = \'' + a_history + '\' WHERE userId = "' + a_userId + '"';
     //console.log(sql);
     query(sql, function (a_error, a_rows, a_fields) {
         if (a_error) {
@@ -350,7 +350,7 @@ exports.create_user = function (a_account, a_name, a_coins, a_gems, a_sex, a_hea
 
     var sql = 'INSERT INTO t_users(userId,account,name,coins,gems,sex,headimg) VALUES("{0}", "{1}","{2}",{3},{4},{5},{6})';
     sql = sql.format(userId, a_account, a_name, a_coins, a_gems, a_sex, a_headImg);
-    console.log(sql);
+    // console.log(sql);
     query(sql, function (a_error, a_rows, a_fields) {
         if (a_error) {
             throw a_error;
@@ -374,7 +374,7 @@ exports.update_user_info = function (a_userId, a_name, a_headImg, a_sex, a_callb
     a_name = m_crypto.toBase64(a_name);
     var sql = 'UPDATE t_users SET name="{0}",headimg={1},sex={2} WHERE account="{3}"';
     sql = sql.format(a_name, a_headImg, a_sex, a_userId);
-    console.log(sql);
+    // console.log(sql);
     query(sql, function (err, rows, fields) {
         if (err) {
             throw err;
@@ -391,7 +391,7 @@ exports.get_user_base_info = function (a_userId, a_callback) {
     }
     var sql = 'SELECT name,sex,headimg FROM t_users WHERE userId={0}';
     sql = sql.format(a_userId);
-    console.log(sql);
+    // console.log(sql);
     query(sql, function (a_error, a_rows, a_fields) {
         if (a_error) {
             throw a_error;
@@ -417,7 +417,7 @@ exports.is_room_exist = function (a_roomId, a_callback) {
 exports.cost_gems = function (a_userId, a_cost, a_callback) {
     a_callback = a_callback == null ? nop : a_callback;
     var sql = 'UPDATE t_users SET gems = gems -' + a_cost + ' WHERE userId = ' + a_userId;
-    console.log(sql);
+    // console.log(sql);
     query(sql, function (a_error, a_rows, a_fields) {
         if (a_error) {
             a_callback(false);
@@ -433,8 +433,8 @@ exports.set_room_id_of_user = function (a_userId, a_roomId, a_callback) {
     if (a_roomId != null) {
         a_roomId = '"' + a_roomId + '"';
     }
-    var sql = 'UPDATE t_users SET roomid = ' + a_roomId + ' WHERE userId = "' + a_userId + '"';
-    console.log(sql);
+    var sql = 'UPDATE t_users SET roomId = ' + a_roomId + ' WHERE userId = "' + a_userId + '"';
+    // console.log(sql);
     query(sql, function (a_error, a_rows, a_fields) {
         if (a_error) {
             console.error(a_error);
@@ -448,14 +448,14 @@ exports.set_room_id_of_user = function (a_userId, a_roomId, a_callback) {
 
 exports.get_room_id_of_user = function (a_userId, a_callback) {
     a_callback = a_callback == null ? nop : a_callback;
-    var sql = 'SELECT roomid FROM t_users WHERE userId = "' + a_userId + '"';
+    var sql = 'SELECT roomId FROM t_users WHERE userId = "' + a_userId + '"';
     query(sql, function (err, rows, fields) {
         if (err) {
             a_callback(null);
             throw err;
         } else {
             if (rows.length > 0) {
-                a_callback(rows[0].roomid);
+                a_callback(rows[0].roomId);
             } else {
                 a_callback(null);
             }
@@ -470,7 +470,7 @@ exports.create_room = function (a_roomId, a_roomConfig, a_ip, a_port, a_createTi
     var uuid = Date.now() + a_roomId;
     var baseInfo = JSON.stringify(a_roomConfig);
     sql = sql.format(uuid, a_roomId, baseInfo, a_ip, a_port, a_createTime);
-    console.log(sql);
+    // console.log(sql);
     query(sql, function (a_error, a_rows, a_fields) {
         if (a_error) {
             a_callback(null);
@@ -594,7 +594,7 @@ exports.delete_room = function (a_roomId, a_callback) {
     }
     var sql = "DELETE FROM t_rooms WHERE id = '{0}'";
     sql = sql.format(a_roomId);
-    console.log(sql);
+    // console.log(sql);
     query(sql, function (a_err, a_rows, a_fields) {
         if (a_err) {
             a_callback(false);
@@ -627,7 +627,7 @@ exports.delete_games = function (a_roomUuid, a_callback) {
     }
     var sql = "DELETE FROM t_games WHERE room_uuid = '{0}'";
     sql = sql.format(a_roomUuid);
-    console.log(sql);
+    // console.log(sql);
     query(sql, function (a_error, a_rows, a_fields) {
         if (a_error) {
             a_callback(false);
@@ -645,7 +645,7 @@ exports.archive_games = function (a_roomUuid, a_callback) {
     }
     var sql = "INSERT INTO t_games_archive(SELECT * FROM t_games WHERE room_uuid = '{0}')";
     sql = sql.format(a_roomUuid);
-    console.log(sql);
+    // console.log(sql);
     query(sql, function (a_error, a_rows, a_fields) {
         if (a_error) {
             a_callback(false);

@@ -62,7 +62,7 @@ cc.Class({
                     self.exp = ret.exp;
                     self.coins = ret.coins;
                     self.gems = ret.gems;
-                    self.roomData = ret.roomid;
+                    self.roomData = ret.roomId;
                     self.sex = ret.sex;
                     self.ip = ret.ip;
                     cc.director.loadScene("hall");
@@ -120,7 +120,7 @@ cc.Class({
         var data = {
             account: cc.vv.userMgr.account,
             sign: cc.vv.userMgr.sign,
-            roomid: roomId
+            roomId: roomId
         };
         cc.vv.wc.show("正在进入房间 " + roomId);
         cc.vv.http.sendRequest("/enter_private_room", data, onEnter);
