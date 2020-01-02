@@ -212,15 +212,6 @@ cc.Class({
                 var nodeTile = nodeDiscardedTiles.getChildByName("nodeTile" + idxTile);
                 nodeTile.active = false;
             }
-
-            var nodeSeat = nodeSide.getChildByName("nodeSeat");
-            var nodeScore = nodeSeat.getChildByName("nodePlayerScore");
-            var labelScore = nodeScore.getComponent(cc.Label);
-            var natualIndex = cc.vv.gameNetMgr.getNatualIndex(idxSide);
-            var seat = cc.vv.gameNetMgr.seats[natualIndex];
-            if (seat.fsmPlayerState) {
-                labelScore.string = seat.fsmPlayerState;
-            }
         }
 
         for (var idxSeat in cc.vv.gameNetMgr.seats) {
@@ -241,6 +232,13 @@ cc.Class({
             nodeSeat.getChildByName("nodePlayerScore").getComponent(cc.Label).string = a_seat.score;
             nodeSeat.getChildByName("nodeDealer").active = (a_seat.seatIndex == cc.vv.gameNetMgr.dealer);
             nodeSeat.getChildByName("nodeOffline").active = (!a_seat.online);
+
+            // TOFIX
+            if (a_seat.fsmPlayerState) {
+                nodeSeat.getChildByName("nodePlayerScore").getComponent(cc.Label).string = a_seat.fsmPlayerState;
+            } else {
+                nodeSeat.getChildByName("nodePlayerScore").getComponent(cc.Label).string = "N/A";
+            }
 
             nodeSeat.active = true;
         } else {
