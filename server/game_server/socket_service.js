@@ -1,3 +1,5 @@
+var m_mahjong = require("../../common/mahjong.js");
+
 var m_crypto = require("../utils/crypto");
 var m_db = require("../utils/db");
 var m_express = require("express");
@@ -66,7 +68,7 @@ exports.start = function (a_config, a_mgr) {
 			}
 
 			//检查房间合法性
-			var userId = m_tokenMgr.getUserID(loginInfo.token);
+			var userId = m_tokenMgr.getUserIdByToken(loginInfo.token);
 			var roomId = m_roomMgr.getRoomIdByUserId(userId);
 
 			m_userMgr.bind(userId, a_socket);
@@ -77,27 +79,28 @@ exports.start = function (a_config, a_mgr) {
 			var seatIndex = m_roomMgr.getSeatIndexByUserId(userId);
 			room.seats[seatIndex].ip = a_socket.handshake.address;
 
-			var dataSeat = null;
+			var joinedSeat = null;
 			var seats = [];
 			for (var idxSeat = 0; idxSeat < room.seats.length; ++idxSeat) {
-				var seat = room.seats[idxSeat];
+				var roomSeat = room.seats[idxSeat];
 				var online = false;
-				if (seat.userId > 0) {
-					online = m_userMgr.isOnline(seat.userId);
+				if (roomSeat.userId > 0) {
+					online = m_userMgr.isOnline(roomSeat.userId);
 				}
 
 				seats.push({
-					userId: seat.userId,
-					name: seat.name,
-					ip: seat.ip,
-					score: seat.score,
+					userId: roomSeat.userId,
+					name: roomSeat.name,
+					ip: roomSeat.ip,
+					score: roomSeat.score,
 					online: online,
-					ready: seat.ready,
+					ready: roomSeat.ready,
 					seatIndex: idxSeat
 				});
+				seats[idxSeat].fsmPlayerState = m_mahjong.MJ_PLAYER_STATE_IDLE;
 
-				if (userId == seat.userId) {
-					dataSeat = seats[idxSeat];
+				if (userId == roomSeat.userId) {
+					joinedSeat = seats[idxSeat];
 				}
 			}
 
@@ -115,7 +118,7 @@ exports.start = function (a_config, a_mgr) {
 			a_socket.emit("server_resp_login_result", loginResult);
 
 			//通知其它客户端
-			m_userMgr.broadcastMsg("server_brc_player_join", dataSeat, userId, false);
+			m_userMgr.broadcastMsg("server_brc_player_join", joinedSeat, userId, false);
 
 			a_socket.gameMgr = room.gameMgr;
 
@@ -163,7 +166,7 @@ exports.start = function (a_config, a_mgr) {
 			a_socket.gameMgr.on_client_req_action_discard_tile(a_socket.userId, tile);
 		});
 
-		// Steal: Chow, Pong, Kong
+		// Steal: Chow, Pong, Kong, Win
 		a_socket.on("client_req_action_steal", function (a_data) {
 			console.assert(a_socket.userId != null);
 			console.assert(a_data != null);

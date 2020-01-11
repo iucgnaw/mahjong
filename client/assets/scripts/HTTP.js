@@ -59,7 +59,7 @@ function sendRequest(a_path, a_data, a_handler, a_extraUrl) {
     }, 5000);
 
     var retryFunc = function () {
-        sendRequest(a_path, a_data, a_handler, a_extraUrl); // TOFIX: very likly this cause recursive call?
+        sendRequest(a_path, a_data, a_handler, a_extraUrl);
     };
 
     xmlHttpRequest.onreadystatechange = function () {
@@ -67,7 +67,8 @@ function sendRequest(a_path, a_data, a_handler, a_extraUrl) {
 
         clearTimeout(timer);
 
-        if (xmlHttpRequest.readyState === 4 && (xmlHttpRequest.status >= 200 && xmlHttpRequest.status < 300)) {
+        if (xmlHttpRequest.readyState === 4 &&
+            (xmlHttpRequest.status >= 200 && xmlHttpRequest.status < 300)) {
             // console.log("http res(" + xhr.responseText.length + "):" + xhr.responseText);
             var responseText = xmlHttpRequest.responseText;
             var responseObject = null;

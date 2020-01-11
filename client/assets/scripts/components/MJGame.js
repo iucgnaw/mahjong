@@ -382,7 +382,7 @@ cc.Class({
                 break;
 
             case "nodeActionDiscard":
-                var tile;
+                var tile; // TOFIX
                 if (selectedTiles.tiles.length <= 0) {
                     alert("客户端消息：\r\n请选择1张手牌。");
                     return;
@@ -440,7 +440,7 @@ cc.Class({
                 break;
 
             case "nodeActionWin":
-                cc.vv.net.send("client_req_action_win");
+                cc.vv.net.send("client_req_action_steal", m_mahjong.MJ_ACTION_WIN);
                 break;
         }
     },

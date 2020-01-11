@@ -565,6 +565,38 @@ exports.on_client_req_action_steal = function (a_userId, a_action) {
                 }
             }
             break;
+
+        case m_mahjong.MJ_ACTION_WIN:
+            if ((seat.fsmPlayerState != m_mahjong.MJ_PLAYER_STATE_GET_TURN) &&
+                (seat.fsmPlayerState != m_mahjong.MJ_PLAYER_STATE_FULL_HAND) &&
+                (seat.fsmPlayerState != m_mahjong.MJ_PLAYER_STATE_THINKING_ON_DISCARDING_TILE) &&
+                (seat.fsmPlayerState != m_mahjong.MJ_PLAYER_STATE_THINKING_ON_CHOWING)) {
+                m_userMgr.sendMsg(a_userId, "server_push_message", "Can't [" + a_action + "] on state: " + seat.fsmPlayerState);
+                return;
+            }
+
+            message = "server_brc_winning"
+
+            seat.fsmPlayerState = m_mahjong.MJ_PLAYER_STATE_WINING;
+            for (var i = 0; i < game.seats.length; ++i) {
+                if (seat.seatIndex == idxSeat) {
+                    continue;
+                }
+
+                if (game.seats[i].fsmPlayerState == m_mahjong.MJ_PLAYER_STATE_DISCARDING_TILE) {
+                    game.seats[i].fsmPlayerState = m_mahjong.MJ_PLAYER_STATE_BEING_TARGETED;
+                } else if ((game.seats[i].fsmPlayerState == m_mahjong.MJ_PLAYER_STATE_IDLE) ||
+                    (game.seats[i].fsmPlayerState == m_mahjong.MJ_PLAYER_STATE_CHOWING) ||
+                    (game.seats[i].fsmPlayerState == m_mahjong.MJ_PLAYER_STATE_PONGING) ||
+                    (game.seats[i].fsmPlayerState == m_mahjong.MJ_PLAYER_STATE_KONGING)) {
+                    game.seats[i].fsmPlayerState = m_mahjong.MJ_PLAYER_STATE_THINKING_ON_WINING;
+                }
+            }
+
+            for (var idxTile = 0; idxTile < seat.handTiles.length; idxTile++) {
+                seat.handTiles[idxTile].pose = "lying";
+            }
+            break;
     }
 
     // Tell clients
@@ -581,7 +613,6 @@ exports.on_client_req_action_steal = function (a_userId, a_action) {
 exports.on_client_req_action_win = function (a_userId) {
     var seat = g_seatByUserId[a_userId];
     console.assert(seat != null);
-    var seatIndex = seat.seatIndex;
     var game = seat.game;
 
     //通知前端，有人和牌了

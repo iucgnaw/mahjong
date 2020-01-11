@@ -24,7 +24,7 @@ exports.getToken = function (userId) {
 	return users[userId];
 };
 
-exports.getUserID = function (token) {
+exports.getUserIdByToken = function (token) {
 	return tokens[token].userId;
 };
 

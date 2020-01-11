@@ -6,7 +6,7 @@ exports.bind = function (a_userId, a_socket) {
     g_userOnline++;
 };
 
-exports.del = function (a_userId, socket) {
+exports.del = function (a_userId, a_socket) {
     delete g_userSockets[a_userId];
     g_userOnline--;
 };
