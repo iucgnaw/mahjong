@@ -60,9 +60,16 @@ var g_arrayTileName = [
 	"season_1_spring", "season_2_summer", "season_3_autumn", "season_4_winter", "flower_1_plum", "flower_2_orchid", "flower_3_bamboo", "flower_4_chrysanthemum"
 ];
 
+exports.MJ_TABLE_STATE_IDLE = "牌桌空闲";
+exports.MJ_TABLE_STATE_REPLACE_HONOR_TILES = "牌桌换花";
+exports.MJ_TABLE_STATE_PLAYING = "牌桌对战";
+
+exports.MJ_PLAYER_STATE_INITIAL_WAITING = "开局待换花";
+exports.MJ_PLAYER_STATE_INITIAL_REPLACING = "开局换花中";
 exports.MJ_PLAYER_STATE_IDLE = "空闲";
-exports.MJ_PLAYER_STATE_GET_TURN = "获得Turn";
-exports.MJ_PLAYER_STATE_FULL_HAND = "满手牌";
+exports.MJ_PLAYER_STATE_GET_TURN = "获得轮次";
+exports.MJ_PLAYER_STATE_FULL_HAND = "手牌齐";
+exports.MJ_PLAYER_STATE_KONG_BACKDRAWING = "杠后补牌中";
 exports.MJ_PLAYER_STATE_DISCARDING_TILE = "出牌中";
 exports.MJ_PLAYER_STATE_BEING_TARGETED = "被瞄上";
 exports.MJ_PLAYER_STATE_THINKING_ON_DISCARDING_TILE = "思考已出牌";

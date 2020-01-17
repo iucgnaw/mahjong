@@ -16,6 +16,37 @@ var MJ_ACTION_WIN = 5;
 var MJ_ACTION_WIN_SELFDRAW = 6;
 var MJ_ACTION_CHOW = 7;
 
+function copyGameForClient(a_gameForClient, a_game, a_userId) {
+    a_gameForClient.tilewallRemaining = a_game.tilewall.length;
+    a_gameForClient.dealer = a_game.dealer;
+    a_gameForClient.turn = a_game.turn;
+    a_gameForClient.jokerTile = a_game.jokerTile;
+    a_gameForClient.fsmTableState = a_game.fsmTableState;
+
+    a_gameForClient.seats = [];
+    for (var idxSeat = 0; idxSeat < a_game.seats.length; ++idxSeat) {
+        var seat = {};
+
+        // seat.handTiles = a_game.seats[idxSeat].handTiles;
+        seat.handTiles = JSON.parse(JSON.stringify(a_game.seats[idxSeat].handTiles));
+        if (a_game.seats[idxSeat].userId != a_userId) { // Invalidize handTiles
+            for (var idxTile = 0; idxTile < seat.handTiles.length; idxTile++) {
+                if (seat.handTiles[idxTile].pose == "standing") { // and only invalidize stading ones
+                    seat.handTiles[idxTile].tile = m_mahjong.MJ_TILE_INVALID;
+                }
+            }
+        }
+        seat.honorTiles = a_game.seats[idxSeat].honorTiles;
+        seat.discardedTiles = a_game.seats[idxSeat].discardedTiles;
+        seat.melds = a_game.seats[idxSeat].melds;
+        seat.huinfo = a_game.seats[idxSeat].huinfo;
+
+        seat.fsmPlayerState = a_game.seats[idxSeat].fsmPlayerState;
+
+        a_gameForClient.seats.push(seat);
+    }
+}
+
 function drawTile(a_game, a_seatIndex) {
     if (a_game.tilewall.length <= 0) { // No more tile in Tiles Wall
         return m_mahjong.MJ_TILE_INVALID;
@@ -84,6 +115,12 @@ function dealTiles(a_game) {
         }
     }
     a_game.jokerTile = jokerTile;
+}
+
+function getNextSeatIndex(a_seatIndex) {
+    var nextSeatIndex = a_seatIndex + 1;
+    nextSeatIndex %= 4;
+    return nextSeatIndex;
 }
 
 function changeTurn(a_game, a_seatIndex) {
@@ -326,7 +363,6 @@ function store_game(a_game, a_callback) {
 exports.begin = function (a_roomId) {
     var room = m_roomMgr.getRoomById(a_roomId);
     console.assert(room != null);
-    var roomSeats = room.seats;
 
     var game = {
         conf: room.conf,
@@ -343,6 +379,8 @@ exports.begin = function (a_roomId) {
 
         jokerTile: m_mahjong.MJ_TILE_INVALID,
 
+        fsmTableState: m_mahjong.MJ_TABLE_STATE_IDLE,
+
         actionList: [],
     };
 
@@ -355,7 +393,7 @@ exports.begin = function (a_roomId) {
 
         seat.seatIndex = idxSeat;
 
-        seat.userId = roomSeats[idxSeat].userId;
+        seat.userId = room.seats[idxSeat].userId;
         seat.handTiles = [];
         seat.honorTiles = [];
         seat.discardedTiles = [];
@@ -373,19 +411,20 @@ exports.begin = function (a_roomId) {
     //发牌
     dealTiles(game);
 
-    for (var idxSeat = 0; idxSeat < roomSeats.length; ++idxSeat) {
-        var seat = roomSeats[idxSeat];
+    game.fsmTableState = m_mahjong.MJ_TABLE_STATE_REPLACE_HONOR_TILES;
+    for (var idxSeat = 0; idxSeat < game.seats.length; ++idxSeat) {
+        var seat = game.seats[idxSeat];
 
         //TOFIX
         m_userMgr.sendMsg(seat.userId, "server_brc_hand_count", room.gameIndex);
 
-        seat.fsmPlayerState = m_mahjong.MJ_PLAYER_STATE_IDLE;
+        seat.fsmPlayerState = m_mahjong.MJ_PLAYER_STATE_INITIAL_WAITING;
     }
     construct_game_base_info(game);
 
     //通知玩家出牌方
-    m_userMgr.broadcastMsg("server_brc_change_turn", game.seats[game.turn].userId, game.seats[game.turn].userId, true);
-    game.seats[game.turn].fsmPlayerState = m_mahjong.MJ_PLAYER_STATE_FULL_HAND;
+    // m_userMgr.broadcastMsg("server_brc_change_turn", game.seats[game.turn].userId, game.seats[game.turn].userId, true);
+    game.seats[game.turn].fsmPlayerState = m_mahjong.MJ_PLAYER_STATE_INITIAL_REPLACING;
 
     // Sync game
     for (var idxSeat = 0; idxSeat < game.seats.length; ++idxSeat) {
@@ -470,17 +509,27 @@ exports.on_client_req_action_steal = function (a_userId, a_action) {
     var seat = g_seatByUserId[a_userId];
     console.assert(seat != null);
     var game = seat.game;
-    var message;
+    var reponseMessage;
 
     switch (a_action) {
         case m_mahjong.MJ_ACTION_SET_ASIDE:
-            if ((seat.fsmPlayerState != m_mahjong.MJ_PLAYER_STATE_GET_TURN) &&
-                (seat.fsmPlayerState != m_mahjong.MJ_PLAYER_STATE_FULL_HAND)) {
+            if ((seat.fsmPlayerState != m_mahjong.MJ_PLAYER_STATE_INITIAL_REPLACING) &&
+                (seat.fsmPlayerState != m_mahjong.MJ_PLAYER_STATE_GET_TURN)) {
                 m_userMgr.sendMsg(a_userId, "server_push_message", "Can't [" + a_action + "] on state: " + seat.fsmPlayerState);
                 return;
             }
 
-            message = "server_brc_set_aside"
+            // Validate lying tiles are honor tiles
+            for (var idxTile = 0; idxTile < seat.handTiles.length; idxTile++) {
+                if (seat.handTiles[idxTile].pose == "lying") {
+                    if (m_mahjong.getTileSuit(seat.handTiles[idxTile].tile) != m_mahjong.MJ_TILE_SUIT_HONOR) {
+                        m_userMgr.sendMsg(a_userId, "server_push_message", "不能存非花牌！");
+                        return;
+                    }
+                }
+            }
+
+            reponseMessage = "server_brc_set_aside"
 
             // Copy lying tiles to honor tiles
             for (var idxTile = 0; idxTile < seat.handTiles.length; idxTile++) {
@@ -502,7 +551,7 @@ exports.on_client_req_action_steal = function (a_userId, a_action) {
                 return;
             }
 
-            message = "server_brc_chowing"
+            reponseMessage = "server_brc_chowing"
 
             seat.fsmPlayerState = m_mahjong.MJ_PLAYER_STATE_CHOWING;
             for (var idxSeat = 0; idxSeat < game.seats.length; ++idxSeat) {
@@ -512,7 +561,7 @@ exports.on_client_req_action_steal = function (a_userId, a_action) {
 
                 if (game.seats[idxSeat].fsmPlayerState == m_mahjong.MJ_PLAYER_STATE_DISCARDING_TILE) {
                     game.seats[idxSeat].fsmPlayerState = m_mahjong.MJ_PLAYER_STATE_BEING_TARGETED;
-                } else if (game.seats[idxSeat].fsmPlayerState == m_mahjong.MJ_PLAYER_STATE_IDLE) {
+                } else if (game.seats[idxSeat].fsmPlayerState == m_mahjong.MJ_PLAYER_STATE_THINKING_ON_DISCARDING_TILE) {
                     game.seats[idxSeat].fsmPlayerState = m_mahjong.MJ_PLAYER_STATE_THINKING_ON_CHOWING;
                 }
             }
@@ -525,7 +574,7 @@ exports.on_client_req_action_steal = function (a_userId, a_action) {
                 return;
             }
 
-            message = "server_brc_ponging"
+            reponseMessage = "server_brc_ponging"
 
             seat.fsmPlayerState = m_mahjong.MJ_PLAYER_STATE_PONGING;
             for (var i = 0; i < game.seats.length; ++i) {
@@ -535,7 +584,7 @@ exports.on_client_req_action_steal = function (a_userId, a_action) {
 
                 if (game.seats[i].fsmPlayerState == m_mahjong.MJ_PLAYER_STATE_DISCARDING_TILE) {
                     game.seats[i].fsmPlayerState = m_mahjong.MJ_PLAYER_STATE_BEING_TARGETED;
-                } else if ((game.seats[i].fsmPlayerState == m_mahjong.MJ_PLAYER_STATE_IDLE) ||
+                } else if ((game.seats[i].fsmPlayerState == m_mahjong.MJ_PLAYER_STATE_THINKING_ON_DISCARDING_TILE) ||
                     (game.seats[i].fsmPlayerState == m_mahjong.MJ_PLAYER_STATE_CHOWING)) {
                     game.seats[i].fsmPlayerState = m_mahjong.MJ_PLAYER_STATE_THINKING_ON_PONGING;
                 }
@@ -549,7 +598,7 @@ exports.on_client_req_action_steal = function (a_userId, a_action) {
                 return;
             }
 
-            message = "server_brc_konging"
+            reponseMessage = "server_brc_konging"
 
             seat.fsmPlayerState = m_mahjong.MJ_PLAYER_STATE_KONGING;
             for (var i = 0; i < game.seats.length; ++i) {
@@ -559,7 +608,7 @@ exports.on_client_req_action_steal = function (a_userId, a_action) {
 
                 if (game.seats[i].fsmPlayerState == m_mahjong.MJ_PLAYER_STATE_DISCARDING_TILE) {
                     game.seats[i].fsmPlayerState = m_mahjong.MJ_PLAYER_STATE_BEING_TARGETED;
-                } else if ((game.seats[i].fsmPlayerState == m_mahjong.MJ_PLAYER_STATE_IDLE) ||
+                } else if ((game.seats[i].fsmPlayerState == m_mahjong.MJ_PLAYER_STATE_THINKING_ON_DISCARDING_TILE) ||
                     (game.seats[i].fsmPlayerState == m_mahjong.MJ_PLAYER_STATE_CHOWING)) {
                     game.seats[i].fsmPlayerState = m_mahjong.MJ_PLAYER_STATE_THINKING_ON_KONGING;
                 }
@@ -570,12 +619,15 @@ exports.on_client_req_action_steal = function (a_userId, a_action) {
             if ((seat.fsmPlayerState != m_mahjong.MJ_PLAYER_STATE_GET_TURN) &&
                 (seat.fsmPlayerState != m_mahjong.MJ_PLAYER_STATE_FULL_HAND) &&
                 (seat.fsmPlayerState != m_mahjong.MJ_PLAYER_STATE_THINKING_ON_DISCARDING_TILE) &&
-                (seat.fsmPlayerState != m_mahjong.MJ_PLAYER_STATE_THINKING_ON_CHOWING)) {
+                (seat.fsmPlayerState != m_mahjong.MJ_PLAYER_STATE_THINKING_ON_CHOWING) &&
+                (seat.fsmPlayerState != m_mahjong.MJ_PLAYER_STATE_THINKING_ON_PONGING) &&
+                (seat.fsmPlayerState != m_mahjong.MJ_PLAYER_STATE_THINKING_ON_KONGING) &&
+                (seat.fsmPlayerState != m_mahjong.MJ_PLAYER_STATE_THINKING_ON_WINING)) {
                 m_userMgr.sendMsg(a_userId, "server_push_message", "Can't [" + a_action + "] on state: " + seat.fsmPlayerState);
                 return;
             }
 
-            message = "server_brc_winning"
+            reponseMessage = "server_brc_winning"
 
             seat.fsmPlayerState = m_mahjong.MJ_PLAYER_STATE_WINING;
             for (var i = 0; i < game.seats.length; ++i) {
@@ -586,6 +638,7 @@ exports.on_client_req_action_steal = function (a_userId, a_action) {
                 if (game.seats[i].fsmPlayerState == m_mahjong.MJ_PLAYER_STATE_DISCARDING_TILE) {
                     game.seats[i].fsmPlayerState = m_mahjong.MJ_PLAYER_STATE_BEING_TARGETED;
                 } else if ((game.seats[i].fsmPlayerState == m_mahjong.MJ_PLAYER_STATE_IDLE) ||
+                    (game.seats[i].fsmPlayerState == m_mahjong.MJ_PLAYER_STATE_THINKING_ON_DISCARDING_TILE) ||
                     (game.seats[i].fsmPlayerState == m_mahjong.MJ_PLAYER_STATE_CHOWING) ||
                     (game.seats[i].fsmPlayerState == m_mahjong.MJ_PLAYER_STATE_PONGING) ||
                     (game.seats[i].fsmPlayerState == m_mahjong.MJ_PLAYER_STATE_KONGING)) {
@@ -596,11 +649,14 @@ exports.on_client_req_action_steal = function (a_userId, a_action) {
             for (var idxTile = 0; idxTile < seat.handTiles.length; idxTile++) {
                 seat.handTiles[idxTile].pose = "lying";
             }
+
+            // var turnSeat = game.seats[game.turn];
+            // doGameOver(game, turnSeat.userId);
             break;
     }
 
     // Tell clients
-    m_userMgr.broadcastMsg(message, seat.userId, seat.userId, true);
+    m_userMgr.broadcastMsg(reponseMessage, seat.userId, seat.userId, true);
 
     // Sync game
     for (var idxSeat = 0; idxSeat < game.seats.length; ++idxSeat) {
@@ -609,69 +665,19 @@ exports.on_client_req_action_steal = function (a_userId, a_action) {
         m_userMgr.sendMsg(game.seats[idxSeat].userId, "server_push_game_sync", gameForClient);
     }
 };
-
-exports.on_client_req_action_win = function (a_userId) {
-    var seat = g_seatByUserId[a_userId];
-    console.assert(seat != null);
-    var game = seat.game;
-
-    //通知前端，有人和牌了
-    m_userMgr.broadcastMsg("server_brc_winning", seat.userId, seat.userId, true);
-
-    for (var idxTile = 0; idxTile < seat.handTiles.length; idxTile++) {
-        seat.handTiles[idxTile].pose = "lying";
-    }
-
-    // Sync game
-    for (var idxSeat = 0; idxSeat < game.seats.length; ++idxSeat) {
-        var gameForClient = {};
-        copyGameForClient(gameForClient, game, game.seats[idxSeat].userId);
-        m_userMgr.sendMsg(game.seats[idxSeat].userId, "server_push_game_sync", gameForClient);
-    }
-    // var turnSeat = game.seats[game.turn];
-    // doGameOver(game, turnSeat.userId);
-};
-
-function copyGameForClient(a_gameForClient, a_game, a_userId) {
-    a_gameForClient.tilewallRemaining = a_game.tilewall.length;
-    a_gameForClient.dealer = a_game.dealer;
-    a_gameForClient.turn = a_game.turn;
-    a_gameForClient.jokerTile = a_game.jokerTile;
-
-    a_gameForClient.seats = [];
-    for (var idxSeat = 0; idxSeat < a_game.seats.length; ++idxSeat) {
-        var seat = {};
-
-        // seat.handTiles = a_game.seats[idxSeat].handTiles;
-        seat.handTiles = JSON.parse(JSON.stringify(a_game.seats[idxSeat].handTiles));
-        if (a_game.seats[idxSeat].userId != a_userId) { // Invalidize handTiles
-            for (var idxTile = 0; idxTile < seat.handTiles.length; idxTile++) {
-                if (seat.handTiles[idxTile].pose == "standing") { // and only invalidize stading ones
-                    seat.handTiles[idxTile].tile = m_mahjong.MJ_TILE_INVALID;
-                }
-            }
-        }
-        seat.honorTiles = a_game.seats[idxSeat].honorTiles;
-        seat.discardedTiles = a_game.seats[idxSeat].discardedTiles;
-        seat.melds = a_game.seats[idxSeat].melds;
-        seat.huinfo = a_game.seats[idxSeat].huinfo;
-
-        seat.fsmPlayerState = a_game.seats[idxSeat].fsmPlayerState;
-
-        a_gameForClient.seats.push(seat);
-    }
-}
 
 exports.on_client_req_action_pass = function (a_userId) {
     var seat = g_seatByUserId[a_userId];
     console.assert(seat != null);
-
-    var seatIndex = seat.seatIndex;
     var game = seat.game;
 
-    if ((seat.fsmPlayerState != m_mahjong.MJ_PLAYER_STATE_THINKING_ON_DISCARDING_TILE) &&
+    if ((seat.fsmPlayerState != m_mahjong.MJ_PLAYER_STATE_INITIAL_WAITING) &&
+        (seat.fsmPlayerState != m_mahjong.MJ_PLAYER_STATE_INITIAL_REPLACING) &&
+        (seat.fsmPlayerState != m_mahjong.MJ_PLAYER_STATE_THINKING_ON_DISCARDING_TILE) &&
         (seat.fsmPlayerState != m_mahjong.MJ_PLAYER_STATE_THINKING_ON_CHOWING) &&
-        (seat.fsmPlayerState != m_mahjong.MJ_PLAYER_STATE_THINKING_ON_PONGING)) {
+        (seat.fsmPlayerState != m_mahjong.MJ_PLAYER_STATE_THINKING_ON_PONGING) &&
+        (seat.fsmPlayerState != m_mahjong.MJ_PLAYER_STATE_THINKING_ON_KONGING) &&
+        (seat.fsmPlayerState != m_mahjong.MJ_PLAYER_STATE_THINKING_ON_WINING)) {
         m_userMgr.sendMsg(a_userId, "server_push_message", "Can't [Pass] on state: " + seat.fsmPlayerState);
         return;
     }
@@ -682,76 +688,101 @@ exports.on_client_req_action_pass = function (a_userId) {
     }, seat.userId, true);
     seat.fsmPlayerState = m_mahjong.MJ_PLAYER_STATE_IDLE;
 
-    // Check whether any player is still thinking
-    var anyPlayerThinking = false;
-    for (var i = 0; i < game.seats.length; ++i) {
-        if ((game.seats[i].fsmPlayerState == m_mahjong.MJ_PLAYER_STATE_THINKING_ON_DISCARDING_TILE) ||
-            (game.seats[i].fsmPlayerState == m_mahjong.MJ_PLAYER_STATE_THINKING_ON_CHOWING) ||
-            (game.seats[i].fsmPlayerState == m_mahjong.MJ_PLAYER_STATE_THINKING_ON_PONGING)) {
-            // console.log("game.seats[" + i + "].fsmPlayerState: " + game.seats[i].fsmPlayerState);
-            anyPlayerThinking = true;
-            break;
-        }
-    }
-    if (anyPlayerThinking) { // Still some players are thinking
-        // console.log("anyPlayerThinking: " + anyPlayerThinking);
-        return;
-    }
-
-    // No player is thinking
-    m_userMgr.broadcastMsg("server_brc_nobody_thinking", {
-        userId: game.seats[game.turn].userId,
-    }, game.seats[game.turn].userId, true);
-
     // Determine next turn
     var nextTurnIndex = -1;
-    for (var idxSeat = 0; idxSeat < game.seats.length; ++idxSeat) {
-        seat = game.seats[idxSeat];
-
-        if ((seat.fsmPlayerState == m_mahjong.MJ_PLAYER_STATE_DISCARDING_TILE) ||
-            (seat.fsmPlayerState == m_mahjong.MJ_PLAYER_STATE_BEING_TARGETED)) {
-            seat.fsmPlayerState = m_mahjong.MJ_PLAYER_STATE_IDLE;
-        } else if ((seat.fsmPlayerState == m_mahjong.MJ_PLAYER_STATE_CHOWING) ||
-            (seat.fsmPlayerState == m_mahjong.MJ_PLAYER_STATE_PONGING) ||
-            (seat.fsmPlayerState == m_mahjong.MJ_PLAYER_STATE_KONGING)) {
-            var meld = {
-                type: "",
-                tiles: [],
-            };
-
-            // Copy lying tiles to meld
-            for (var idxTile = 0; idxTile < seat.handTiles.length; idxTile++) {
-                if (seat.handTiles[idxTile].pose == "lying") {
-                    meld.tiles.push(seat.handTiles[idxTile].tile);
+    if (game.fsmTableState == m_mahjong.MJ_TABLE_STATE_REPLACE_HONOR_TILES) {
+        if (seat.seatIndex == game.turn) {
+            var nextWaitingSeatIndex = -1;
+            var curSeatIndex = seat.seatIndex;
+            for (var seatCount = 0; seatCount < game.seats.length - 1; seatCount++) {
+                var seatIndex = getNextSeatIndex(curSeatIndex);
+                if (game.seats[seatIndex].fsmPlayerState == m_mahjong.MJ_PLAYER_STATE_INITIAL_WAITING) {
+                    nextWaitingSeatIndex = seatIndex;
+                    break;
                 }
-            }
-            // Remove lying tiles from hand tiles
-            for (var idxTile = seat.handTiles.length - 1; idxTile >= 0; idxTile--) {
-                if (seat.handTiles[idxTile].pose == "lying") {
-                    seat.handTiles.splice(idxTile, 1);
-                }
+                curSeatIndex = seatIndex;
             }
 
-            // Steal tile from turn player, and move to meld
-            var tileStealing = game.seats[game.turn].discardedTiles.pop();
-            meld.tiles.push(tileStealing);
+            if (nextWaitingSeatIndex != -1) {
+                nextTurnIndex = nextWaitingSeatIndex;
+                game.seats[nextTurnIndex].fsmPlayerState = m_mahjong.MJ_PLAYER_STATE_INITIAL_REPLACING;
+            } else {
+                game.fsmTableState = m_mahjong.MJ_TABLE_STATE_PLAYING;
+                nextTurnIndex = game.dealer;
+                game.seats[nextTurnIndex].fsmPlayerState = m_mahjong.MJ_PLAYER_STATE_FULL_HAND;
+            }
+        } else {
+            // Do nothing
+        }
+    } else { // !(game.fsmTableState == m_mahjong.MJ_TABLE_STATE_REPLACE_HONOR_TILES)
+        var noPlayerThinking = true;
+        for (var i = 0; i < game.seats.length; ++i) {
+            if ((game.seats[i].fsmPlayerState == m_mahjong.MJ_PLAYER_STATE_THINKING_ON_DISCARDING_TILE) ||
+                (game.seats[i].fsmPlayerState == m_mahjong.MJ_PLAYER_STATE_THINKING_ON_CHOWING) ||
+                (game.seats[i].fsmPlayerState == m_mahjong.MJ_PLAYER_STATE_THINKING_ON_PONGING) ||
+                (game.seats[i].fsmPlayerState == m_mahjong.MJ_PLAYER_STATE_THINKING_ON_KONGING) ||
+                (game.seats[i].fsmPlayerState == m_mahjong.MJ_PLAYER_STATE_THINKING_ON_WINING)) {
+                noPlayerThinking = false;
+                break;
+            }
+        }
+        if (noPlayerThinking) {
+            m_userMgr.broadcastMsg("server_brc_nobody_thinking", {
+                userId: game.seats[game.turn].userId,
+            }, game.seats[game.turn].userId, true);
 
-            // Push meld
-            seat.melds.push(meld);
+            for (var idxSeat = 0; idxSeat < game.seats.length; ++idxSeat) {
+                if ((game.seats[idxSeat].fsmPlayerState == m_mahjong.MJ_PLAYER_STATE_DISCARDING_TILE) ||
+                    (game.seats[idxSeat].fsmPlayerState == m_mahjong.MJ_PLAYER_STATE_BEING_TARGETED)) {
+                        game.seats[idxSeat].fsmPlayerState = m_mahjong.MJ_PLAYER_STATE_IDLE;
+                } else if ((game.seats[idxSeat].fsmPlayerState == m_mahjong.MJ_PLAYER_STATE_CHOWING) ||
+                    (game.seats[idxSeat].fsmPlayerState == m_mahjong.MJ_PLAYER_STATE_PONGING) ||
+                    (game.seats[idxSeat].fsmPlayerState == m_mahjong.MJ_PLAYER_STATE_KONGING)) {
+                    var meld = {
+                        type: "",
+                        tiles: [],
+                    };
 
-            seat.fsmPlayerState = m_mahjong.MJ_PLAYER_STATE_FULL_HAND;
+                    // Copy lying tiles to meld
+                    for (var idxTile = 0; idxTile < game.seats[idxSeat].handTiles.length; idxTile++) {
+                        if (game.seats[idxSeat].handTiles[idxTile].pose == "lying") {
+                            meld.tiles.push(game.seats[idxSeat].handTiles[idxTile].tile);
+                        }
+                    }
+                    // Remove lying tiles from hand tiles
+                    for (var idxTile = game.seats[idxSeat].handTiles.length - 1; idxTile >= 0; idxTile--) {
+                        if (game.seats[idxSeat].handTiles[idxTile].pose == "lying") {
+                            game.seats[idxSeat].handTiles.splice(idxTile, 1);
+                        }
+                    }
 
-            nextTurnIndex = seat.seatIndex;
+                    // Steal tile from turn player, and move to meld
+                    var tileStealing = game.seats[game.turn].discardedTiles.pop();
+                    meld.tiles.push(tileStealing);
+
+                    // Push meld
+                    game.seats[idxSeat].melds.push(meld);
+
+                    nextTurnIndex = game.seats[idxSeat].seatIndex;
+                    if (game.seats[nextTurnIndex].fsmPlayerState == m_mahjong.MJ_PLAYER_STATE_KONGING) {
+                        game.seats[nextTurnIndex].fsmPlayerState = m_mahjong.MJ_PLAYER_STATE_KONG_BACKDRAWING;
+                    } else {
+                        game.seats[nextTurnIndex].fsmPlayerState = m_mahjong.MJ_PLAYER_STATE_FULL_HAND;
+                    }
+                }
+            }
+
+            if (nextTurnIndex == -1) { // No stealing of turn
+                nextTurnIndex = getNextSeatIndex(game.turn);
+                game.seats[nextTurnIndex].fsmPlayerState = m_mahjong.MJ_PLAYER_STATE_GET_TURN;
+            }
         }
     }
-
-    if (nextTurnIndex == -1) {
-        changeTurn(game);
-        game.seats[game.turn].fsmPlayerState = m_mahjong.MJ_PLAYER_STATE_GET_TURN;
-    } else {
+    if (nextTurnIndex != -1) {
         changeTurn(game, nextTurnIndex);
+        m_userMgr.broadcastMsg("server_brc_change_turn", game.seats[game.turn].userId, game.seats[game.turn].userId, true);
+    } else {
     }
-    m_userMgr.broadcastMsg("server_brc_change_turn", game.seats[game.turn].userId, game.seats[game.turn].userId, true);
 
     // Sync game
     for (var idxSeat = 0; idxSeat < game.seats.length; ++idxSeat) {
@@ -790,14 +821,35 @@ exports.on_client_req_action_backdraw_tile = function (a_userId) {
 
     var game = seat.game;
 
-    // if (seat.fsmPlayerState != m_mahjong.MJ_PLAYER_STATE_GET_TURN) {
-    //     m_userMgr.sendMsg(a_userId, "server_push_message", "Can't [Backdraw Tile] on state: " + seat.fsmPlayerState);
-    //     return;
-    // }
+    if ((seat.fsmPlayerState != m_mahjong.MJ_PLAYER_STATE_INITIAL_REPLACING) &&
+        (seat.fsmPlayerState != m_mahjong.MJ_PLAYER_STATE_KONG_BACKDRAWING)) {
+        m_userMgr.sendMsg(a_userId, "server_push_message", "Can't [Backdraw Tile] on state: " + seat.fsmPlayerState);
+        return;
+    }
+
+    var maxHandTilesNum;
+    if (seat.fsmPlayerState == m_mahjong.MJ_PLAYER_STATE_INITIAL_REPLACING) {
+        if (seat.seatIndex == game.dealer) {
+            maxHandTilesNum = 14;
+        } else {
+            maxHandTilesNum = 13;
+        }
+    } else {
+        maxHandTilesNum = 14;
+    }
+    if ((seat.melds.length * 3 + seat.handTiles.length) >= maxHandTilesNum) {
+        m_userMgr.sendMsg(a_userId, "server_push_message", "已经补满牌！");
+        return;
+    }
 
     doBackdrawTile(game);
 
-    // seat.fsmPlayerState = m_mahjong.MJ_PLAYER_STATE_FULL_HAND;
+    if ((seat.melds.length * 3 + seat.handTiles.length) >= 14) {
+        if (seat.fsmPlayerState == m_mahjong.MJ_PLAYER_STATE_INITIAL_REPLACING) {
+        } else if (seat.fsmPlayerState == m_mahjong.MJ_PLAYER_STATE_KONG_BACKDRAWING) {
+            seat.fsmPlayerState = m_mahjong.MJ_PLAYER_STATE_FULL_HAND;
+        }
+    }
 
     // Sync game
     for (var idxSeat = 0; idxSeat < game.seats.length; ++idxSeat) {

@@ -31,6 +31,7 @@ cc.Class({
     reset: function () {
         this.turn = -1;
         this.dealer = -1;
+        this.fsmTableState = m_mahjong.MJ_TABLE_STATE_IDLE;
         for (var idxSeat = 0; idxSeat < this.seats.length; ++idxSeat) {
             this.seats[idxSeat].handTiles = [];
             this.seats[idxSeat].honorTiles = [];
@@ -210,6 +211,7 @@ cc.Class({
             self.dealer = a_data.dealer;
             self.turn = a_data.turn;
             self.jokerTile = a_data.jokerTile;
+            self.fsmTableState = a_data.fsmTableState;
 
             for (var i = 0; i < a_data.seats.length; ++i) {
                 var seat = self.seats[i];
@@ -322,10 +324,10 @@ cc.Class({
         this.dispatchEvent("event_server_brc_player_pass", seat);
     },
 
+    // TOFIX: Seems can be deleted.
     on_server_brc_nobody_thinking: function (seatIndex, tile) {
         var seat = this.seats[seatIndex];
         seat.discardedTiles.push(tile);
-        this.dispatchEvent("event_server_brc_nobody_thinking", seat);
     },
 
     on_server_brc_discarding_tile: function (a_seatIndex, a_tile) {
@@ -362,12 +364,12 @@ cc.Class({
     },
 
     doChangeTurn: function (a_seatIndex) {
-        var data = {
+        var previousAndNewTurn = {
             previousTurn: this.turn,
             turn: a_seatIndex,
         }
         this.turn = a_seatIndex;
-        this.dispatchEvent("event_server_brc_change_turn", data);
+        this.dispatchEvent("event_server_brc_change_turn", previousAndNewTurn);
     },
 
     connectGameServer: function (data) {

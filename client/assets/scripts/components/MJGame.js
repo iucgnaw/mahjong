@@ -97,12 +97,6 @@ cc.Class({
             self.on_event_server_push_game_sync();
         });
 
-        this.node.on("event_server_brc_change_turn", function (a_data) {
-            if (a_data.previousTurn != cc.vv.gameNetMgr.seatIndex) {}
-
-            if (!cc.vv.replayMgr.isReplaying() && a_data.turn != cc.vv.gameNetMgr.seatIndex) {}
-        });
-
         this.node.on("event_server_push_message", function (a_data) {
             alert("服务器消息：\r\n" + a_data);
         });
@@ -124,8 +118,6 @@ cc.Class({
             self.playActionAnimation(localIndex, "action_pass");
             cc.vv.audioMgr.playSfx("mahjong/action/action_pass.mp3");
         });
-
-        this.node.on("event_server_brc_nobody_thinking", function (a_data) {});
 
         this.node.on("event_server_brc_set_aside", function (a_seat) {
             self.playActionAnimation(cc.vv.gameNetMgr.getLocalIndex(a_seat.seatIndex), "action_set_aside");
@@ -175,6 +167,14 @@ cc.Class({
             nodeJokerTile.active = false;
         }
 
+        // TOFIX
+        if (cc.vv.gameNetMgr.fsmTableState) {
+            nodeTable.getChildByName("nodeTableState").getComponent(cc.Label).string = cc.vv.gameNetMgr.fsmTableState;
+        } else {
+            nodeTable.getChildByName("nodeTableState").getComponent(cc.Label).string = "null";
+        }
+
+
         var sideNames = ["nodeSideBottom", "nodeSideRight", "nodeSideTop", "nodeSideLeft"];
         // Hide and reset all tiles
         for (var idxSide = 0; idxSide < sideNames.length; idxSide++) {
@@ -214,6 +214,8 @@ cc.Class({
             }
         }
 
+        var nodeTableState = nodeTable.getChildByName("nodeTableState");
+
         for (var idxSeat in cc.vv.gameNetMgr.seats) {
             this.refreshSeat(cc.vv.gameNetMgr.seats[idxSeat]);
         }
@@ -235,9 +237,9 @@ cc.Class({
 
             // TOFIX
             if (a_seat.fsmPlayerState) {
-                nodeSeat.getChildByName("nodePlayerScore").getComponent(cc.Label).string = a_seat.fsmPlayerState;
+                nodeSeat.getChildByName("nodePlayerState").getComponent(cc.Label).string = a_seat.fsmPlayerState;
             } else {
-                nodeSeat.getChildByName("nodePlayerScore").getComponent(cc.Label).string = "N/A";
+                nodeSeat.getChildByName("nodePlayerState").getComponent(cc.Label).string = "null";
             }
 
             nodeSeat.active = true;

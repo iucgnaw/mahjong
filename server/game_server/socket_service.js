@@ -176,13 +176,6 @@ exports.start = function (a_config, a_mgr) {
 			a_socket.gameMgr.on_client_req_action_steal(a_socket.userId, action);
 		});
 
-		//胡
-		a_socket.on("client_req_action_win", function (a_data) {
-			console.assert(a_socket.userId != null);
-
-			a_socket.gameMgr.on_client_req_action_win(a_socket.userId);
-		});
-
 		//过
 		a_socket.on("client_req_action_pass", function (a_data) {
 			if (a_socket.userId == null) {
