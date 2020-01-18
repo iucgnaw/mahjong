@@ -37,7 +37,8 @@ cc.Class({
         var nodeTable = this.node.getChildByName("nodeTable");
 
         this._labelGameCount = nodeTable.getChildByName("nodeGameCount").getComponent(cc.Label);
-        this._labelGameCount.string = "" + cc.vv.gameNetMgr.gameIndex + "/" + cc.vv.gameNetMgr.maxHandCount + "局";
+        // this._labelGameCount.string = "" + cc.vv.gameNetMgr.gameIndex + "/" + cc.vv.gameNetMgr.maxHandCount + "局";
+        this._labelGameCount.string = "" + cc.vv.gameNetMgr.gameIndex + "局";
 
         var nodeJokerTile = nodeTable.getChildByName("nodeJokerTile");
         nodeJokerTile.active = false;
@@ -102,7 +103,8 @@ cc.Class({
         });
 
         this.node.on("event_server_brc_hand_count", function (a_data) {
-            self._labelGameCount.string = "" + cc.vv.gameNetMgr.gameIndex + "/" + cc.vv.gameNetMgr.maxHandCount + "局";
+            // self._labelGameCount.string = "" + cc.vv.gameNetMgr.gameIndex + "/" + cc.vv.gameNetMgr.maxHandCount + "局";
+            self._labelGameCount.string = "" + cc.vv.gameNetMgr.gameIndex + "局";
         });
 
         this.node.on("event_server_brc_hand_end", function (a_data) {});

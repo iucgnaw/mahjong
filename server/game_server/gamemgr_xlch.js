@@ -213,6 +213,18 @@ function doGameOver(a_game, a_userId, a_forceEnd) {
     }
 
     if (a_game != null) {
+        var winnerSeatIndex = -1;
+        for (idxSeat = 0; idxSeat < a_game.seats.length; idxSeat++) {
+            if (a_game.seats[idxSeat].fsmPlayerState == m_mahjong.MJ_PLAYER_STATE_WON) {
+                winnerSeatIndex = idxSeat;
+            }
+        }
+        console.log("winnerSeatIndex: " + winnerSeatIndex);
+        if (winnerSeatIndex != a_game.dealer) { // winner is not dealer, change dealer
+            room.nextDealer = (a_game.dealer + 1) % 4;
+        }
+        m_db.update_next_dealer(roomId, room.nextDealer);
+
         for (var i = 0; i < room.seats.length; ++i) {
             var roomSeat = room.seats[i];
             var gameSeat = a_game.seats[i];
@@ -235,13 +247,6 @@ function doGameOver(a_game, a_userId, a_forceEnd) {
             delete g_seatByUserId[gameSeat.userId]; // TODO: ?
         }
         delete g_games[roomId]; // TODO: ?
-
-        var dealer = room.nextDealer;
-        room.nextDealer = (a_game.turn + 1) % 4;
-
-        if (dealer != room.nextDealer) {
-            m_db.update_next_dealer(roomId, room.nextDealer);
-        }
     }
 
     if (a_forceEnd || a_game == null) {
@@ -769,6 +774,7 @@ exports.on_client_req_action_pass = function (a_userId) {
                     nextTurnIndex = game.seats[idxSeat].seatIndex;
                     game.seats[nextTurnIndex].fsmPlayerState = m_mahjong.MJ_PLAYER_STATE_WON;
 
+                    // TOFIX Should move this after game sync, otherwise game sync will raise exception in client.
                     doGameOver(game, game.seats[nextTurnIndex].userId);
                 }
             }

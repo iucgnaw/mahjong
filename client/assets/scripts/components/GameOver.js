@@ -38,6 +38,7 @@ cc.Class({
         this._nodeGameResult = this.node.getChildByName("nodeGameResult");
 
         var nodeResultList = this._nodeGameOver.getChildByName("nodeResultList");
+        nodeResultList.active = false;
         for (var i = 1; i <= 4; ++i) {
             var seatXName = "nodeSeat" + i;
             var nodeSeatX = nodeResultList.getChildByName(seatXName);
@@ -81,13 +82,13 @@ cc.Class({
         this._nodeLose.active = false;
 
         var myScore = a_data[cc.vv.gameNetMgr.seatIndex].score;
-        if (myScore > 0) {
-            this._nodeWin.active = true;
-        } else if (myScore < 0) {
-            this._nodeLose.active = true;
-        } else {
-            this._nodeDraw.active = true;
-        }
+        // if (myScore > 0) {
+        //     this._nodeWin.active = true;
+        // } else if (myScore < 0) {
+        //     this._nodeLose.active = true;
+        // } else {
+        //     this._nodeDraw.active = true;
+        // }
 
         //显示玩家信息
         for (var i = 0; i < 4; ++i) {
@@ -123,8 +124,8 @@ cc.Class({
             //     actionArr.push("刻x" + userData.melds.length);
             // }
 
-            seatView.username.string = cc.vv.gameNetMgr.seats[i].name;
-            seatView.nodeDealer.active = cc.vv.gameNetMgr.dealer == i;
+            // seatView.username.string = cc.vv.gameNetMgr.seats[i].name;
+            // seatView.nodeDealer.active = cc.vv.gameNetMgr.dealer == i;
             // seatView.reason.string = actionArr.join("、");
 
             //

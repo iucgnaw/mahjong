@@ -41,8 +41,8 @@
     },
     "_scale": {
       "__type__": "cc.Vec3",
-      "x": 0.5437377929687499,
-      "y": 0.5437377929687499,
+      "x": 0.54180908203125,
+      "y": 0.54180908203125,
       "z": 1
     },
     "_quat": {
@@ -12264,7 +12264,7 @@
     },
     "_contentSize": {
       "__type__": "cc.Size",
-      "width": 158.35,
+      "width": 208.4,
       "height": 30
     },
     "_anchorPoint": {
@@ -12310,8 +12310,8 @@
     "_srcBlendFactor": 1,
     "_dstBlendFactor": 771,
     "_useOriginalSize": false,
-    "_string": "4局(房卡x2)",
-    "_N$string": "4局(房卡x2)",
+    "_string": "1000局(房卡x2)",
+    "_N$string": "1000局(房卡x2)",
     "_fontSize": 30,
     "_lineHeight": 30,
     "_enableWrapText": true,
@@ -12668,7 +12668,7 @@
     },
     "_contentSize": {
       "__type__": "cc.Size",
-      "width": 158.35,
+      "width": 208.4,
       "height": 30
     },
     "_anchorPoint": {
@@ -12714,8 +12714,8 @@
     "_srcBlendFactor": 1,
     "_dstBlendFactor": 771,
     "_useOriginalSize": false,
-    "_string": "8局(房卡x3)",
-    "_N$string": "8局(房卡x3)",
+    "_string": "2000局(房卡x3)",
+    "_N$string": "2000局(房卡x3)",
     "_fontSize": 30,
     "_lineHeight": 30,
     "_enableWrapText": true,
@@ -20455,7 +20455,7 @@
     },
     "_contentSize": {
       "__type__": "cc.Size",
-      "width": 158.35,
+      "width": 208.4,
       "height": 30
     },
     "_anchorPoint": {
@@ -20501,8 +20501,8 @@
     "_srcBlendFactor": 1,
     "_dstBlendFactor": 771,
     "_useOriginalSize": false,
-    "_string": "4局(房卡x2)",
-    "_N$string": "4局(房卡x2)",
+    "_string": "1000局(房卡x2)",
+    "_N$string": "1000局(房卡x2)",
     "_fontSize": 30,
     "_lineHeight": 30,
     "_enableWrapText": true,
@@ -20859,7 +20859,7 @@
     },
     "_contentSize": {
       "__type__": "cc.Size",
-      "width": 158.35,
+      "width": 208.4,
       "height": 30
     },
     "_anchorPoint": {
@@ -20905,8 +20905,8 @@
     "_srcBlendFactor": 1,
     "_dstBlendFactor": 771,
     "_useOriginalSize": false,
-    "_string": "8局(房卡x3)",
-    "_N$string": "8局(房卡x3)",
+    "_string": "2000局(房卡x3)",
+    "_N$string": "2000局(房卡x3)",
     "_fontSize": 30,
     "_lineHeight": 30,
     "_enableWrapText": true,
