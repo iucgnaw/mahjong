@@ -143,11 +143,11 @@ exports.start = function (a_config, a_mgr) {
 			if (userId == null) {
 				return;
 			}
-			a_socket.gameMgr.setReady(userId);
 			m_userMgr.broadcastMsg("server_brc_player_ready", {
 				userId: userId,
 				ready: true
 			}, userId, true);
+			a_socket.gameMgr.setReady(userId);
 		});
 
 		a_socket.on("client_req_sync_handtiles", function (a_data) {

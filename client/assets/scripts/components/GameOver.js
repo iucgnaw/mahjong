@@ -103,19 +103,19 @@ cc.Class({
                 hupaiRoot.children[j].active = false;
             }
 
-            var hi = 0;
-            for (var j = 0; j < userData.huinfo.length; ++j) {
-                var info = userData.huinfo[j];
-                hued = hued || info.ishupai;
-                if (info.ishupai) {
-                    if (hi < hupaiRoot.childrenCount) {
-                        var hupaiView = hupaiRoot.children[hi];
-                        hupaiView.active = true;
-                        hupaiView.getComponent(cc.Sprite).spriteFrame = cc.vv.mahjongmgr.getSpriteFrameByTile("_front_lying_bottom", info.tile);
-                        hi++;
-                    }
-                }
-            }
+            // var hi = 0;
+            // for (var j = 0; j < userData.huinfo.length; ++j) {
+            //     var info = userData.huinfo[j];
+            //     hued = hued || info.ishupai;
+            //     if (info.ishupai) {
+            //         if (hi < hupaiRoot.childrenCount) {
+            //             var hupaiView = hupaiRoot.children[hi];
+            //             hupaiView.active = true;
+            //             hupaiView.getComponent(cc.Sprite).spriteFrame = cc.vv.mahjongmgr.getSpriteFrameByTile("_front_lying_bottom", info.tile);
+            //             hi++;
+            //         }
+            //     }
+            // }
 
             seatView.hu.active = hued;
 
@@ -140,30 +140,30 @@ cc.Class({
                 n.active = false;
             }
 
-            var numOfMelds = userData.melds.length;
+            // var numOfMelds = userData.melds.length;
 
-            var numOfMeldsTiles = numOfMelds * 3;
-            //显示相关的牌
-            for (var k = 0; k < userData.handTiles.length; ++k) {
-                var tile = userData.handTiles[k].tile;
-                var n = seatView.mahjongs.children[k + numOfMeldsTiles];
-                n.active = true;
-                var sprite = n.getComponent(cc.Sprite);
-                sprite.spriteFrame = cc.vv.mahjongmgr.getSpriteFrameByTile("_front_standing_bottom", tile);
-            }
+            // var numOfMeldsTiles = numOfMelds * 3;
+            // //显示相关的牌
+            // for (var k = 0; k < userData.handTiles.length; ++k) {
+            //     var tile = userData.handTiles[k].tile;
+            //     var n = seatView.mahjongs.children[k + numOfMeldsTiles];
+            //     n.active = true;
+            //     var sprite = n.getComponent(cc.Sprite);
+            //     sprite.spriteFrame = cc.vv.mahjongmgr.getSpriteFrameByTile("_front_standing_bottom", tile);
+            // }
 
 
-            for (var k = 0; k < seatView._pengandgang.length; ++k) {
-                seatView._pengandgang[k].active = false;
-            }
+            // for (var k = 0; k < seatView._pengandgang.length; ++k) {
+            //     seatView._pengandgang[k].active = false;
+            // }
 
             //初始化杠牌
-            var index = 0;
-            var melds = userData.melds;
-            for (var k = 0; k < melds.length; ++k) {
-                this.drawMeld(seatView, index, melds[k]);
-                index++;
-            }
+            // var index = 0;
+            // var melds = userData.melds;
+            // for (var k = 0; k < melds.length; ++k) {
+            //     this.drawMeld(seatView, index, melds[k]);
+            //     index++;
+            // }
         }
     },
 

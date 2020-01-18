@@ -221,9 +221,9 @@ cc.Class({
                 seat.honorTiles = dataSeat.honorTiles;
                 seat.discardedTiles = dataSeat.discardedTiles;
                 seat.melds = dataSeat.melds;
-                seat.huinfo = dataSeat.huinfo;
 
                 seat.fsmPlayerState = dataSeat.fsmPlayerState;
+                seat.score = dataSeat.score;
             }
             self.dispatchEvent("event_server_push_game_sync");
         });
