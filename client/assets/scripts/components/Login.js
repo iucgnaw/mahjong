@@ -55,11 +55,11 @@ cc.Class({
         this._mima = ["A", "A", "B", "B", "A", "B", "A", "B", "A", "A", "A", "B", "B", "B"];
 
         if (!cc.sys.isNative || cc.sys.os == cc.sys.OS_WINDOWS) {
-            cc.find("Canvas/btn_yk").active = true;
-            cc.find("Canvas/btn_weixin").active = false;
+            cc.find("Canvas/nodeButtonGuestLogin").active = true;
+            cc.find("Canvas/nodeButtonWeChatLogin").active = false;
         } else {
-            cc.find("Canvas/btn_yk").active = false;
-            cc.find("Canvas/btn_weixin").active = true;
+            cc.find("Canvas/nodeButtonGuestLogin").active = false;
+            cc.find("Canvas/nodeButtonWeChatLogin").active = true;
         }
     },
 
@@ -89,7 +89,7 @@ cc.Class({
         if (this._mima[this._mimaIndex] == event.target.name) {
             this._mimaIndex++;
             if (this._mimaIndex == this._mima.length) {
-                cc.find("Canvas/btn_yk").active = true;
+                cc.find("Canvas/nodeButtonGuestLogin").active = true;
             }
         } else {
             console.log("oh ho~~~");

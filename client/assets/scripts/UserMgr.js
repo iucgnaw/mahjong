@@ -69,7 +69,7 @@ cc.Class({
                 }
             }
         };
-        cc.vv.wc.show("正在登录游戏");
+        cc.vv.wc.show("正在登录游戏大厅");
         cc.vv.http.sendRequest("/login", {
             account: this.account,
             sign: this.sign

@@ -72,13 +72,13 @@ cc.Class({
 
     // use this for initialization
     onLoad: function () {
-        console.log("start scene, AppStart.js, onLoad()");
+        console.log("AppStart scene, AppStart.js, onLoad()");
 
         initMgr();
 
         cc.vv.utils.fitCanvasWithFrame();
 
-        this._mainScene = "loading";
+        this._sceneLogin = "Login";
 
         this.getServerInfo();
     },
@@ -102,12 +102,12 @@ cc.Class({
                         if (cc.vv.serverInfo.version != cc.VERSION) {
                             cc.find("Canvas/nodeAlert").active = true;
                         } else {
-                            cc.director.loadScene(self._mainScene);
+                            cc.director.loadScene(self._sceneLogin);
                         }
                     }
                 }.bind(this));
             } else {
-                cc.director.loadScene(self._mainScene);
+                cc.director.loadScene(self._sceneLogin);
             }
         };
 
