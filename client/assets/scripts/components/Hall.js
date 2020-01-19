@@ -38,6 +38,8 @@ cc.Class({
 
     // use this for initialization
     onLoad: function () {
+        console.log("hall scene, Hall.js, onLoad()");
+
         cc.vv.utils.fitCanvasWithFrame();
         this.initLabels();
 

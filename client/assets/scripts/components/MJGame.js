@@ -9,6 +9,8 @@ cc.Class({
     },
 
     onLoad: function () {
+        console.log("mjgame scene, MJGame.js, onLoad()");
+
         cc.vv.utils.fitCanvasWithFrame();
 
         this.addComponent("GameOver");

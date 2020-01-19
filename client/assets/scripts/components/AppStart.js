@@ -54,8 +54,6 @@ function initMgr() {
     cc.args = urlParse();
 }
 
-
-
 cc.Class({
     extends: cc.Component,
 
@@ -70,76 +68,39 @@ cc.Class({
         //    readonly: false,    // optional, default is false
         // },
         // ...
-        labelLog: {
-            default: null,
-            type: cc.Label
-        },
-
-        labelLoadingProgess: cc.Label,
     },
 
     // use this for initialization
     onLoad: function () {
+        console.log("start scene, AppStart.js, onLoad()");
+
         initMgr();
+
         cc.vv.utils.fitCanvasWithFrame();
-        // console.log("haha");
+
         this._mainScene = "loading";
-        this.showSplash(function () {
-            this.getServerInfo();
-        }.bind(this));
+
+        this.getServerInfo();
     },
 
-    onBtnDownloadClicked: function () {
+    onButtonOkClicked: function () {
         cc.sys.openURL(cc.vv.serverInfo.appweb);
-    },
-
-    showSplash: function (a_fnAfterSplash) {
-        var self = this;
-        var SHOW_TIME = 1000;
-        var FADE_TIME = 200;
-        this._splash = cc.find("Canvas/splash");
-        if (true || cc.sys.os != cc.sys.OS_IOS || !cc.sys.isNative) {
-            this._splash.active = true;
-            if (this._splash.getComponent(cc.Sprite).spriteFrame == null) {
-                a_fnAfterSplash();
-                return;
-            }
-            var time = Date.now();
-            var fnTimeout = function () {
-                var timeDiff = Date.now() - time;
-                if (timeDiff < SHOW_TIME) {
-                    setTimeout(fnTimeout, 33);
-                } else {
-                    var opacity = (1 - ((timeDiff - SHOW_TIME) / FADE_TIME)) * 255;
-                    if (opacity < 0) {
-                        self._splash.opacity = 0;
-                        a_fnAfterSplash();
-                    } else {
-                        self._splash.opacity = opacity;
-                        setTimeout(fnTimeout, 33);
-                    }
-                }
-            };
-            setTimeout(fnTimeout, 33);
-        } else {
-            this._splash.active = false;
-            a_fnAfterSplash();
-        }
     },
 
     getServerInfo: function () {
         var self = this;
         var fnGetVersion = function (a_serverInfo) {
             cc.vv.serverInfo = a_serverInfo;
+
             if (cc.sys.isNative) {
                 var url = cc.url.raw("resources/ver/cv.txt");
-                cc.loader.load(url, function (err, data) {
-                    cc.VERSION = data;
+                cc.loader.load(url, function (a_err, a_version) {
+                    cc.VERSION = a_version;
                     if (a_serverInfo.version == null) {
                         console.error("a_serverInfo.version == null");
                     } else {
                         if (cc.vv.serverInfo.version != cc.VERSION) {
-                            cc.find("Canvas/alert").active = true;
+                            cc.find("Canvas/nodeAlert").active = true;
                         } else {
                             cc.director.loadScene(self._mainScene);
                         }
@@ -151,25 +112,29 @@ cc.Class({
         };
 
         var xmlHttpRequest = null;
-        var complete = false;
+        var connected = false;
         var fnGetServerInfo = function () {
-            self.labelLoadingProgess.string = "正在连接服务器...";
+            cc.find("Canvas/nodeConnectionStatus").getComponent(cc.Label).string = "正在连接账户服务器...";
+
             xmlHttpRequest = cc.vv.http.sendRequest("/get_serverinfo", null, function (a_serverInfo) {
                 xmlHttpRequest = null;
-                complete = true;
+                connected = true;
                 fnGetVersion(a_serverInfo);
             });
+
             setTimeout(fnConnect, 5000);
         }
 
         var fnConnect = function () {
-            if (!complete) {
-                if (xmlHttpRequest) {
+            if (!connected) {
+                if (xmlHttpRequest) { // Has pending request
                     xmlHttpRequest.abort();
-                    self.labelLoadingProgess.string = "连接失败，即将重试。";
+
+                    cc.find("Canvas/nodeConnectionStatus").getComponent(cc.Label).string = "连接失败，即将重试...";
+
                     setTimeout(function () {
                         fnGetServerInfo();
-                    }, 5000);
+                    }, 1000);
                 } else {
                     fnGetServerInfo();
                 }
@@ -177,9 +142,5 @@ cc.Class({
         };
 
         fnConnect();
-    },
-
-    log: function (a_content) {
-        this.labelLog.string += a_content + "\n";
     },
 });

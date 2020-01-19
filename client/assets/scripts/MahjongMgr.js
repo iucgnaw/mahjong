@@ -15,6 +15,8 @@ cc.Class({
     },
 
     onLoad: function () {
+        console.log("mjgame scene, MahjongMgr.js, onLoad()");
+
         if (cc.vv == null) {
             return;
         }

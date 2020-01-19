@@ -923,7 +923,7 @@
       "__id__": 10
     },
     "component": "LoadingLogic",
-    "handler": "onBtnDownloadClicked",
+    "handler": "onButtonOkClicked",
     "customEventData": ""
   },
   {
@@ -1043,7 +1043,6 @@
     },
     "_stateStr": "",
     "_progress": 0,
-    "_splash": null,
     "_isLoading": false,
     "_id": "e32CXpn6ZBf5WWPyC/MKVO"
   }

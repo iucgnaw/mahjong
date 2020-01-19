@@ -41,6 +41,8 @@ cc.Class({
 
     // use this for initialization
     onLoad: function () {
+        console.log("login scene, Login.js, onLoad()");
+
         cc.vv.utils.fitCanvasWithFrame();
         cc.vv.http.g_currentUrl = cc.vv.http.g_masterUrl;
         cc.vv.net.addHandler("push_need_create_role", function () {

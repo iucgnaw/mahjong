@@ -22,6 +22,8 @@ cc.Class({
 
     // use this for initialization
     onLoad: function () {
+        console.log("mjgame scene, Alert.js, onLoad()");
+
         if (cc.vv == null) {
             return;
         }

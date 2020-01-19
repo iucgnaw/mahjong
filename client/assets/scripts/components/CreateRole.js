@@ -35,6 +35,8 @@ cc.Class({
 
     // use this for initialization
     onLoad: function () {
+        console.log("createrole scene, CreateRole.js, onLoad()");
+
         cc.vv.utils.fitCanvasWithFrame();
         this.onRandomBtnClicked();
     },

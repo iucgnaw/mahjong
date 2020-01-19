@@ -5,12 +5,13 @@ cc.Class({
         tipLabel: cc.Label,
         _stateStr: "",
         _progress: 0.0,
-        _splash: null,
         _isLoading: false,
     },
 
     // use this for initialization
     onLoad: function () {
+        console.log("loading scene, LoadingLogic.js, onLoad()");
+
         cc.vv.utils.fitCanvasWithFrame();
         this.tipLabel.string = this._stateStr;
         this.startPreloading();
