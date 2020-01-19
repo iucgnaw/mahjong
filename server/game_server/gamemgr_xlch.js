@@ -219,7 +219,6 @@ function doGameOver(a_game, a_userId, a_forceEnd) {
                 winnerSeatIndex = idxSeat;
             }
         }
-        console.log("winnerSeatIndex: " + winnerSeatIndex);
         if (winnerSeatIndex != a_game.dealer) { // winner is not dealer, change dealer
             room.nextDealer = (a_game.dealer + 1) % 4;
         }
