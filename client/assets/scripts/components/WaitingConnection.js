@@ -17,16 +17,16 @@ cc.Class({
 
     // use this for initialization
     onLoad: function () {
-        // console.log("******** WaitingConnection.js, onLoad()");
+        console.log("******** WaitingConnection.js, onLoad()");
 
         if (cc.vv == null) {
-            // console.log("******** cc.vv == null");
+            console.log("******** cc.vv == null");
 
             return null;
         }
 
         cc.vv.wc = this;
-        // console.log("******** cc.vv.wc = this;");
+        console.log("******** cc.vv.wc = this;");
         this.node.active = this._isShow;
     },
 
