@@ -431,6 +431,7 @@ cc.Class({
                 break;
 
             case "nodeActionKong":
+                var action;
                 if (selectedTiles.tiles.length == 1) {
                     selectedTiles.type = "meld_pong_to_kong";
                 } else if (selectedTiles.tiles.length == 3) {

@@ -116,11 +116,52 @@ exports.getTileSuit = function (a_tile) {
 	}
 }
 
+exports.compareTiles = function (a_tile1, a_tile2) {
+	return a_tile1.tile - a_tile2.tile;
+}
+
 // TOFIX should move to right file.
-exports.sortHandTiles = function (a_tiles) {
-	a_tiles.sort(function (a_tile1, a_tile2) {
-		return a_tile1.tile - a_tile2.tile;
-	});
+exports.sortHandTiles = function (a_handTiles, a_pirmaryJokerTile) {
+	var pirmaryJokerTile = a_pirmaryJokerTile;
+	var secondaryJokerTile = pirmaryJokerTile + 1;
+	switch (pirmaryJokerTile) {
+		case exports.MJ_TILE_DOT_9:
+			secondaryJokerTile = exports.MJ_TILE_DOT_1;
+			break;
+		case exports.MJ_TILE_BAMBOO_9:
+			secondaryJokerTile = exports.MJ_TILE_BAMBOO_1;
+			break;
+		case exports.MJ_TILE_CHARACTER_9:
+			secondaryJokerTile = exports.MJ_TILE_CHARACTER_1;
+			break;
+		case exports.MJ_TILE_WIND_4_NORTH:
+			secondaryJokerTile = exports.MJ_TILE_WIND_1_EAST;
+			break;
+		case exports.MJ_TILE_DRAGON_3_WHITE:
+			secondaryJokerTile = exports.MJ_TILE_DRAGON_1_RED;
+			break;
+		case exports.MJ_TILE_FLOWER_4_CHRYSANTHEMUM:
+			secondaryJokerTile = exports.MJ_TILE_SEASON_1_SPRING;
+			break;
+	}
+
+	var jokerTiles = [];
+	// Move joker tiles to a temp array
+	for (var idxTile = a_handTiles.length - 1; idxTile >= 0; idxTile--) {
+		if ((a_handTiles[idxTile].tile == pirmaryJokerTile) ||
+			((a_handTiles[idxTile].tile == secondaryJokerTile))) {
+			jokerTiles.push(a_handTiles[idxTile]);
+			a_handTiles.splice(idxTile, 1);
+		}
+	}
+
+	a_handTiles.sort(exports.compareTiles);
+	jokerTiles.sort(exports.compareTiles);
+
+	// a_handTiles = jokerTiles.concat(a_handTiles);
+	for (var idxTile = jokerTiles.length - 1; idxTile >= 0; idxTile--) {
+		a_handTiles.unshift(jokerTiles[idxTile]);
+	}
 }
 
 exports.shuffleTilewall = function (a_tilewall) {
@@ -147,6 +188,11 @@ exports.shuffleTilewall = function (a_tilewall) {
 		a_tilewall[idxTileForwardRandom] = a_tilewall[idxTileBackward];
 		a_tilewall[idxTileBackward] = tileSwap;
 	}
+
+	// a_tilewall[53] = exports.MJ_TILE_FLOWER_4_CHRYSANTHEMUM;
+	// a_tilewall[54] = exports.MJ_TILE_FLOWER_4_CHRYSANTHEMUM;
+	// a_tilewall[55] = exports.MJ_TILE_FLOWER_4_CHRYSANTHEMUM;
+	// a_tilewall[56] = exports.MJ_TILE_FLOWER_4_CHRYSANTHEMUM;
 }
 
 exports.tossDice = function () {

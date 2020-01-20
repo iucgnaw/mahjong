@@ -17,16 +17,12 @@ cc.Class({
 
     // use this for initialization
     onLoad: function () {
-        console.log("******** WaitingConnection.js, onLoad()");
-
+        // TOFIX, if didn't activate this node, won't call this and cause other place raise exception.
         if (cc.vv == null) {
-            console.log("******** cc.vv == null");
-
             return null;
         }
 
         cc.vv.wc = this;
-        console.log("******** cc.vv.wc = this;");
         this.node.active = this._isShow;
     },
 
