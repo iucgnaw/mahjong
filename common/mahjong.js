@@ -69,7 +69,6 @@ exports.MJ_PLAYER_STATE_INITIAL_REPLACING = "开局换花中";
 exports.MJ_PLAYER_STATE_IDLE = "空闲";
 exports.MJ_PLAYER_STATE_GET_TURN = "获得轮次";
 exports.MJ_PLAYER_STATE_FULL_HAND = "手牌齐";
-exports.MJ_PLAYER_STATE_KONG_BACKDRAWING = "杠后补牌中";
 exports.MJ_PLAYER_STATE_DISCARDING_TILE = "出牌中";
 exports.MJ_PLAYER_STATE_BEING_TARGETED = "被瞄上";
 exports.MJ_PLAYER_STATE_THINKING_ON_DISCARDING_TILE = "思考已出牌";
@@ -78,6 +77,8 @@ exports.MJ_PLAYER_STATE_THINKING_ON_CHOWING = "考虑吃中";
 exports.MJ_PLAYER_STATE_PONGING = "碰中";
 exports.MJ_PLAYER_STATE_THINKING_ON_PONGING = "考虑碰中";
 exports.MJ_PLAYER_STATE_KONGING = "杠中";
+exports.MJ_PLAYER_STATE_KONG_BACKDRAWING = "杠后补牌中";
+exports.MJ_PLAYER_STATE_KONG_BEING_ROBBED = "被抢杠中";
 exports.MJ_PLAYER_STATE_THINKING_ON_KONGING = "考虑杠中";
 exports.MJ_PLAYER_STATE_WINING = "胡中";
 exports.MJ_PLAYER_STATE_THINKING_ON_WINING = "考虑胡中";
@@ -189,10 +190,10 @@ exports.shuffleTilewall = function (a_tilewall) {
 		a_tilewall[idxTileBackward] = tileSwap;
 	}
 
-	// a_tilewall[53] = exports.MJ_TILE_FLOWER_4_CHRYSANTHEMUM;
-	// a_tilewall[54] = exports.MJ_TILE_FLOWER_4_CHRYSANTHEMUM;
-	// a_tilewall[55] = exports.MJ_TILE_FLOWER_4_CHRYSANTHEMUM;
-	// a_tilewall[56] = exports.MJ_TILE_FLOWER_4_CHRYSANTHEMUM;
+	a_tilewall[0] = exports.MJ_TILE_DOT_1;
+	a_tilewall[1] = exports.MJ_TILE_DOT_1;
+	a_tilewall[2] = exports.MJ_TILE_DOT_1;
+	a_tilewall[53] = exports.MJ_TILE_DOT_1;
 }
 
 exports.tossDice = function () {

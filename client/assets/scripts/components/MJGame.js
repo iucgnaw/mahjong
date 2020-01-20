@@ -344,13 +344,21 @@ cc.Class({
             }
             if (a_event.target == nodeTile) { // Found 
                 var seat = cc.vv.gameNetMgr.seats[cc.vv.gameNetMgr.seatIndex];
-                var handTiles = seat.handTiles;
-                if (handTiles[idxTile].pose == "standing") {
-                    handTiles[idxTile].pose = "lying";
-                } else {
-                    handTiles[idxTile].pose = "standing";
+                switch (seat.fsmPlayerState) {
+                    case m_mahjong.MJ_PLAYER_STATE_CHOWING:
+                    case m_mahjong.MJ_PLAYER_STATE_PONGING:
+                    case m_mahjong.MJ_PLAYER_STATE_KONGING:
+                    case m_mahjong.MJ_PLAYER_STATE_WINING:
+                        alert("客户端消息：\r\n吃、碰、杠、胡中不能动牌！");
+                        return;
                 }
-                cc.vv.net.send("client_req_sync_handtiles", handTiles);
+        
+                if (seat.handTiles[idxTile].pose == "standing") {
+                    seat.handTiles[idxTile].pose = "lying";
+                } else {
+                    seat.handTiles[idxTile].pose = "standing";
+                }
+                cc.vv.net.send("client_req_sync_handtiles", seat.handTiles);
                 return;
             }
             idxTile++;
@@ -359,19 +367,17 @@ cc.Class({
 
     onActionClicked: function (a_event) {
         var seat = cc.vv.gameNetMgr.seats[cc.vv.gameNetMgr.seatIndex];
-        var selectedTiles = {
-            type: "",
-            tiles: [],
-        };
+        var selectedTiles = [];
+
         for (var idxTile = 0; idxTile < seat.handTiles.length; idxTile++) {
             if (seat.handTiles[idxTile].pose == "lying") {
-                selectedTiles.tiles.push(seat.handTiles[idxTile].tile);
+                selectedTiles.push(seat.handTiles[idxTile].tile);
             }
         }
 
         switch (a_event.target.name) {
             case "nodeActionSetAside":
-                if (selectedTiles.tiles.length < 1) {
+                if (selectedTiles.length < 1) {
                     alert("客户端消息：\r\n请选手牌。");
                     return;
                 }
@@ -389,15 +395,15 @@ cc.Class({
 
             case "nodeActionDiscard":
                 var tile; // TOFIX
-                if (selectedTiles.tiles.length <= 0) {
+                if (selectedTiles.length <= 0) {
                     alert("客户端消息：\r\n请选择1张手牌。");
                     return;
-                } else if (selectedTiles.tiles.length > 1) {
+                } else if (selectedTiles.length > 1) {
                     alert("客户端消息：\r\n由于选择了多张手牌，将随机打出一张。");
-                    var index = Math.floor(Math.random() * selectedTiles.tiles.length + 0);
-                    tile = selectedTiles.tiles[index];
+                    var index = Math.floor(Math.random() * selectedTiles.length + 0);
+                    tile = selectedTiles[index];
                 } else {
-                    tile = selectedTiles.tiles[0];
+                    tile = selectedTiles[0];
                 }
                 cc.vv.net.send("client_req_action_discard_tile", tile);
                 break;
@@ -411,36 +417,39 @@ cc.Class({
                 break;
 
             case "nodeActionChow":
-                if (selectedTiles.tiles.length != 2) {
+                if (selectedTiles.length != 2) {
                     alert("客户端消息：\r\n请选择2张手牌。");
                     return;
                 }
-                selectedTiles.type = "meld_chow";
 
                 cc.vv.net.send("client_req_action_steal", m_mahjong.MJ_ACTION_CHOW);
                 break;
 
             case "nodeActionPong":
-                if (selectedTiles.tiles.length != 2) {
+                if (selectedTiles.length != 2) {
                     alert("客户端消息：\r\n请选择2张手牌。");
                     return;
                 }
-                selectedTiles.type = "meld_pong";
 
                 cc.vv.net.send("client_req_action_steal", m_mahjong.MJ_ACTION_PONG);
                 break;
 
             case "nodeActionKong":
-                var action;
-                if (selectedTiles.tiles.length == 1) {
-                    selectedTiles.type = "meld_pong_to_kong";
-                } else if (selectedTiles.tiles.length == 3) {
-                    selectedTiles.type = "meld_exposed_kong";
-                } else if (selectedTiles.tiles.length == 4) {
-                    selectedTiles.type = "meld_concealed_kong";
+                if (seat.seatIndex == cc.vv.gameNetMgr.turn) {
+                    if ((selectedTiles.length != 1) && (selectedTiles.length != 4)) {
+                        alert("客户端消息：\r\n如果是暗杠，请选择4张手牌。如果是碰转杠，请选择1张手牌。");
+                        return;
+                    } else if (selectedTiles.length == 1) {
+                        if (seat.melds.length <= 0) {
+                            alert("客户端消息：\r\n没有组牌，不能碰转杠！");
+                            return;
+                        }
+                    }
                 } else {
-                    alert("客户端消息：\r\n如果是明杠，请选择3张手牌。如果是暗杠，请选择4张手牌。如果是补杠，请选择1张手牌。");
-                    return;
+                    if (selectedTiles.length != 3) {
+                        alert("客户端消息：\r\n明杠，请选择3张手牌。");
+                        return;
+                    }
                 }
 
                 cc.vv.net.send("client_req_action_steal", m_mahjong.MJ_ACTION_KONG);
