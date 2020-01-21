@@ -349,7 +349,7 @@ cc.Class({
                     case m_mahjong.MJ_PLAYER_STATE_PONGING:
                     case m_mahjong.MJ_PLAYER_STATE_KONGING:
                     case m_mahjong.MJ_PLAYER_STATE_WINING:
-                        alert("客户端消息：\r\n吃、碰、杠、胡中不能动牌！");
+                        alert("客户端消息：\r\n吃、碰、杠、胡中，不能动牌！");
                         return;
                 }
         
@@ -382,7 +382,7 @@ cc.Class({
                     return;
                 }
 
-                cc.vv.net.send("client_req_action_steal", m_mahjong.MJ_ACTION_SET_ASIDE);
+                cc.vv.net.send("client_req_action", m_mahjong.MJ_ACTION_SET_ASIDE);
                 break;
 
             case "nodeActionBackdraw":
@@ -422,7 +422,7 @@ cc.Class({
                     return;
                 }
 
-                cc.vv.net.send("client_req_action_steal", m_mahjong.MJ_ACTION_CHOW);
+                cc.vv.net.send("client_req_action", m_mahjong.MJ_ACTION_CHOW);
                 break;
 
             case "nodeActionPong":
@@ -431,7 +431,7 @@ cc.Class({
                     return;
                 }
 
-                cc.vv.net.send("client_req_action_steal", m_mahjong.MJ_ACTION_PONG);
+                cc.vv.net.send("client_req_action", m_mahjong.MJ_ACTION_PONG);
                 break;
 
             case "nodeActionKong":
@@ -452,11 +452,11 @@ cc.Class({
                     }
                 }
 
-                cc.vv.net.send("client_req_action_steal", m_mahjong.MJ_ACTION_KONG);
+                cc.vv.net.send("client_req_action", m_mahjong.MJ_ACTION_KONG);
                 break;
 
             case "nodeActionWin":
-                cc.vv.net.send("client_req_action_steal", m_mahjong.MJ_ACTION_WIN);
+                cc.vv.net.send("client_req_action", m_mahjong.MJ_ACTION_WIN);
                 break;
         }
     },

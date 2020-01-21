@@ -511,7 +511,7 @@ exports.on_client_req_action_discard_tile = function (a_userId, a_tile) {
     }
 };
 
-exports.on_client_req_action_steal = function (a_userId, a_action) {
+exports.on_client_req_action = function (a_userId, a_action) {
     var seat = g_seatByUserId[a_userId];
     console.assert(seat != null);
     var game = seat.game;

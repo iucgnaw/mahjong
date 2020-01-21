@@ -190,10 +190,10 @@ exports.shuffleTilewall = function (a_tilewall) {
 		a_tilewall[idxTileBackward] = tileSwap;
 	}
 
-	a_tilewall[0] = exports.MJ_TILE_DOT_1;
-	a_tilewall[1] = exports.MJ_TILE_DOT_1;
-	a_tilewall[2] = exports.MJ_TILE_DOT_1;
-	a_tilewall[53] = exports.MJ_TILE_DOT_1;
+	// a_tilewall[0] = exports.MJ_TILE_DOT_1;
+	// a_tilewall[1] = exports.MJ_TILE_DOT_1;
+	// a_tilewall[2] = exports.MJ_TILE_DOT_1;
+	// a_tilewall[53] = exports.MJ_TILE_DOT_1;
 }
 
 exports.tossDice = function () {

@@ -166,14 +166,14 @@ exports.start = function (a_config, a_mgr) {
 			a_socket.gameMgr.on_client_req_action_discard_tile(a_socket.userId, tile);
 		});
 
-		// Steal: Chow, Pong, Kong, Win
-		a_socket.on("client_req_action_steal", function (a_data) {
+		// Action: Chow, Pong, Kong, Win
+		a_socket.on("client_req_action", function (a_data) {
 			console.assert(a_socket.userId != null);
 			console.assert(a_data != null);
 
 			var action = a_data;
 
-			a_socket.gameMgr.on_client_req_action_steal(a_socket.userId, action);
+			a_socket.gameMgr.on_client_req_action(a_socket.userId, action);
 		});
 
 		//过
