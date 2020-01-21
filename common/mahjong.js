@@ -63,6 +63,7 @@ var g_arrayTileName = [
 exports.MJ_TABLE_STATE_IDLE = "牌桌空闲";
 exports.MJ_TABLE_STATE_REPLACE_HONOR_TILES = "牌桌换花";
 exports.MJ_TABLE_STATE_PLAYING = "牌桌对战";
+exports.MJ_TABLE_STATE_SCORING = "牌桌对账";
 
 exports.MJ_PLAYER_STATE_INITIAL_WAITING = "开局待换花";
 exports.MJ_PLAYER_STATE_INITIAL_REPLACING = "开局换花中";

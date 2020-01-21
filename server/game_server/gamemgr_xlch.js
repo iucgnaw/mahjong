@@ -921,11 +921,22 @@ exports.on_client_req_action_pass = function (a_userId) {
                         game.seats[idxSeat].handTiles.push(handTile);
                     }
 
+                    // Change all seats' hand tiles to lying
+                    // TOFIX make it a function to avoid idxSeat2
+                    for (var idxSeat2 = 0; idxSeat2 < game.seats.length; ++idxSeat2) {
+                        for (var idxTile = 0; idxTile < game.seats[idxSeat2].handTiles.length; idxTile++) {
+                            game.seats[idxSeat2].handTiles[idxTile].pose = "lying";
+                        }
+                    }
+
                     nextTurnIndex = game.seats[idxSeat].seatIndex;
                     game.seats[nextTurnIndex].fsmPlayerState = m_mahjong.MJ_PLAYER_STATE_WON;
 
-                    // TOFIX Should move this after game sync, otherwise game sync will raise exception in client.
-                    doGameOver(game, game.seats[nextTurnIndex].userId);
+                    game.fsmTableState = m_mahjong.MJ_TABLE_STATE_SCORING;
+
+                    if (game.fsmTableState == m_mahjong.MJ_TABLE_STATE_SCORING) {
+                        doGameOver(game, game.seats[nextTurnIndex].userId);
+                    }
                 }
             }
 
