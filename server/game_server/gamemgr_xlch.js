@@ -557,6 +557,46 @@ exports.on_client_req_action = function (a_userId, a_action) {
             }
             break;
 
+        case m_mahjong.MJ_ACTION_BACKDRAW:
+            if ((seat.fsmPlayerState != m_mahjong.MJ_PLAYER_STATE_INITIAL_REPLACING) &&
+                (seat.fsmPlayerState != m_mahjong.MJ_PLAYER_STATE_FULL_HAND) &&
+                (seat.fsmPlayerState != m_mahjong.MJ_PLAYER_STATE_KONG_BACKDRAWING)) {
+                m_userMgr.sendMsg(a_userId, "server_push_message", "Can't [Backdraw Tile] on state: " + seat.fsmPlayerState);
+                return;
+            }
+
+            var maxHandTilesNum;
+            if (seat.fsmPlayerState == m_mahjong.MJ_PLAYER_STATE_INITIAL_REPLACING) {
+                if (seat.seatIndex == game.dealer) {
+                    maxHandTilesNum = 14;
+                } else {
+                    maxHandTilesNum = 13;
+                }
+            } else {
+                maxHandTilesNum = 14;
+            }
+            if ((seat.melds.length * 3 + seat.handTiles.length) >= maxHandTilesNum) {
+                m_userMgr.sendMsg(a_userId, "server_push_message", "已经补满牌！");
+                return;
+            }
+
+            reponseMessage = "server_brc_backdraw"
+
+            // Sort hand tiles
+            m_mahjong.sortHandTiles(seat.handTiles, game.jokerTile);
+
+            doBackdrawTile(game);
+
+            if ((seat.melds.length * 3 + seat.handTiles.length) >= 14) {
+                if ((seat.fsmPlayerState == m_mahjong.MJ_PLAYER_STATE_INITIAL_REPLACING) ||
+                    (seat.fsmPlayerState == m_mahjong.MJ_PLAYER_STATE_FULL_HAND)) {
+                    // Do nothing
+                } else if (seat.fsmPlayerState == m_mahjong.MJ_PLAYER_STATE_KONG_BACKDRAWING) {
+                    seat.fsmPlayerState = m_mahjong.MJ_PLAYER_STATE_FULL_HAND;
+                }
+            }
+            break;
+
         case m_mahjong.MJ_ACTION_CHOW:
             if (seat.fsmPlayerState != m_mahjong.MJ_PLAYER_STATE_THINKING_ON_DISCARDING_TILE) {
                 m_userMgr.sendMsg(a_userId, "server_push_message", "Can't [" + a_action + "] on state: " + seat.fsmPlayerState);
@@ -899,56 +939,6 @@ exports.on_client_req_action_draw_tile = function (a_userId) {
     doDrawTile(game);
 
     seat.fsmPlayerState = m_mahjong.MJ_PLAYER_STATE_FULL_HAND;
-
-    // Sync game
-    for (var idxSeat = 0; idxSeat < game.seats.length; ++idxSeat) {
-        var gameForClient = {};
-        copyGameForClient(gameForClient, game, game.seats[idxSeat].userId);
-        m_userMgr.sendMsg(game.seats[idxSeat].userId, "server_push_game_sync", gameForClient);
-    }
-};
-
-exports.on_client_req_action_backdraw_tile = function (a_userId) {
-    var seat = g_seatByUserId[a_userId];
-    console.assert(seat != null);
-
-    var game = seat.game;
-
-    if ((seat.fsmPlayerState != m_mahjong.MJ_PLAYER_STATE_INITIAL_REPLACING) &&
-        (seat.fsmPlayerState != m_mahjong.MJ_PLAYER_STATE_FULL_HAND) &&
-        (seat.fsmPlayerState != m_mahjong.MJ_PLAYER_STATE_KONG_BACKDRAWING)) {
-        m_userMgr.sendMsg(a_userId, "server_push_message", "Can't [Backdraw Tile] on state: " + seat.fsmPlayerState);
-        return;
-    }
-
-    var maxHandTilesNum;
-    if (seat.fsmPlayerState == m_mahjong.MJ_PLAYER_STATE_INITIAL_REPLACING) {
-        if (seat.seatIndex == game.dealer) {
-            maxHandTilesNum = 14;
-        } else {
-            maxHandTilesNum = 13;
-        }
-    } else {
-        maxHandTilesNum = 14;
-    }
-    if ((seat.melds.length * 3 + seat.handTiles.length) >= maxHandTilesNum) {
-        m_userMgr.sendMsg(a_userId, "server_push_message", "已经补满牌！");
-        return;
-    }
-
-    // Sort hand tiles
-    m_mahjong.sortHandTiles(seat.handTiles, game.jokerTile);
-
-    doBackdrawTile(game);
-
-    if ((seat.melds.length * 3 + seat.handTiles.length) >= 14) {
-        if ((seat.fsmPlayerState == m_mahjong.MJ_PLAYER_STATE_INITIAL_REPLACING) ||
-            (seat.fsmPlayerState == m_mahjong.MJ_PLAYER_STATE_FULL_HAND)) {
-            // Do nothing
-        } else if (seat.fsmPlayerState == m_mahjong.MJ_PLAYER_STATE_KONG_BACKDRAWING) {
-            seat.fsmPlayerState = m_mahjong.MJ_PLAYER_STATE_FULL_HAND;
-        }
-    }
 
     // Sync game
     for (var idxSeat = 0; idxSeat < game.seats.length; ++idxSeat) {

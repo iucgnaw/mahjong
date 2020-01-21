@@ -386,7 +386,7 @@ cc.Class({
                 break;
 
             case "nodeActionBackdraw":
-                cc.vv.net.send("client_req_action_backdraw_tile");
+                cc.vv.net.send("client_req_action", m_mahjong.MJ_ACTION_BACKDRAW);
                 break;
 
             case "nodeActionDraw":
