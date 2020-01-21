@@ -109,15 +109,16 @@ cc.Class({
             self._labelGameCount.string = "" + cc.vv.gameNetMgr.gameIndex + "局";
         });
 
-        this.node.on("event_server_brc_hand_end", function (a_data) {});
-
-        this.node.on("event_server_brc_discarding_tile", function (a_data) {
+        this.node.on("event_server_brc_action_discard", function (a_data) {
+            var seat = a_data.seat;
+            var localIndex = cc.vv.gameNetMgr.getLocalIndex(seat.seatIndex);
+            self.playActionAnimation(localIndex, "action_discard");
             cc.vv.audioMgr.playSfx("give.mp3");
             cc.vv.audioMgr.playSfx(cc.vv.mahjongmgr.getAudioUrlByTile(a_data.tile));
         });
 
-        this.node.on("event_server_brc_player_pass", function (a_data) {
-            var seat = a_data;
+        this.node.on("event_server_brc_player_pass", function (a_seat) {
+            var seat = a_seat;
             var localIndex = cc.vv.gameNetMgr.getLocalIndex(seat.seatIndex);
             self.playActionAnimation(localIndex, "action_pass");
             cc.vv.audioMgr.playSfx("mahjong/action/action_pass.mp3");

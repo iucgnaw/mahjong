@@ -490,7 +490,7 @@ exports.on_client_req_action_discard_tile = function (a_userId, a_tile) {
     seat.discardedTiles.push(a_tile);
 
     // Notify all seats
-    m_userMgr.broadcastMsg("server_brc_discarding_tile", {
+    m_userMgr.broadcastMsg("server_brc_action_discard", {
         userId: seat.userId,
         tile: a_tile
     }, seat.userId, true);
@@ -867,7 +867,7 @@ exports.on_client_req_action_pass = function (a_userId) {
                         // Move lying tiles from hand tiles to meld
                         for (var idxTile = game.seats[idxSeat].handTiles.length - 1; idxTile >= 0; idxTile--) {
                             if (game.seats[idxSeat].handTiles[idxTile].pose == "lying") {
-                                pongMeld.tiles.unshift(game.seats[idxSeat].handTiles[idxTile].tile);
+                                pongMeld.tiles.push(game.seats[idxSeat].handTiles[idxTile].tile);
                                 game.seats[idxSeat].handTiles.splice(idxTile, 1);
                             }
                         }

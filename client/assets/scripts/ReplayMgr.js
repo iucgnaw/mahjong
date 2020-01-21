@@ -77,7 +77,6 @@ cc.Class({
         var nextActionDelay = 1.0;
         if (action.type == MJ_ACTION_DISCARD_TILE) {
             //console.log("MJ_ACTION_DISCARD_TILE");
-            cc.vv.gameNetMgr.on_server_brc_discarding_tile(action.si, action.tile);
             return 1.0;
         } else if (action.type == MJ_ACTION_DRAW_TILE) {
             //console.log("MJ_ACTION_DRAW_TILE");

@@ -260,11 +260,11 @@ cc.Class({
             }
         });
 
-        cc.vv.net.addHandler("server_brc_discarding_tile", function (a_data) {
+        cc.vv.net.addHandler("server_brc_action_discard", function (a_data) {
             var userId = a_data.userId;
             var tile = a_data.tile;
             var seatIndex = self.getSeatIndexByUserId(userId);
-            self.on_server_brc_discarding_tile(seatIndex, tile);
+            self.on_server_brc_action_discard(seatIndex, tile);
         });
 
         cc.vv.net.addHandler("server_brc_player_pass", function (data) {
@@ -311,10 +311,10 @@ cc.Class({
         seat.discardedTiles.push(tile);
     },
 
-    on_server_brc_discarding_tile: function (a_seatIndex, a_tile) {
+    on_server_brc_action_discard: function (a_seatIndex, a_tile) {
         var seat = this.seats[a_seatIndex];
 
-        this.dispatchEvent("event_server_brc_discarding_tile", {
+        this.dispatchEvent("event_server_brc_action_discard", {
             seat: seat,
             tile: a_tile
         });
