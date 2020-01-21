@@ -515,7 +515,6 @@ exports.on_client_req_action = function (a_userId, a_action) {
     var seat = g_seatByUserId[a_userId];
     console.assert(seat != null);
     var game = seat.game;
-    var reponseMessage;
 
     switch (a_action) {
         case m_mahjong.MJ_ACTION_SET_ASIDE:
@@ -540,8 +539,6 @@ exports.on_client_req_action = function (a_userId, a_action) {
                     }
                 }
             }
-
-            reponseMessage = "server_brc_set_aside"
 
             // Copy lying tiles to honor tiles
             for (var idxTile = 0; idxTile < seat.handTiles.length; idxTile++) {
@@ -580,8 +577,6 @@ exports.on_client_req_action = function (a_userId, a_action) {
                 return;
             }
 
-            reponseMessage = "server_brc_backdraw"
-
             // Sort hand tiles
             m_mahjong.sortHandTiles(seat.handTiles, game.jokerTile);
 
@@ -597,6 +592,18 @@ exports.on_client_req_action = function (a_userId, a_action) {
             }
             break;
 
+        case m_mahjong.MJ_ACTION_DRAW:
+            if (seat.fsmPlayerState != m_mahjong.MJ_PLAYER_STATE_GET_TURN) {
+                m_userMgr.sendMsg(a_userId, "server_push_message", "Can't [Draw Tile] on state: " + seat.fsmPlayerState);
+                return;
+            }
+
+
+            doDrawTile(game);
+
+            seat.fsmPlayerState = m_mahjong.MJ_PLAYER_STATE_FULL_HAND;
+            break;
+
         case m_mahjong.MJ_ACTION_CHOW:
             if (seat.fsmPlayerState != m_mahjong.MJ_PLAYER_STATE_THINKING_ON_DISCARDING_TILE) {
                 m_userMgr.sendMsg(a_userId, "server_push_message", "Can't [" + a_action + "] on state: " + seat.fsmPlayerState);
@@ -606,8 +613,6 @@ exports.on_client_req_action = function (a_userId, a_action) {
                 m_userMgr.sendMsg(a_userId, "server_push_message", "只能[" + a_action + "]上家的出牌！");
                 return;
             }
-
-            reponseMessage = "server_brc_chowing"
 
             seat.fsmPlayerState = m_mahjong.MJ_PLAYER_STATE_CHOWING;
             for (var idxSeat = 0; idxSeat < game.seats.length; ++idxSeat) {
@@ -629,8 +634,6 @@ exports.on_client_req_action = function (a_userId, a_action) {
                 m_userMgr.sendMsg(a_userId, "server_push_message", "Can't [" + a_action + "] on state: " + seat.fsmPlayerState);
                 return;
             }
-
-            reponseMessage = "server_brc_ponging"
 
             seat.fsmPlayerState = m_mahjong.MJ_PLAYER_STATE_PONGING;
             for (var i = 0; i < game.seats.length; ++i) {
@@ -656,8 +659,6 @@ exports.on_client_req_action = function (a_userId, a_action) {
                 m_userMgr.sendMsg(a_userId, "server_push_message", "Can't [" + a_action + "] on state: " + seat.fsmPlayerState);
                 return;
             }
-
-            reponseMessage = "server_brc_konging"
 
             seat.fsmPlayerState = m_mahjong.MJ_PLAYER_STATE_KONGING;
             for (var i = 0; i < game.seats.length; ++i) {
@@ -687,8 +688,6 @@ exports.on_client_req_action = function (a_userId, a_action) {
                 m_userMgr.sendMsg(a_userId, "server_push_message", "Can't [" + a_action + "] on state: " + seat.fsmPlayerState);
                 return;
             }
-
-            reponseMessage = "server_brc_winning"
 
             seat.fsmPlayerState = m_mahjong.MJ_PLAYER_STATE_WINING;
             for (var idxSeat = 0; idxSeat < game.seats.length; ++idxSeat) {
@@ -720,7 +719,10 @@ exports.on_client_req_action = function (a_userId, a_action) {
     }
 
     // Tell clients
-    m_userMgr.broadcastMsg(reponseMessage, seat.userId, seat.userId, true);
+    var msgData = {};
+    msgData.userId = seat.userId;
+    msgData.action = a_action;
+    m_userMgr.broadcastMsg("server_brc_action", msgData, seat.userId, true);
 
     // Sync game
     for (var idxSeat = 0; idxSeat < game.seats.length; ++idxSeat) {
@@ -916,29 +918,6 @@ exports.on_client_req_action_pass = function (a_userId) {
         changeTurn(game, nextTurnIndex);
         m_userMgr.broadcastMsg("server_brc_change_turn", game.seats[game.turn].userId, game.seats[game.turn].userId, true);
     }
-
-    // Sync game
-    for (var idxSeat = 0; idxSeat < game.seats.length; ++idxSeat) {
-        var gameForClient = {};
-        copyGameForClient(gameForClient, game, game.seats[idxSeat].userId);
-        m_userMgr.sendMsg(game.seats[idxSeat].userId, "server_push_game_sync", gameForClient);
-    }
-};
-
-exports.on_client_req_action_draw_tile = function (a_userId) {
-    var seat = g_seatByUserId[a_userId];
-    console.assert(seat != null);
-
-    var game = seat.game;
-
-    if (seat.fsmPlayerState != m_mahjong.MJ_PLAYER_STATE_GET_TURN) {
-        m_userMgr.sendMsg(a_userId, "server_push_message", "Can't [Draw Tile] on state: " + seat.fsmPlayerState);
-        return;
-    }
-
-    doDrawTile(game);
-
-    seat.fsmPlayerState = m_mahjong.MJ_PLAYER_STATE_FULL_HAND;
 
     // Sync game
     for (var idxSeat = 0; idxSeat < game.seats.length; ++idxSeat) {

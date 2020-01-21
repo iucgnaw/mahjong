@@ -123,32 +123,42 @@ cc.Class({
             cc.vv.audioMgr.playSfx("mahjong/action/action_pass.mp3");
         });
 
-        this.node.on("event_server_brc_set_aside", function (a_seat) {
-            self.playActionAnimation(cc.vv.gameNetMgr.getLocalIndex(a_seat.seatIndex), "action_set_aside");
-            cc.vv.audioMgr.playSfx("mahjong/action/action_set_aside.mp3");
-        });
-
-        this.node.on("event_server_brc_chowing", function (a_seat) {
-            self.playActionAnimation(cc.vv.gameNetMgr.getLocalIndex(a_seat.seatIndex), "action_chow");
-            cc.vv.audioMgr.playSfx("mahjong/action/action_chow.mp3");
-        });
-
-        this.node.on("event_server_brc_ponging", function (a_seat) {
-            self.playActionAnimation(cc.vv.gameNetMgr.getLocalIndex(a_seat.seatIndex), "action_pong");
-            cc.vv.audioMgr.playSfx("mahjong/action/action_pong.mp3");
-        });
-
-        this.node.on("event_server_brc_konging", function (a_seat) {
-            self.playActionAnimation(cc.vv.gameNetMgr.getLocalIndex(a_seat.seatIndex), "action_kong");
-            cc.vv.audioMgr.playSfx("mahjong/action/action_kong.mp3");
-        });
-
-        this.node.on("event_server_brc_winning", function (a_seat) {
-            var seat = a_seat;
-            var localIndex = cc.vv.gameNetMgr.getLocalIndex(seat.seatIndex);
-
-            self.playActionAnimation(localIndex, "action_win");
-            cc.vv.audioMgr.playSfx("mahjong/action/action_win.mp3");
+        this.node.on("event_server_brc_action", function (a_eventData) {
+            var actionName = null;
+            switch (a_eventData.action) {
+                case m_mahjong.MJ_ACTION_BACKDRAW:
+                    actionName = "action_backdraw";
+                    break;
+                case m_mahjong.MJ_ACTION_CHOW:
+                    actionName = "action_chow";
+                    break;
+                case m_mahjong.MJ_ACTION_DISCARD:
+                    actionName = "action_discard";
+                    break;
+                case m_mahjong.MJ_ACTION_DRAW:
+                    actionName = "action_draw";
+                    break;
+                case m_mahjong.MJ_ACTION_KONG:
+                    actionName = "action_kong";
+                    break;
+                case m_mahjong.MJ_ACTION_PASS:
+                    actionName = "action_pass";
+                    break;
+                case m_mahjong.MJ_ACTION_PONG:
+                    actionName = "action_pong";
+                    break;
+                case m_mahjong.MJ_ACTION_REJECT:
+                    actionName = "action_reject";
+                    break;
+                case m_mahjong.MJ_ACTION_SET_ASIDE:
+                    actionName = "action_set_aside";
+                    break;
+                case m_mahjong.MJ_ACTION_WIN:
+                    actionName = "action_win";
+                    break;
+            }
+            self.playActionAnimation(cc.vv.gameNetMgr.getLocalIndex(a_eventData.seatIndex), actionName);
+            cc.vv.audioMgr.playSfx("mahjong/action/" + actionName + ".mp3");
         });
     },
 
@@ -352,7 +362,7 @@ cc.Class({
                         alert("客户端消息：\r\n吃、碰、杠、胡中，不能动牌！");
                         return;
                 }
-        
+
                 if (seat.handTiles[idxTile].pose == "standing") {
                     seat.handTiles[idxTile].pose = "lying";
                 } else {
@@ -390,7 +400,7 @@ cc.Class({
                 break;
 
             case "nodeActionDraw":
-                cc.vv.net.send("client_req_action_draw_tile");
+                cc.vv.net.send("client_req_action", m_mahjong.MJ_ACTION_DRAW);
                 break;
 
             case "nodeActionDiscard":

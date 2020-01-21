@@ -85,17 +85,14 @@ cc.Class({
             return 0.5;
         } else if (action.type == MJ_ACTION_CHOW) {
             //console.log("MJ_ACTION_PONG");
-            cc.vv.gameNetMgr.on_server_brc_chowing(action.si, action.tile);
             cc.vv.gameNetMgr.doChangeTurn(action.si);
             return 1.0;
         } else if (action.type == MJ_ACTION_PONG) {
             //console.log("MJ_ACTION_PONG");
-            cc.vv.gameNetMgr.on_server_brc_ponging(action.si, action.tile);
             cc.vv.gameNetMgr.doChangeTurn(action.si);
             return 1.0;
         } else if (action.type == MJ_ACTION_KONG) {
             //console.log("MJ_ACTION_KONG");
-            cc.vv.gameNetMgr.on_server_brc_konging(action.si, action.tile);
             cc.vv.gameNetMgr.doChangeTurn(action.si);
             return 1.0;
         } else if (action.type == MJ_ACTION_WIN) {

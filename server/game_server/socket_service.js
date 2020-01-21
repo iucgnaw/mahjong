@@ -166,7 +166,7 @@ exports.start = function (a_config, a_mgr) {
 			a_socket.gameMgr.on_client_req_action_discard_tile(a_socket.userId, tile);
 		});
 
-		// Action: Chow, Pong, Kong, Win, Backdraw
+		// Action: Chow, Pong, Kong, Win, Set Aside, Backdraw, Draw
 		a_socket.on("client_req_action", function (a_data) {
 			console.assert(a_socket.userId != null);
 			console.assert(a_data != null);
@@ -182,14 +182,6 @@ exports.start = function (a_config, a_mgr) {
 				return;
 			}
 			a_socket.gameMgr.on_client_req_action_pass(a_socket.userId);
-		});
-
-		//摸
-		a_socket.on("client_req_action_draw_tile", function (a_data) {
-			if (a_socket.userId == null) {
-				return;
-			}
-			a_socket.gameMgr.on_client_req_action_draw_tile(a_socket.userId);
 		});
 
 		//退出房间
