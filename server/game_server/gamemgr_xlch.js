@@ -524,9 +524,9 @@ exports.on_client_req_action = function (a_userId, a_action) {
                 return;
             }
 
-            // Validate lying tiles are honor tiles
+            // Validate selected tiles are honor tiles
             for (var idxTile = 0; idxTile < seat.handTiles.length; idxTile++) {
-                if (seat.handTiles[idxTile].pose == "lying") {
+                if (seat.handTiles[idxTile].pose == "selected") {
                     if (m_mahjong.getTileSuit(seat.handTiles[idxTile].tile) != m_mahjong.MJ_TILE_SUIT_HONOR) {
                         m_userMgr.sendMsg(a_userId, "server_push_message", "不能存非花牌！");
                         return;
@@ -540,15 +540,15 @@ exports.on_client_req_action = function (a_userId, a_action) {
                 }
             }
 
-            // Copy lying tiles to honor tiles
+            // Copy selected tiles to honor tiles
             for (var idxTile = 0; idxTile < seat.handTiles.length; idxTile++) {
-                if (seat.handTiles[idxTile].pose == "lying") {
+                if (seat.handTiles[idxTile].pose == "selected") {
                     seat.honorTiles.push(seat.handTiles[idxTile].tile);
                 }
             }
-            // Remove lying tiles from hand tiles
+            // Remove selected tiles from hand tiles
             for (var idxTile = seat.handTiles.length - 1; idxTile >= 0; idxTile--) {
-                if (seat.handTiles[idxTile].pose == "lying") {
+                if (seat.handTiles[idxTile].pose == "selected") {
                     seat.handTiles.splice(idxTile, 1);
                 }
             }
@@ -614,6 +614,13 @@ exports.on_client_req_action = function (a_userId, a_action) {
                 return;
             }
 
+            // Change selected tiles to lying
+            for (var idxTile = 0; idxTile < seat.handTiles.length; idxTile++) {
+                if (seat.handTiles[idxTile].pose == "selected") {
+                    seat.handTiles[idxTile].pose = "lying";
+                }
+            }
+
             seat.fsmPlayerState = m_mahjong.MJ_PLAYER_STATE_CHOWING;
             for (var idxSeat = 0; idxSeat < game.seats.length; ++idxSeat) {
                 if (seat.seatIndex == idxSeat) {
@@ -633,6 +640,13 @@ exports.on_client_req_action = function (a_userId, a_action) {
                 (seat.fsmPlayerState != m_mahjong.MJ_PLAYER_STATE_THINKING_ON_CHOWING)) {
                 m_userMgr.sendMsg(a_userId, "server_push_message", "Can't [" + a_action + "] on state: " + seat.fsmPlayerState);
                 return;
+            }
+
+            // Change selected tiles to lying
+            for (var idxTile = 0; idxTile < seat.handTiles.length; idxTile++) {
+                if (seat.handTiles[idxTile].pose == "selected") {
+                    seat.handTiles[idxTile].pose = "lying";
+                }
             }
 
             seat.fsmPlayerState = m_mahjong.MJ_PLAYER_STATE_PONGING;
@@ -658,6 +672,13 @@ exports.on_client_req_action = function (a_userId, a_action) {
                 (seat.fsmPlayerState != m_mahjong.MJ_PLAYER_STATE_THINKING_ON_CHOWING)) {
                 m_userMgr.sendMsg(a_userId, "server_push_message", "Can't [" + a_action + "] on state: " + seat.fsmPlayerState);
                 return;
+            }
+
+            // Change selected tiles to lying
+            for (var idxTile = 0; idxTile < seat.handTiles.length; idxTile++) {
+                if (seat.handTiles[idxTile].pose == "selected") {
+                    seat.handTiles[idxTile].pose = "lying";
+                }
             }
 
             seat.fsmPlayerState = m_mahjong.MJ_PLAYER_STATE_KONGING;

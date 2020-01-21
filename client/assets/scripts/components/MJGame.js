@@ -299,7 +299,22 @@ cc.Class({
                     } else {
                         sprite.spriteFrame = cc.vv.mahjongmgr.getSpriteFrameTileBackStanding(localIndex);
                     }
-                } else { // "lying"
+                } else if (a_seat.handTiles[idxTile].pose == "selected") {
+                    if (sideString == "nodeSideBottom") {
+                        sprite.spriteFrame = cc.vv.mahjongmgr.getSpriteFrameByTile("_front_standing_bottom", a_seat.handTiles[idxTile].tile);
+                    } else {
+                        sprite.spriteFrame = cc.vv.mahjongmgr.getSpriteFrameTileBackStanding(localIndex);
+                    }
+                    if (sideString == "nodeSideBottom") {
+                        sprite.node.y += 10;
+                    } else if (sideString == "nodeSideRight") {
+                        sprite.node.x -= 20;
+                    } else if (sideString == "nodeSideTop") {
+                        sprite.node.y -= 10;
+                    } else if (sideString == "nodeSideLeft") {
+                        sprite.node.x += 20;
+                    }
+                } else { // lying
                     sprite.spriteFrame = cc.vv.mahjongmgr.getSpriteFrameByTile(prefixString, a_seat.handTiles[idxTile].tile);
                     if (sideString == "nodeSideBottom") {
                         sprite.node.y += 10;
@@ -365,7 +380,7 @@ cc.Class({
                 }
 
                 if (seat.handTiles[idxTile].pose == "standing") {
-                    seat.handTiles[idxTile].pose = "lying";
+                    seat.handTiles[idxTile].pose = "selected";
                 } else {
                     seat.handTiles[idxTile].pose = "standing";
                 }
@@ -381,7 +396,7 @@ cc.Class({
         var selectedTiles = [];
 
         for (var idxTile = 0; idxTile < seat.handTiles.length; idxTile++) {
-            if (seat.handTiles[idxTile].pose == "lying") {
+            if (seat.handTiles[idxTile].pose == "selected") {
                 selectedTiles.push(seat.handTiles[idxTile].tile);
             }
         }
