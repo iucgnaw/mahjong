@@ -126,15 +126,75 @@ cc.Class({
         return "mahjong/tile/" + tileName + ".mp3";
     },
 
-    getSpriteFrameTileBackLying: function (a_side) {
-        if (a_side == "nodeSideTop") {
-            return this.atlasTile.getSpriteFrame("back_lying_top");
-        } else if (a_side == "nodeSideBottom") {
-            return this.atlasTile.getSpriteFrame("back_lying_bottom");
-        } else if (a_side == "nodeSideLeft") {
-            return this.atlasTile.getSpriteFrame("back_lying_left");
-        } else if (a_side == "nodeSideRight") {
-            return this.atlasTile.getSpriteFrame("back_lying_right");
+    getSpriteFrameTileBackLying: function (a_localIndex, a_rotationDegree) {
+        switch (a_localIndex) {
+            case 0: // Bottom
+                switch (a_rotationDegree) {
+                    case 0:
+                        return this.atlasTile.getSpriteFrame("back_lying_bottom");
+                    case 90:
+                        return this.atlasTile.getSpriteFrame("back_lying_right");
+                    case 180:
+                        return this.atlasTile.getSpriteFrame("back_lying_top");
+                    case 270:
+                        return this.atlasTile.getSpriteFrame("back_lying_left");
+                    default:
+                        console.assert(false);
+                        break;
+                }
+                break;
+
+            case 1: // Right
+                switch (a_rotationDegree) {
+                    case 0:
+                        return this.atlasTile.getSpriteFrame("back_lying_right");
+                    case 90:
+                        return this.atlasTile.getSpriteFrame("back_lying_bottom");
+                    case 180:
+                        return this.atlasTile.getSpriteFrame("back_lying_left");
+                    case 270:
+                        return this.atlasTile.getSpriteFrame("back_lying_top");
+                    default:
+                        console.assert(false);
+                        break;
+                }
+                break;
+
+            case 2: // Top
+                switch (a_rotationDegree) {
+                    case 0:
+                        return this.atlasTile.getSpriteFrame("back_lying_top");
+                    case 90:
+                        return this.atlasTile.getSpriteFrame("back_lying_right");
+                    case 180:
+                        return this.atlasTile.getSpriteFrame("back_lying_bottom");
+                    case 270:
+                        return this.atlasTile.getSpriteFrame("back_lying_left");
+                    default:
+                        console.assert(false);
+                        break;
+                }
+                break;
+
+            case 3: // Left
+                switch (a_rotationDegree) {
+                    case 0:
+                        return this.atlasTile.getSpriteFrame("back_lying_left");
+                    case 90:
+                        return this.atlasTile.getSpriteFrame("back_lying_top");
+                    case 180:
+                        return this.atlasTile.getSpriteFrame("back_lying_right");
+                    case 270:
+                        return this.atlasTile.getSpriteFrame("back_lying_bottom");
+                    default:
+                        console.assert(false);
+                        break;
+                }
+                break;
+
+            default:
+                console.assert(false);
+                break;
         }
     },
 

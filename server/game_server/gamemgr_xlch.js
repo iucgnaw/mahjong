@@ -674,26 +674,44 @@ exports.on_client_req_action = function (a_userId, a_action) {
                 return;
             }
 
-            // Change selected tiles to lying
-            for (var idxTile = 0; idxTile < seat.handTiles.length; idxTile++) {
-                if (seat.handTiles[idxTile].pose == "selected") {
-                    seat.handTiles[idxTile].pose = "lying";
-                }
-            }
+            if (seat.seatIndex == game.turn) { // Concealed Kong
+                var meld = {
+                    type: "",
+                    tiles: [],
+                };
 
-            seat.fsmPlayerState = m_mahjong.MJ_PLAYER_STATE_KONGING;
-            for (var i = 0; i < game.seats.length; ++i) {
-                if (seat.seatIndex == idxSeat) {
-                    continue;
+                // Move lying tiles from hand tiles to meld
+                for (var idxTile = seat.handTiles.length - 1; idxTile >= 0; idxTile--) {
+                    if (seat.handTiles[idxTile].pose == "selected") {
+                        meld.tiles.unshift(seat.handTiles[idxTile].tile);
+                        seat.handTiles.splice(idxTile, 1);
+                    }
+                }
+                meld.type = "meld_concealed_kong";
+                seat.melds.push(meld);
+                seat.fsmPlayerState = m_mahjong.MJ_PLAYER_STATE_KONG_BACKDRAWING;
+            } else { // Exposed Kong or Pong to Kong
+                // Change selected tiles to lying
+                for (var idxTile = 0; idxTile < seat.handTiles.length; idxTile++) {
+                    if (seat.handTiles[idxTile].pose == "selected") {
+                        seat.handTiles[idxTile].pose = "lying";
+                    }
                 }
 
-                if (game.seats[i].fsmPlayerState == m_mahjong.MJ_PLAYER_STATE_DISCARDING_TILE) {
-                    game.seats[i].fsmPlayerState = m_mahjong.MJ_PLAYER_STATE_BEING_TARGETED;
-                } else if ((game.seats[i].fsmPlayerState == m_mahjong.MJ_PLAYER_STATE_IDLE) ||
-                    (game.seats[i].fsmPlayerState == m_mahjong.MJ_PLAYER_STATE_THINKING_ON_DISCARDING_TILE) ||
-                    (game.seats[i].fsmPlayerState == m_mahjong.MJ_PLAYER_STATE_THINKING_ON_CHOWING) ||
-                    (game.seats[i].fsmPlayerState == m_mahjong.MJ_PLAYER_STATE_CHOWING)) {
-                    game.seats[i].fsmPlayerState = m_mahjong.MJ_PLAYER_STATE_THINKING_ON_KONGING;
+                seat.fsmPlayerState = m_mahjong.MJ_PLAYER_STATE_KONGING;
+                for (var i = 0; i < game.seats.length; ++i) {
+                    if (seat.seatIndex == idxSeat) {
+                        continue;
+                    }
+
+                    if (game.seats[i].fsmPlayerState == m_mahjong.MJ_PLAYER_STATE_DISCARDING_TILE) {
+                        game.seats[i].fsmPlayerState = m_mahjong.MJ_PLAYER_STATE_BEING_TARGETED;
+                    } else if ((game.seats[i].fsmPlayerState == m_mahjong.MJ_PLAYER_STATE_IDLE) ||
+                        (game.seats[i].fsmPlayerState == m_mahjong.MJ_PLAYER_STATE_THINKING_ON_DISCARDING_TILE) ||
+                        (game.seats[i].fsmPlayerState == m_mahjong.MJ_PLAYER_STATE_THINKING_ON_CHOWING) ||
+                        (game.seats[i].fsmPlayerState == m_mahjong.MJ_PLAYER_STATE_CHOWING)) {
+                        game.seats[i].fsmPlayerState = m_mahjong.MJ_PLAYER_STATE_THINKING_ON_KONGING;
+                    }
                 }
             }
             break;
@@ -851,7 +869,9 @@ exports.on_client_req_action_pass = function (a_userId) {
                             }
                         }
 
-                        if (game.seats[idxSeat].seatIndex != game.turn) { // Stealing meld
+                        if (game.seats[idxSeat].seatIndex == game.turn) {
+                            meld.type = "meld_concealed_kong";
+                        } else { // Stealing meld
                             // Steal tile from turn player, and move to meld
                             var stealingTile = game.seats[game.turn].discardedTiles.pop();
                             if (lyingTileNum == 2) {
@@ -863,13 +883,9 @@ exports.on_client_req_action_pass = function (a_userId) {
                             } else {
                                 meld.type = "meld_exposed_kong";
                             }
-
                             meld.tiles.push(stealingTile);
-                        } else {
-                            meld.type = "meld_concealed_kong";
                         }
 
-                        // Push meld
                         game.seats[idxSeat].melds.push(meld);
                     } else {
                         var pongMeld = null;
@@ -883,7 +899,7 @@ exports.on_client_req_action_pass = function (a_userId) {
                             }
                         }
                         if (pongMeld == null) {
-                            pongMeld = game.seats[idxSeat].melds[0];
+                            pongMeld = game.seats[idxSeat].melds[0]; // TOFIX, may be already a Kong meld!!
                         }
                         // Move lying tiles from hand tiles to meld
                         for (var idxTile = game.seats[idxSeat].handTiles.length - 1; idxTile >= 0; idxTile--) {

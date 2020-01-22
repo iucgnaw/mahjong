@@ -55,6 +55,7 @@ cc.Class({
                 // Store default attributes
                 nodeTile.xDefault = nodeTile.x;
                 nodeTile.yDefault = nodeTile.y;
+                nodeTile.opacityDefault = nodeTile.opacity;
                 var sprite = nodeTile.getComponent(cc.Sprite);
                 sprite.spriteFrameDefault = sprite.spriteFrame;
                 // Hide tile
@@ -217,6 +218,7 @@ cc.Class({
                 // Restore default attributes
                 nodeTile.x = nodeTile.xDefault;
                 nodeTile.y = nodeTile.yDefault;
+                nodeTile.opacity = nodeTile.opacityDefault;
                 var sprite = nodeTile.getComponent(cc.Sprite);
                 sprite.spriteFrame = sprite.spriteFrameDefault;
                 nodeTile.active = false;
@@ -269,14 +271,31 @@ cc.Class({
                 console.assert(a_seat.melds[idxMeld].tiles.length <= 4);
 
                 var nodeMeld = nodeMelds.getChildByName("nodeMeld" + idxMeld);
-                nodeMeld.active = true;
-
                 for (var idxTile = 0; idxTile < a_seat.melds[idxMeld].tiles.length; idxTile++) {
                     var nodeTile = nodeMeld.getChildByName("nodeTile" + idxTile);
                     var sprite = nodeTile.getComponent(cc.Sprite);
-                    sprite.spriteFrame = cc.vv.mahjongmgr.getSpriteFrameByTilePose(a_seat.melds[idxMeld].tiles[idxTile], localIndex, nodeTile._rotationDegree);
+
+                    if (localIndex == 0) {
+                        sprite.spriteFrame = cc.vv.mahjongmgr.getSpriteFrameByTilePose(a_seat.melds[idxMeld].tiles[idxTile], localIndex, nodeTile._rotationDegree);
+                        if (a_seat.melds[idxMeld].type == "meld_concealed_kong") {
+                            nodeTile.opacity = 128;
+                        }
+                    } else {
+                        if (a_seat.melds[idxMeld].type == "meld_concealed_kong") {
+                            if (cc.vv.gameNetMgr.fsmTableState == m_mahjong.MJ_TABLE_STATE_SCORING) {
+                                sprite.spriteFrame = cc.vv.mahjongmgr.getSpriteFrameByTilePose(a_seat.melds[idxMeld].tiles[idxTile], localIndex, nodeTile._rotationDegree);
+                                nodeTile.opacity = 128;
+                            } else {
+                                sprite.spriteFrame = cc.vv.mahjongmgr.getSpriteFrameTileBackLying(localIndex, nodeTile._rotationDegree);
+                            }
+                        } else {
+                            sprite.spriteFrame = cc.vv.mahjongmgr.getSpriteFrameByTilePose(a_seat.melds[idxMeld].tiles[idxTile], localIndex, nodeTile._rotationDegree);
+                        }
+                    }
+
                     nodeTile.active = true;
                 }
+                nodeMeld.active = true;
             }
 
             // Hide tiles positions that overlay with melds
