@@ -8,13 +8,22 @@ var ROOM_PRI_KEY = "~!@#$(*&^%$&";
 var LOCAL_IP = "localhost";
 
 exports.mysql = function () {
-	return {
+	var configDb = {
 		HOST: "127.0.0.1",
 		USER: "root",
 		PSWD: "Qwer!234",
 		DB: "mahjong",
 		PORT: 3306,
+	};
+
+	// Choosed dev or prod DB based on file location
+	// https://stackoverflow.com/questions/3133243/how-do-i-get-the-path-to-the-current-script-with-node-js
+	var filename = __filename;
+	if (filename.includes("GitHub")) {
+		configDb.DB = "mahjong_dev";
 	}
+
+	return configDb;
 }
 
 //账号服配置
