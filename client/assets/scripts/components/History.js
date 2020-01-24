@@ -41,7 +41,7 @@ cc.Class({
         var node = cc.find("Canvas/btn_zhanji");
         this.addClickEvent(node, this.node, "History", "onBtnHistoryClicked");
 
-        var node = cc.find("Canvas/history/btn_back");
+        var node = cc.find("Canvas/history/nodeButtonBack");
         this.addClickEvent(node, this.node, "History", "onBtnBackClicked");
     },
 

@@ -453,7 +453,7 @@
   },
   {
     "__type__": "cc.Node",
-    "_name": "btn_ok",
+    "_name": "nodeButtonOk",
     "_objFlags": 0,
     "_opacity": 255,
     "_color": {

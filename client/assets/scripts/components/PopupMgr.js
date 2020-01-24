@@ -39,7 +39,7 @@ cc.Class({
         this.addBtnHandler("settings/btn_sqjsfj");
         this.addBtnHandler("dissolve_notice/btn_agree");
         this.addBtnHandler("dissolve_notice/btn_reject");
-        this.addBtnHandler("dissolve_notice/btn_ok");
+        this.addBtnHandler("dissolve_notice/nodeButtonOk");
 
         var self = this;
         this.node.on("event_propose_dismiss_room", function (data) {

@@ -81,7 +81,7 @@ exports.createRoom = function (a_creator, a_roomConf, a_gems, a_ip, a_port, a_ca
 						seats: [],
 						conf: {
 							creator: a_creator,
-							playerNum: 3,
+							playerNum: a_roomConf.playerNum,
 						}
 					};
 

@@ -35155,7 +35155,7 @@
   },
   {
     "__type__": "cc.Node",
-    "_name": "btn_back",
+    "_name": "nodeButtonBack",
     "_objFlags": 0,
     "_parent": {
       "__id__": 744
@@ -39944,7 +39944,7 @@
   },
   {
     "__type__": "cc.Node",
-    "_name": "btn_ok",
+    "_name": "nodeButtonOk",
     "_objFlags": 0,
     "_parent": {
       "__id__": 863
@@ -62393,7 +62393,7 @@
   },
   {
     "__type__": "cc.Node",
-    "_name": "btn_ok",
+    "_name": "nodeButtonOk",
     "_objFlags": 0,
     "_parent": {
       "__id__": 1371

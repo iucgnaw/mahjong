@@ -31,7 +31,7 @@ cc.Class({
         this._title = cc.find("Canvas/alert/title").getComponent(cc.Label);
         this._content = cc.find("Canvas/alert/content").getComponent(cc.Label);
 
-        this._btnOK = cc.find("Canvas/alert/btn_ok");
+        this._btnOK = cc.find("Canvas/alert/nodeButtonOk");
         this._btnCancel = cc.find("Canvas/alert/btn_cancel");
 
         cc.vv.utils.addClickEvent(this._btnOK, this.node, "Alert", "onBtnClicked");
@@ -42,7 +42,7 @@ cc.Class({
     },
 
     onBtnClicked: function (event) {
-        if (event.target.name == "btn_ok") {
+        if (event.target.name == "nodeButtonOk") {
             if (this._onok) {
                 this._onok();
             }

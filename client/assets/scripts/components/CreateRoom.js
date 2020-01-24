@@ -19,6 +19,7 @@ cc.Class({
     // use this for initialization
     onLoad: function () {
         this._gamelist = this.node.getChildByName("game_list");
+        this._currentGame = this._gamelist.getChildByName("xlch");;
     },
 
     onBtnBack: function () {
@@ -30,21 +31,21 @@ cc.Class({
         this.createRoom();
     },
 
-    getSelectedOfRadioGroup(groupRoot) {
-        // console.log(groupRoot);
-        var t = this._currentGame.getChildByName(groupRoot);
+    getSelectedOfRadioGroup(a_nodeRadioGroupName) {
+        var nodeRadioGroup = this._currentGame.getChildByName(a_nodeRadioGroupName);
 
-        var arr = [];
-        for (var i = 0; i < t.childrenCount; ++i) {
-            var n = t.children[i].getComponent("RadioButton");
-            if (n != null) {
-                arr.push(n);
+        var nodeRadioButtonArray = [];
+        for (var idxChild = 0; idxChild < nodeRadioGroup.childrenCount; ++idxChild) {
+            var nodeRadioButton = nodeRadioGroup.children[idxChild].getComponent("RadioButton");
+            if (nodeRadioButton != null) {
+                nodeRadioButtonArray.push(nodeRadioButton);
             }
         }
+
         var selected = 0;
-        for (var i = 0; i < arr.length; ++i) {
-            if (arr[i].checked) {
-                selected = i;
+        for (var idxChild = 0; idxChild < nodeRadioButtonArray.length; ++idxChild) {
+            if (nodeRadioButtonArray[idxChild].checked) {
+                selected = idxChild;
                 break;
             }
         }
@@ -83,28 +84,35 @@ cc.Class({
     constructRoomConf: function () {
         var wanfaxuanze = this._currentGame.getChildByName("wanfaxuanze"); //玩法
         var jushuxuanze = this.getSelectedOfRadioGroup("xuanzejushu"); //局数
-
         var roomConf = {
             jushuxuanze: jushuxuanze,
         };
+
+        var playerNumSelection = this.getSelectedOfRadioGroup("nodeRadioGroupPlayerNum");
+        if (playerNumSelection == 0) {
+            roomConf.playerNum = 4;
+        } else {
+            roomConf.playerNum = 3;
+        }
+
         return roomConf;
     },
 
 
     // called every frame, uncomment this function to activate update callback
     update: function (dt) {
-        var type = "xlch";
-        if (this.lastType != type) {
-            this.lastType = type;
-            for (var i = 0; i < this._gamelist.childrenCount; ++i) {
-                this._gamelist.children[i].active = false;
-            }
+        // var type = "xlch";
+        // if (this.lastType != type) {
+        //     this.lastType = type;
+        //     for (var i = 0; i < this._gamelist.childrenCount; ++i) {
+        //         this._gamelist.children[i].active = false;
+        //     }
 
-            var game = this._gamelist.getChildByName(type);
-            if (game) {
-                game.active = true;
-            }
-            this._currentGame = game;
-        }
+        //     var game = this._gamelist.getChildByName(type);
+        //     if (game) {
+        //         game.active = true;
+        //     }
+        //     this._currentGame = game;
+        // }
     },
 });

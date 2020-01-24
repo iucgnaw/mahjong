@@ -16,12 +16,12 @@ cc.Class({
 
     // use this for initialization
     onLoad: function () {
-        var btn = this.node.getChildByName("btn_back");
+        var btn = this.node.getChildByName("nodeButtonBack");
         cc.vv.utils.addClickEvent(btn, this.node, "OnBack", "onBtnClicked");
     },
 
     onBtnClicked: function (event) {
-        if (event.target.name == "btn_back") {
+        if (event.target.name == "nodeButtonBack") {
             this.node.active = false;
         }
     }
