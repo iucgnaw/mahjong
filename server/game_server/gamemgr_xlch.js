@@ -166,7 +166,7 @@ function doGameOver(a_game, a_userId, a_forceEnd) {
         return;
     }
 
-    var results = [1, 1, 1, 1];
+    var results = [1, 1, 1, 1]; // TOFIX, [].length is wrong!!!
     var dbResult = [0, 0, 0, 0];
 
     var fnNotifyResult = function (a_isEnd) {
@@ -977,13 +977,13 @@ exports.hasBegan = function (a_roomId) {
 var g_dismissList = [];
 
 exports.doDissolve = function (a_roomId) {
-    var roomInfo = m_roomMgr.getRoomById(a_roomId);
-    if (roomInfo == null) {
+    var room = m_roomMgr.getRoomById(a_roomId);
+    if (room == null) {
         return null;
     }
 
     var game = g_games[a_roomId];
-    doGameOver(game, roomInfo.seats[0].userId, true);
+    doGameOver(game, room.seats[0].userId, true);
 };
 
 exports.dissolveRequest = function (a_roomId, a_userId) {
@@ -1002,8 +1002,11 @@ exports.dissolveRequest = function (a_roomId, a_userId) {
     room.dismissRequest = {
         // endTime: Date.now() + 30000,
         endTime: Date.now() + 10000, // TOFIX: Temporarily change the time
-        states: [false, false, false, false]
+        states: []
     };
+    for (var idxSeat = 0; idxSeat < room.seats.length; idxSeat++) {
+        room.dismissRequest.states.push(false);
+    }
     room.dismissRequest.states[seatIndex] = true;
 
     g_dismissList.push(a_roomId);

@@ -107,10 +107,10 @@ cc.Class({
     showDissolveNotice: function (a_data) {
         this._endTime = Date.now() / 1000 + a_data.time;
         this._extraInfo = "";
-        for (var i = 0; i < a_data.states.length; ++i) {
-            var b = a_data.states[i];
-            var name = cc.vv.gameNetMgr.seats[i].name;
-            if (b) {
+        for (var idxSeat = 0; idxSeat < a_data.states.length; ++idxSeat) {
+            var agreed = a_data.states[idxSeat];
+            var name = cc.vv.gameNetMgr.seats[idxSeat].name;
+            if (agreed) {
                 this._extraInfo += "\n[已同意] " + name;
             } else {
                 this._extraInfo += "\n[待确认] " + name;
