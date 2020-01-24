@@ -229,9 +229,10 @@ cc.Class({
                 var nodeTile = nodeDiscardedTiles.getChildByName("nodeTile" + idxTile);
                 nodeTile.active = false;
             }
-        }
 
-        var nodeTableState = nodeTable.getChildByName("nodeTableState");
+            var nodeSeat = nodeSide.getChildByName("nodeSeat");
+            nodeSeat.active = false;
+        }
 
         for (var idxSeat in cc.vv.gameNetMgr.seats) {
             this.refreshSeat(cc.vv.gameNetMgr.seats[idxSeat]);

@@ -4,7 +4,7 @@ Navicat MySQL Data Transfer
 Source Server         : localhost
 Source Server Version : 50624
 Source Host           : localhost:3306
-Source Database       : db_babykylin
+Source Database       : mahjong, or mahjong_dev
 
 Target Server Type    : MYSQL
 Target Server Version : 50624
@@ -108,22 +108,22 @@ CREATE TABLE `t_rooms` (
   `create_time` int(11) NOT NULL,
   `num_of_turns` int(11) NOT NULL DEFAULT '0',
   `next_dealer` int(11) NOT NULL DEFAULT '0',
-  `user_id0` int(11) NOT NULL DEFAULT '0',
-  `user_icon0` varchar(128) NOT NULL DEFAULT '',
-  `user_name0` varchar(32) NOT NULL DEFAULT '',
-  `user_score0` int(11) NOT NULL DEFAULT '0',
-  `user_id1` int(11) NOT NULL DEFAULT '0',
-  `user_icon1` varchar(128) NOT NULL DEFAULT '',
-  `user_name1` varchar(32) NOT NULL DEFAULT '',
-  `user_score1` int(11) NOT NULL DEFAULT '0',
-  `user_id2` int(11) NOT NULL DEFAULT '0',
-  `user_icon2` varchar(128) NOT NULL DEFAULT '',
-  `user_name2` varchar(32) NOT NULL DEFAULT '',
-  `user_score2` int(11) NOT NULL DEFAULT '0',
-  `user_id3` int(11) NOT NULL DEFAULT '0',
-  `user_icon3` varchar(128) NOT NULL DEFAULT '',
-  `user_name3` varchar(32) NOT NULL DEFAULT '',
-  `user_score3` int(11) NOT NULL DEFAULT '0',
+  `user_id_0` int(11) NOT NULL DEFAULT '0',
+  `user_icon_0` varchar(128) NOT NULL DEFAULT '',
+  `user_name_0` varchar(32) NOT NULL DEFAULT '',
+  `user_score_0` int(11) NOT NULL DEFAULT '0',
+  `user_id_1` int(11) NOT NULL DEFAULT '0',
+  `user_icon_1` varchar(128) NOT NULL DEFAULT '',
+  `user_name_1` varchar(32) NOT NULL DEFAULT '',
+  `user_score_1` int(11) NOT NULL DEFAULT '0',
+  `user_id_2` int(11) NOT NULL DEFAULT '0',
+  `user_icon_2` varchar(128) NOT NULL DEFAULT '',
+  `user_name_2` varchar(32) NOT NULL DEFAULT '',
+  `user_score_2` int(11) NOT NULL DEFAULT '0',
+  `user_id_3` int(11) NOT NULL DEFAULT '0',
+  `user_icon_3` varchar(128) NOT NULL DEFAULT '',
+  `user_name_3` varchar(32) NOT NULL DEFAULT '',
+  `user_score_3` int(11) NOT NULL DEFAULT '0',
   `ip` varchar(16) DEFAULT NULL,
   `port` int(11) DEFAULT '0',
   PRIMARY KEY (`uuid`),
@@ -134,7 +134,7 @@ CREATE TABLE `t_rooms` (
 -- ----------------------------
 -- Records of t_rooms
 -- ----------------------------
-INSERT INTO `t_rooms` VALUES ('1490875578938526035', '526035', '{\"creator\":9}', '1490875579', '0', '0', '9', '', '5aSP5L6v6LWM5L6g', '0', '10', '', '55qH55Sr56iz6LWi', '0', '11', '', '5Lic5pa56ZuA5Zyj', '0', '12', '', '5qyn6Ziz6Ieq5pG4', '0', '127.0.0.1', '10000');
+-- INSERT INTO `t_rooms` VALUES ('1490875578938526035', '526035', '{\"creator\":9}', '1490875579', '0', '0', '9', '', '5aSP5L6v6LWM5L6g', '0', '10', '', '55qH55Sr56iz6LWi', '0', '11', '', '5Lic5pa56ZuA5Zyj', '0', '12', '', '5qyn6Ziz6Ieq5pG4', '0', '127.0.0.1', '10000');
 
 -- ----------------------------
 -- Table structure for `t_users`
@@ -159,7 +159,4 @@ CREATE TABLE `t_users` (
 -- ----------------------------
 -- Records of t_users
 -- ----------------------------
-INSERT INTO `t_users` VALUES ('9', 'guest_123456', '5aSP5L6v6LWM5L6g', '0', null, '1', '0', '1000', '1021', '526035', '');
-INSERT INTO `t_users` VALUES ('10', 'guest_asdf1', '55qH55Sr56iz6LWi', '0', null, '1', '0', '1000', '1021', '526035', '');
-INSERT INTO `t_users` VALUES ('11', 'guest_asdf2', '5Lic5pa56ZuA5Zyj', '0', null, '1', '0', '1000', '1021', '526035', '');
-INSERT INTO `t_users` VALUES ('12', 'guest_asdf3', '5qyn6Ziz6Ieq5pG4', '0', null, '1', '0', '1000', '1021', '526035', '');
+-- INSERT INTO `t_users` VALUES ('9', 'guest_123456', '5aSP5L6v6LWM5L6g', '0', null, '1', '0', '1000', '1021', '526035', '');

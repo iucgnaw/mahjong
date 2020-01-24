@@ -8,14 +8,6 @@ var m_crypto = require("../utils/crypto");
 var g_games = {};
 var g_seatByUserId = {};
 
-var MJ_ACTION_DISCARD_TILE = 1;
-var MJ_ACTION_DRAW_TILE = 2;
-var MJ_ACTION_PONG = 3;
-var MJ_ACTION_KONG = 4;
-var MJ_ACTION_WIN = 5;
-var MJ_ACTION_WIN_SELFDRAW = 6;
-var MJ_ACTION_CHOW = 7;
-
 function copyGameForClient(a_gameForClient, a_game, a_userId) {
     a_gameForClient.tilewallRemaining = a_game.tilewall.length;
     a_gameForClient.dealer = a_game.dealer;
@@ -80,25 +72,28 @@ function backdrawTile(a_game, a_seatIndex) {
 }
 
 function dealTiles(a_game) {
-    // TODO Should each seat draw 4 tiles for 3 rounds, then draw 1 tile each
     var seatIndex = a_game.dealer;
-    for (var idxRound = 0; idxRound < 12; ++idxRound) {
+
+    for (var idxRound = 0; idxRound < (a_game.seats.length * 3); ++idxRound) {
         drawTile(a_game, seatIndex);
         drawTile(a_game, seatIndex);
         drawTile(a_game, seatIndex);
         drawTile(a_game, seatIndex);
 
+        // Move to next player
         seatIndex++;
-        seatIndex %= 4;
+        seatIndex %= a_game.seats.length;
     }
-    for (var idxRound = 0; idxRound < 4; ++idxRound) {
+    // Each player draw 1 more tile (to get 13rd tile)
+    for (var idxRound = 0; idxRound < a_game.seats.length; ++idxRound) {
         drawTile(a_game, seatIndex);
 
+        // Move to next player
         seatIndex++;
-        seatIndex %= 4;
+        seatIndex %= a_game.seats.length;
     }
-    drawTile(a_game, a_game.dealer); // Draw last tile for dealer
-
+    // Dealer draw 1 more tile (to get 14th tile)
+    drawTile(a_game, a_game.dealer);
     a_game.turn = a_game.dealer;
 
     var jokerTile;
@@ -117,20 +112,10 @@ function dealTiles(a_game) {
     }
 }
 
-function getNextSeatIndex(a_seatIndex) {
+function getNextSeatIndex(a_seatIndex, a_playerNum) {
     var nextSeatIndex = a_seatIndex + 1;
-    nextSeatIndex %= 4;
+    nextSeatIndex %= a_playerNum;
     return nextSeatIndex;
-}
-
-function changeTurn(a_game, a_seatIndex) {
-    if (a_seatIndex == null) { // Don't get this argument, change turn to next seat
-        a_game.turn++;
-        a_game.turn %= 4;
-        return;
-    } else { // Change turn to specified seat
-        a_game.turn = a_seatIndex;
-    }
 }
 
 function doDrawTile(a_game) {
@@ -220,7 +205,7 @@ function doGameOver(a_game, a_userId, a_forceEnd) {
             }
         }
         if (winnerSeatIndex != a_game.dealer) { // winner is not dealer, change dealer
-            room.nextDealer = (a_game.dealer + 1) % 4;
+            room.nextDealer = (a_game.dealer + 1) % a_game.seats.length;
         }
         m_db.update_next_dealer(roomId, room.nextDealer);
 
@@ -292,7 +277,7 @@ exports.setReady = function (a_userId, a_callback) {
 
     var game = g_games[roomId];
     if (game == null) { // Non-exist game
-        if (room.seats.length == 4) {
+        if (room.seats.length == room.conf.playerNum) {
             for (var idxSeat = 0; idxSeat < room.seats.length; ++idxSeat) {
                 var gameSeat = room.seats[idxSeat];
                 if (gameSeat.ready == false ||
@@ -323,25 +308,25 @@ function store_single_history(a_userId, a_history) {
     });
 }
 
-function store_history(a_roomInfo) {
-    var seats = a_roomInfo.seats;
+function store_history(a_room) {
+    var seats = a_room.seats;
     var history = {
-        uuid: a_roomInfo.uuid,
-        id: a_roomInfo.id,
-        time: a_roomInfo.createTime,
-        seats: new Array(4)
+        uuid: a_room.uuid,
+        id: a_room.id,
+        time: a_room.createTime,
+        seats: []
     };
 
-    for (var i = 0; i < seats.length; ++i) {
-        var seat = seats[i];
-        var historySeat = history.seats[i] = {};
+    for (var idxSeat = 0; idxSeat < seats.length; ++idxSeat) {
+        var seat = seats[idxSeat];
+        var historySeat = history.seats[idxSeat] = {};
         historySeat.userId = seat.userId;
         historySeat.name = m_crypto.toBase64(seat.name);
         historySeat.score = seat.score;
     }
 
-    for (var i = 0; i < seats.length; ++i) {
-        var seat = seats[i];
+    for (var idxSeat = 0; idxSeat < seats.length; ++idxSeat) {
+        var seat = seats[idxSeat];
         store_single_history(seat.userId, history);
     }
 }
@@ -352,10 +337,10 @@ function construct_game_base_info(a_game) {
         dealer: a_game.dealer,
         index: a_game.gameIndex,
         tilewall: a_game.tilewall,
-        seats: new Array(4)
+        seats: []
     }
-    for (var i = 0; i < baseInfo.seats.length; ++i) {
-        baseInfo.seats[i] = a_game.seats[i].handTiles; // TOFIX, seats != seats[].handTiles
+    for (var idxSeat = 0; idxSeat < a_game.seats.length; ++idxSeat) {
+        baseInfo.seats[idxSeat] = a_game.seats[idxSeat].handTiles; // TOFIX, seats != seats[].handTiles
     }
     a_game.baseInfoJson = JSON.stringify(baseInfo);
 }
@@ -376,9 +361,9 @@ exports.begin = function (a_roomId) {
 
         dealer: room.nextDealer,
 
-        tilewall: [], // TODO: use constant
+        tilewall: [],
 
-        seats: new Array(4), // TODO: use constant
+        seats: [],
 
         turn: 0,
 
@@ -391,7 +376,7 @@ exports.begin = function (a_roomId) {
 
     room.gameIndex++;
 
-    for (var idxSeat = 0; idxSeat < game.seats.length; ++idxSeat) {
+    for (var idxSeat = 0; idxSeat < room.seats.length; ++idxSeat) {
         var seat = game.seats[idxSeat] = {};
 
         seat.game = game;
@@ -609,7 +594,7 @@ exports.on_client_req_action = function (a_userId, a_action) {
                 m_userMgr.sendMsg(a_userId, "server_push_message", "Can't [" + a_action + "] on state: " + seat.fsmPlayerState);
                 return;
             }
-            if (((game.turn + 1) % 4) != seat.seatIndex) {
+            if (((game.turn + 1) % game.seats.length) != seat.seatIndex) {
                 m_userMgr.sendMsg(a_userId, "server_push_message", "只能[" + a_action + "]上家的出牌！");
                 return;
             }
@@ -803,7 +788,7 @@ exports.on_client_req_action_pass = function (a_userId) {
             var nextWaitingSeatIndex = -1;
             var curSeatIndex = seat.seatIndex;
             for (var seatCount = 0; seatCount < game.seats.length - 1; seatCount++) {
-                var seatIndex = getNextSeatIndex(curSeatIndex);
+                var seatIndex = getNextSeatIndex(curSeatIndex, game.seats.length);
                 if (game.seats[seatIndex].fsmPlayerState == m_mahjong.MJ_PLAYER_STATE_INITIAL_WAITING) {
                     nextWaitingSeatIndex = seatIndex;
                     break;
@@ -957,13 +942,14 @@ exports.on_client_req_action_pass = function (a_userId) {
             }
 
             if (nextTurnIndex == -1) { // No stealing of turn
-                nextTurnIndex = getNextSeatIndex(game.turn);
+                nextTurnIndex = getNextSeatIndex(game.turn, game.seats.length);
                 game.seats[nextTurnIndex].fsmPlayerState = m_mahjong.MJ_PLAYER_STATE_GET_TURN;
             }
         }
     }
     if (nextTurnIndex != -1) {
-        changeTurn(game, nextTurnIndex);
+        game.turn = nextTurnIndex;
+        // TOFIX shall remove this message
         m_userMgr.broadcastMsg("server_brc_change_turn", game.seats[game.turn].userId, game.seats[game.turn].userId, true);
     }
 

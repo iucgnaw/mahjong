@@ -52,7 +52,6 @@ cc.Class({
     },
 
     createRoom: function () {
-        var self = this;
         var onCreate = function (ret) {
             if (ret.errcode !== 0) {
                 cc.vv.wc.hide();

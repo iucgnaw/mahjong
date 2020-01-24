@@ -465,8 +465,7 @@ exports.get_room_id_of_user = function (a_userId, a_callback) {
 
 exports.create_room = function (a_roomId, a_roomConfig, a_ip, a_port, a_createTime, a_callback) {
     a_callback = a_callback == null ? nop : a_callback;
-    var sql = "INSERT INTO t_rooms(uuid,id,base_info,ip,port,create_time) \
-                VALUES('{0}','{1}','{2}','{3}',{4},{5})";
+    var sql = "INSERT INTO t_rooms(uuid,id,base_info,ip,port,create_time) VALUES('{0}','{1}','{2}','{3}',{4},{5})";
     var uuid = Date.now() + a_roomId;
     var baseInfo = JSON.stringify(a_roomConfig);
     sql = sql.format(uuid, a_roomId, baseInfo, a_ip, a_port, a_createTime);
@@ -496,7 +495,7 @@ exports.get_room_uuid = function (a_roomId, a_callback) {
 
 exports.update_seat_info = function (a_roomId, a_seatIndex, a_userId, a_icon, a_name, a_callback) {
     a_callback = a_callback == null ? nop : a_callback;
-    var sql = 'UPDATE t_rooms SET user_id{0} = {1},user_icon{0} = "{2}",user_name{0} = "{3}" WHERE id = "{4}"';
+    var sql = 'UPDATE t_rooms SET user_id_{0} = {1},user_icon_{0} = "{2}",user_name_{0} = "{3}" WHERE id = "{4}"';
     a_name = m_crypto.toBase64(a_name);
     sql = sql.format(a_seatIndex, a_userId, a_icon, a_name, a_roomId);
     //console.log(sql);
@@ -576,10 +575,10 @@ exports.get_room_data = function (a_roomId, a_callback) {
             throw a_error;
         }
         if (a_rows.length > 0) {
-            a_rows[0].user_name0 = m_crypto.fromBase64(a_rows[0].user_name0);
-            a_rows[0].user_name1 = m_crypto.fromBase64(a_rows[0].user_name1);
-            a_rows[0].user_name2 = m_crypto.fromBase64(a_rows[0].user_name2);
-            a_rows[0].user_name3 = m_crypto.fromBase64(a_rows[0].user_name3);
+            a_rows[0].user_name_0 = m_crypto.fromBase64(a_rows[0].user_name_0);
+            a_rows[0].user_name_1 = m_crypto.fromBase64(a_rows[0].user_name_1);
+            a_rows[0].user_name_2 = m_crypto.fromBase64(a_rows[0].user_name_2);
+            a_rows[0].user_name_3 = m_crypto.fromBase64(a_rows[0].user_name_3);
             a_callback(a_rows[0]);
         } else {
             a_callback(null);

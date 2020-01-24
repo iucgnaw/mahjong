@@ -170,7 +170,7 @@ exports.shuffleTilewall = function (a_tilewall) {
 	// Place tiles in tilewall by order
 	var tileCount = 0;
 	for (var tile = exports.MJ_TILE_DOT_1; tile <= exports.MJ_TILE_DRAGON_3_WHITE; ++tile) {
-		for (var idxTile = 0; idxTile < 4; ++idxTile) {
+		for (var idxTile = 0; idxTile < 4; ++idxTile) { // 4 pieces tiles each
 			a_tilewall[tileCount] = tile;
 			tileCount++;
 		}

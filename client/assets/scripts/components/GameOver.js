@@ -39,8 +39,8 @@ cc.Class({
 
         var nodeResultList = this._nodeGameOver.getChildByName("nodeResultList");
         nodeResultList.active = false;
-        for (var i = 1; i <= 4; ++i) {
-            var seatXName = "nodeSeat" + i;
+        for (var idxSeat = 1; idxSeat <= nodeResultList.childrenCount; ++idxSeat) {
+            var seatXName = "nodeSeat" + idxSeat;
             var nodeSeatX = nodeResultList.getChildByName(seatXName);
             var seatView = {};
             seatView.username = nodeSeatX.getChildByName("username").getComponent(cc.Label);
@@ -91,9 +91,9 @@ cc.Class({
         // }
 
         //显示玩家信息
-        for (var i = 0; i < 4; ++i) {
-            var seatView = this._seatViewArray[i];
-            var userData = a_data[i];
+        for (var idxSeat = 0; idxSeat < this._seatViewArray.length; ++idxSeat) {
+            var seatView = this._seatViewArray[idxSeat];
+            var userData = a_data[idxSeat];
             var hued = false;
             var actionArr = [];
             var is7pairs = false;

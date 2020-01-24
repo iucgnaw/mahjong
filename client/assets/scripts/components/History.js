@@ -67,18 +67,18 @@ cc.Class({
     onBtnHistoryClicked: function () {
         this._history.active = true;
         var self = this;
-        cc.vv.userMgr.getHistoryList(function (data) {
-            data.sort(function (a, b) {
+        cc.vv.userMgr.getHistoryList(function (a_data) {
+            a_data.sort(function (a, b) {
                 return a.time < b.time;
             });
-            self._historyData = data;
-            for (var i = 0; i < data.length; ++i) {
-                for (var j = 0; j < 4; ++j) {
-                    var s = data[i].seats[j];
-                    s.name = new Buffer(s.name, "base64").toString();
-                }
-            }
-            self.initRoomHistoryList(data);
+            self._historyData = a_data;
+            // for (var idxGame = 0; idxGame < a_data.length; ++idxGame) {
+            //     for (var idxSeat = 0; idxSeat < a_data[idxGame].seats.length; ++idxSeat) {
+            //         var seat = a_data[idxGame].seats[idxSeat];
+            //         seat.name = new Buffer(seat.name, "base64").toString();
+            //     }
+            // }
+            self.initRoomHistoryList(a_data);
         });
     },
 
@@ -100,60 +100,60 @@ cc.Class({
         return datetime;
     },
 
-    initRoomHistoryList: function (data) {
-        for (var i = 0; i < data.length; ++i) {
-            var node = this.getViewItem(i);
-            node.idx = i;
-            var titleId = "" + (i + 1);
+    initRoomHistoryList: function (a_data) {
+        for (var idxGame = 0; idxGame < a_data.length; ++idxGame) {
+            var node = this.getViewItem(idxGame);
+            node.idx = idxGame;
+            var titleId = "" + (idxGame + 1);
             node.getChildByName("title").getComponent(cc.Label).string = titleId;
-            node.getChildByName("roomNo").getComponent(cc.Label).string = "房间ID:" + data[i].id;
-            var datetime = this.dateFormat(data[i].time * 1000);
+            node.getChildByName("roomNo").getComponent(cc.Label).string = "房间ID:" + a_data[idxGame].id;
+            var datetime = this.dateFormat(a_data[idxGame].time * 1000);
             node.getChildByName("time").getComponent(cc.Label).string = datetime;
 
             var btnOp = node.getChildByName("btnOp");
-            btnOp.idx = i;
+            btnOp.idx = idxGame;
             btnOp.getChildByName("Label").getComponent(cc.Label).string = "详情";
 
-            for (var j = 0; j < 4; ++j) {
-                var s = data[i].seats[j];
-                var info = s.name + ":" + s.score;
+            for (var idxSeat = 0; idxSeat < a_data[idxGame].seats.length; ++idxSeat) {
+                var seat = a_data[idxGame].seats[idxSeat];
+                var info = seat.name + ":" + seat.score;
                 //console.log(info);
-                node.getChildByName("info" + j).getComponent(cc.Label).string = info;
+                node.getChildByName("info" + idxSeat).getComponent(cc.Label).string = info;
             }
         }
-        this._emptyTip.active = data.length == 0;
-        this.shrinkContent(data.length);
+        this._emptyTip.active = a_data.length == 0;
+        this.shrinkContent(a_data.length);
         this._curRoomInfo = null;
     },
 
-    initGameHistoryList: function (roomInfo, data) {
-        data.sort(function (a, b) {
+    initGameHistoryList: function (a_room, a_data) {
+        a_data.sort(function (a, b) {
             return a.create_time < b.create_time;
         });
-        for (var i = 0; i < data.length; ++i) {
-            var node = this.getViewItem(i);
-            var idx = data.length - i - 1;
+        for (var idxGame = 0; idxGame < a_data.length; ++idxGame) {
+            var node = this.getViewItem(idxGame);
+            var idx = a_data.length - idxGame - 1;
             node.idx = idx;
             var titleId = "" + (idx + 1);
             node.getChildByName("title").getComponent(cc.Label).string = titleId;
-            node.getChildByName("roomNo").getComponent(cc.Label).string = "房间ID:" + roomInfo.id;
-            var datetime = this.dateFormat(data[i].create_time * 1000);
+            node.getChildByName("roomNo").getComponent(cc.Label).string = "房间ID:" + a_room.id;
+            var datetime = this.dateFormat(a_data[idxGame].create_time * 1000);
             node.getChildByName("time").getComponent(cc.Label).string = datetime;
 
             var btnOp = node.getChildByName("btnOp");
             btnOp.idx = idx;
             btnOp.getChildByName("Label").getComponent(cc.Label).string = "回放";
 
-            var result = JSON.parse(data[i].result);
-            for (var j = 0; j < 4; ++j) {
-                var s = roomInfo.seats[j];
-                var info = s.name + ":" + result[j];
+            var result = JSON.parse(a_data[idxGame].result);
+            for (var idxSeat = 0; idxSeat < a_room.seats.length; ++idxSeat) {
+                var seat = a_room.seats[idxSeat];
+                var info = seat.name + ":" + result[idxSeat];
                 //console.log(info);
-                node.getChildByName("info" + j).getComponent(cc.Label).string = info;
+                node.getChildByName("info" + idxSeat).getComponent(cc.Label).string = info;
             }
         }
-        this.shrinkContent(data.length);
-        this._curRoomInfo = roomInfo;
+        this.shrinkContent(a_data.length);
+        this._curRoomInfo = a_room;
     },
 
     getViewItem: function (index) {

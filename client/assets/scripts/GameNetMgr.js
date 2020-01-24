@@ -10,7 +10,7 @@ cc.Class({
         gameIndex: 0,
         tilewallRemaining: 0,
         seatIndex: -1,
-        seats: null,
+        seats: [], // Should be []?
         turn: -1,
         jokerTile: m_mahjong.MJ_TILE_INVALID,
         dealer: -1,
@@ -83,12 +83,12 @@ cc.Class({
     },
 
     getLocalIndex: function (a_natualIndex) {
-        var localIndex = (a_natualIndex - this.seatIndex + 4) % 4;
+        var localIndex = (a_natualIndex - this.seatIndex + this.seats.length) % this.seats.length;
         return localIndex;
     },
 
     getNatualIndex: function (a_localIndex) {
-        var natualIndex = (a_localIndex + this.seatIndex) % 4;
+        var natualIndex = (a_localIndex + this.seatIndex) % this.seats.length;
         return natualIndex;
     },
 
