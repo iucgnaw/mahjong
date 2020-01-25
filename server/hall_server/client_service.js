@@ -108,52 +108,53 @@ g_app.get("/create_user", function (req, res) {
 	});
 });
 
-g_app.get("/create_private_room", function (req, res) {
+g_app.get("/create_private_room", function (a_request, a_response) {
 	//验证参数合法性
-	var data = req.query;
+	var query = a_request.query;
 	//验证玩家身份
-	if (!check_account(req, res)) {
+	if (!check_account(a_request, a_response)) {
 		return;
 	}
 
-	var account = data.account;
+	var account = query.account;
+	var conf = query.conf;
 
-	data.account = null;
-	data.sign = null;
-	var conf = data.conf;
-	m_db.get_user_data(account, function (data) {
-		if (data == null) {
-			m_http.send(res, 1, "system error");
+	query.account = null;
+	query.sign = null;
+	
+	m_db.get_user_data(account, function (a_data) {
+		if (a_data == null) {
+			m_http.send(a_response, 1, "system error");
 			return;
 		}
-		var userId = data.userId;
-		var name = data.name;
+		var userId = a_data.userId;
+		var name = a_data.name;
 		//验证玩家状态
 		m_db.get_room_id_of_user(userId, function (roomId) {
 			if (roomId != null) {
-				m_http.send(res, -1, "user is playing in room now.");
+				m_http.send(a_response, -1, "user is playing in room now.");
 				return;
 			}
 			//创建房间
-			g_room_service.createRoom(account, userId, conf, function (err, roomId) {
-				if (err == 0 && roomId != null) {
-					g_room_service.enterRoom(userId, name, roomId, function (errcode, enterInfo) {
-						if (enterInfo) {
+			g_room_service.createRoom(account, userId, conf, function (a_err, a_roomId) {
+				if (a_err == 0 && a_roomId != null) {
+					g_room_service.enterRoom(userId, name, a_roomId, function (a_errCode, a_enterInfo) {
+						if (a_enterInfo) {
 							var ret = {
-								roomId: roomId,
-								ip: enterInfo.ip,
-								port: enterInfo.port,
-								token: enterInfo.token,
+								roomId: a_roomId,
+								ip: a_enterInfo.ip,
+								port: a_enterInfo.port,
+								token: a_enterInfo.token,
 								time: Date.now()
 							};
 							ret.sign = m_crypto.md5(ret.roomId + ret.token + ret.time + g_config.ROOM_PRI_KEY);
-							m_http.send(res, 0, "ok", ret);
+							m_http.send(a_response, 0, "ok", ret);
 						} else {
-							m_http.send(res, errcode, "room does not exist.");
+							m_http.send(a_response, a_errCode, "room does not exist.");
 						}
 					});
 				} else {
-					m_http.send(res, err, "create failed.");
+					m_http.send(a_response, a_err, "create failed.");
 				}
 			});
 		});

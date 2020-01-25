@@ -51,7 +51,7 @@ function constructRoomFromDb(a_dbData) {
 }
 
 exports.createRoom = function (a_creator, a_roomConf, a_gems, a_ip, a_port, a_callback) {
-	var cost = g_roomCost[a_roomConf.jushuxuanze];
+	var cost = g_roomCost[a_roomConf.handNumSelection];
 	if (cost > a_gems) {
 		a_callback(2222, null);
 		return;

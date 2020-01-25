@@ -337,17 +337,17 @@ cc.Class({
         this.dispatchEvent("event_server_brc_change_turn", previousAndNewTurn);
     },
 
-    connectGameServer: function (data) {
+    connectGameServer: function (a_data) {
         this.dissoveData = null;
-        cc.vv.net.ip = data.ip + ":" + data.port;
+        cc.vv.net.ip = a_data.ip + ":" + a_data.port;
         var self = this;
 
         var onConnectSucceeded = function () {
             var sd = {
-                token: data.token,
-                roomId: data.roomId,
-                time: data.time,
-                sign: data.sign,
+                token: a_data.token,
+                roomId: a_data.roomId,
+                time: a_data.time,
+                sign: a_data.sign,
             };
             cc.vv.net.send("client_req_login", sd);
         };

@@ -12,15 +12,10 @@ cc.Class({
         // },
         // ...
 
-        _gamelist: null,
-        _currentGame: null,
     },
 
     // use this for initialization
-    onLoad: function () {
-        this._gamelist = this.node.getChildByName("game_list");
-        this._currentGame = this._gamelist.getChildByName("xlch");;
-    },
+    onLoad: function () {},
 
     onBtnBack: function () {
         this.node.active = false;
@@ -31,64 +26,56 @@ cc.Class({
         this.createRoom();
     },
 
-    getSelectedOfRadioGroup(a_nodeRadioGroupName) {
-        var nodeRadioGroup = this._currentGame.getChildByName(a_nodeRadioGroupName);
+    getRadioGroupSelection(a_nodeRadioGroup) {
+        var selection = 0;
 
-        var nodeRadioButtonArray = [];
-        for (var idxChild = 0; idxChild < nodeRadioGroup.childrenCount; ++idxChild) {
-            var nodeRadioButton = nodeRadioGroup.children[idxChild].getComponent("RadioButton");
+        for (var idxChild = 0; idxChild < a_nodeRadioGroup.childrenCount; idxChild++) {
+            var nodeRadioButton = a_nodeRadioGroup.children[idxChild].getComponent("RadioButton");
             if (nodeRadioButton != null) {
-                nodeRadioButtonArray.push(nodeRadioButton);
+                if (nodeRadioButton.checked) {
+                    selection = idxChild;
+                    break;
+                }
             }
         }
 
-        var selected = 0;
-        for (var idxChild = 0; idxChild < nodeRadioButtonArray.length; ++idxChild) {
-            if (nodeRadioButtonArray[idxChild].checked) {
-                selected = idxChild;
-                break;
-            }
-        }
-        return selected;
+        return selection;
     },
 
     createRoom: function () {
-        var onCreate = function (ret) {
-            if (ret.errcode !== 0) {
+        var onCreate = function (a_ret) {
+            if (a_ret.errcode !== 0) {
                 cc.vv.wc.hide();
-                //console.error(ret.errmsg);
-                if (ret.errcode == 2222) {
+                if (a_ret.errcode == 2222) {
                     cc.vv.alert.show("提示", "钻石不足，创建房间失败!");
                 } else {
-                    cc.vv.alert.show("提示", "创建房间失败,错误码:" + ret.errcode);
+                    cc.vv.alert.show("提示", "创建房间失败,错误码:" + a_ret.errcode);
                 }
             } else {
-                cc.vv.gameNetMgr.connectGameServer(ret);
+                cc.vv.gameNetMgr.connectGameServer(a_ret);
             }
         };
 
-        var roomConf = null;
-        roomConf = this.constructRoomConf();
-        roomConf.type = "xlch";
+        var roomConf = this.constructRoomConf();
 
-        var data = {
+        cc.vv.wc.show("正在创建房间");
+
+        var queryAccountSignConf = {
             account: cc.vv.userMgr.account,
             sign: cc.vv.userMgr.sign,
             conf: JSON.stringify(roomConf)
         };
-        // console.log(data);
-        cc.vv.wc.show("正在创建房间");
-        cc.vv.http.sendRequest("/create_private_room", data, onCreate);
+        cc.vv.http.sendRequest("/create_private_room", queryAccountSignConf, onCreate);
     },
 
     constructRoomConf: function () {
-        var wanfaxuanze = this._currentGame.getChildByName("wanfaxuanze"); //玩法
-        var jushuxuanze = this.getSelectedOfRadioGroup("xuanzejushu"); //局数
-        var roomConf = {
-            jushuxuanze: jushuxuanze,
-        };
+        var nodePreference = this.node.getChildByName("nodePreference");
+        var roomConf = {};
 
-        var playerNumSelection = this.getSelectedOfRadioGroup("nodeRadioGroupPlayerNum");
+        var handNumSelection = this.getRadioGroupSelection(nodePreference.getChildByName("nodeRadioGroupHandNum"));
+        roomConf.handNumSelection = handNumSelection;
+
+        var playerNumSelection = this.getRadioGroupSelection(nodePreference.getChildByName("nodeRadioGroupPlayerNum"));
         if (playerNumSelection == 0) {
             roomConf.playerNum = 4;
         } else {
@@ -98,21 +85,6 @@ cc.Class({
         return roomConf;
     },
 
-
     // called every frame, uncomment this function to activate update callback
-    update: function (dt) {
-        // var type = "xlch";
-        // if (this.lastType != type) {
-        //     this.lastType = type;
-        //     for (var i = 0; i < this._gamelist.childrenCount; ++i) {
-        //         this._gamelist.children[i].active = false;
-        //     }
-
-        //     var game = this._gamelist.getChildByName(type);
-        //     if (game) {
-        //         game.active = true;
-        //     }
-        //     this._currentGame = game;
-        // }
-    },
+    update: function (dt) {},
 });
