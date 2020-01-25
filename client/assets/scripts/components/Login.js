@@ -50,7 +50,7 @@ cc.Class({
             cc.director.loadScene("createrole");
         });
 
-        cc.vv.audioMgr.playBgm("bgMain.mp3");
+        cc.vv.audioMgr.playBgm("bgm_default.mp3");
 
         this._mima = ["A", "A", "B", "B", "A", "B", "A", "B", "A", "A", "A", "B", "B", "B"];
 

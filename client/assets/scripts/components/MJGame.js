@@ -26,7 +26,7 @@ cc.Class({
 
         this.on_event_server_push_game_sync();
 
-        cc.vv.audioMgr.playBgm("bgFight.mp3");
+        cc.vv.audioMgr.playBgm("bgm_fight.mp3");
 
         cc.vv.utils.addQuitEvent(this.node);
     },
@@ -114,7 +114,7 @@ cc.Class({
             var seat = a_data.seat;
             var localIndex = cc.vv.gameNetMgr.getLocalIndex(seat.seatIndex);
             self.playActionAnimation(localIndex, "action_discard");
-            cc.vv.audioMgr.playSfx("give.mp3");
+            cc.vv.audioMgr.playSfx("mahjong/effect/effect_discard.mp3");
             cc.vv.audioMgr.playSfx(cc.vv.mahjongmgr.getAudioUrlByTile(a_data.tile));
         });
 
@@ -127,40 +127,52 @@ cc.Class({
 
         this.node.on("event_server_brc_action", function (a_eventData) {
             var actionName = null;
+            var effectName = null;
             switch (a_eventData.action) {
                 case m_mahjong.MJ_ACTION_BACKDRAW:
                     actionName = "action_backdraw";
+                    effectName = "effect_draw";
                     break;
                 case m_mahjong.MJ_ACTION_CHOW:
                     actionName = "action_chow";
+                    effectName = "effect_steal";
                     break;
                 case m_mahjong.MJ_ACTION_DISCARD:
                     actionName = "action_discard";
+                    effectName = "effect_discard";
                     break;
                 case m_mahjong.MJ_ACTION_DRAW:
                     actionName = "action_draw";
+                    effectName = "effect_draw";
                     break;
                 case m_mahjong.MJ_ACTION_KONG:
                     actionName = "action_kong";
+                    effectName = "effect_steal";
                     break;
                 case m_mahjong.MJ_ACTION_PASS:
                     actionName = "action_pass";
+                    effectName = "effect_reject";
                     break;
                 case m_mahjong.MJ_ACTION_PONG:
                     actionName = "action_pong";
+                    effectName = "effect_steal";
                     break;
                 case m_mahjong.MJ_ACTION_REJECT:
                     actionName = "action_reject";
+                    effectName = "effect_reject";
                     break;
                 case m_mahjong.MJ_ACTION_SET_ASIDE:
                     actionName = "action_set_aside";
+                    effectName = "effect_discard";
                     break;
                 case m_mahjong.MJ_ACTION_WIN:
                     actionName = "action_win";
+                    effectName = "effect_win";
                     break;
             }
             self.playActionAnimation(cc.vv.gameNetMgr.getLocalIndex(a_eventData.seatIndex), actionName);
             cc.vv.audioMgr.playSfx("mahjong/action/" + actionName + ".mp3");
+            cc.vv.audioMgr.playSfx("mahjong/effect/" + effectName + ".mp3");
         });
     },
 
@@ -405,6 +417,8 @@ cc.Class({
                     seat.handTiles[idxTile].pose = "standing";
                 }
                 cc.vv.net.send("client_req_sync_handtiles", seat.handTiles);
+
+                cc.vv.audioMgr.playSfx("mahjong/effect/effect_select.mp3");
                 return;
             }
             idxTile++;

@@ -87,7 +87,7 @@ cc.Class({
         this.refreshNotice();
         this.refreshGemsTip();
 
-        cc.vv.audioMgr.playBgm("bgMain.mp3");
+        cc.vv.audioMgr.playBgm("bgm_default.mp3");
 
         cc.vv.utils.addQuitEvent(this.node);
     },

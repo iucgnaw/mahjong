@@ -56,7 +56,7 @@ cc.Class({
         if (this._time > 0) {
             this._time -= dt;
             if (this._alertTime > 0 && this._time < this._alertTime) {
-                cc.vv.audioMgr.playSfx("timeup_alarm.mp3");
+                cc.vv.audioMgr.playSfx("alarm_timeup.mp3");
                 this._alertTime = -1;
             }
             var pre = "";
