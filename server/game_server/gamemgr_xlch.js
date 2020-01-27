@@ -636,8 +636,7 @@ exports.on_client_req_action = function (a_userId, a_action) {
 
                 if (game.seats[i].fsmPlayerState == m_mahjong.MJ_PLAYER_STATE_DISCARDING_TILE) {
                     game.seats[i].fsmPlayerState = m_mahjong.MJ_PLAYER_STATE_BEING_TARGETED;
-                } else if ((game.seats[i].fsmPlayerState == m_mahjong.MJ_PLAYER_STATE_IDLE) ||
-                    (game.seats[i].fsmPlayerState == m_mahjong.MJ_PLAYER_STATE_THINKING_ON_DISCARDING_TILE) ||
+                } else if ((game.seats[i].fsmPlayerState == m_mahjong.MJ_PLAYER_STATE_THINKING_ON_DISCARDING_TILE) ||
                     (game.seats[i].fsmPlayerState == m_mahjong.MJ_PLAYER_STATE_THINKING_ON_CHOWING) ||
                     (game.seats[i].fsmPlayerState == m_mahjong.MJ_PLAYER_STATE_CHOWING)) {
                     game.seats[i].fsmPlayerState = m_mahjong.MJ_PLAYER_STATE_THINKING_ON_PONGING;
@@ -685,8 +684,7 @@ exports.on_client_req_action = function (a_userId, a_action) {
 
                     if (game.seats[i].fsmPlayerState == m_mahjong.MJ_PLAYER_STATE_DISCARDING_TILE) {
                         game.seats[i].fsmPlayerState = m_mahjong.MJ_PLAYER_STATE_BEING_TARGETED;
-                    } else if ((game.seats[i].fsmPlayerState == m_mahjong.MJ_PLAYER_STATE_IDLE) ||
-                        (game.seats[i].fsmPlayerState == m_mahjong.MJ_PLAYER_STATE_THINKING_ON_DISCARDING_TILE) ||
+                    } else if ((game.seats[i].fsmPlayerState == m_mahjong.MJ_PLAYER_STATE_THINKING_ON_DISCARDING_TILE) ||
                         (game.seats[i].fsmPlayerState == m_mahjong.MJ_PLAYER_STATE_THINKING_ON_CHOWING) ||
                         (game.seats[i].fsmPlayerState == m_mahjong.MJ_PLAYER_STATE_CHOWING)) {
                         game.seats[i].fsmPlayerState = m_mahjong.MJ_PLAYER_STATE_THINKING_ON_KONGING;
@@ -742,6 +740,8 @@ exports.on_client_req_action = function (a_userId, a_action) {
     msgData.action = a_action;
     m_userMgr.broadcastMsg("server_brc_action", msgData, seat.userId, true);
 
+    checkAnybodyThinking(a_userId);
+
     // Sync game
     for (var idxSeat = 0; idxSeat < game.seats.length; ++idxSeat) {
         var gameForClient = {};
@@ -750,30 +750,10 @@ exports.on_client_req_action = function (a_userId, a_action) {
     }
 };
 
-exports.on_client_req_action_pass = function (a_userId) {
+function checkAnybodyThinking(a_userId) {
     var seat = g_seatByUserId[a_userId];
     console.assert(seat != null);
     var game = seat.game;
-
-    if ((seat.fsmPlayerState != m_mahjong.MJ_PLAYER_STATE_INITIAL_WAITING) &&
-        (seat.fsmPlayerState != m_mahjong.MJ_PLAYER_STATE_INITIAL_REPLACING) &&
-        (seat.fsmPlayerState != m_mahjong.MJ_PLAYER_STATE_THINKING_ON_DISCARDING_TILE) &&
-        (seat.fsmPlayerState != m_mahjong.MJ_PLAYER_STATE_THINKING_ON_CHOWING) &&
-        (seat.fsmPlayerState != m_mahjong.MJ_PLAYER_STATE_THINKING_ON_PONGING) &&
-        (seat.fsmPlayerState != m_mahjong.MJ_PLAYER_STATE_THINKING_ON_KONGING) &&
-        (seat.fsmPlayerState != m_mahjong.MJ_PLAYER_STATE_THINKING_ON_WINING)) {
-        m_userMgr.sendMsg(a_userId, "server_push_message", "Can't [Pass] on state: " + seat.fsmPlayerState);
-        return;
-    }
-
-    // Sort hand tiles
-    m_mahjong.sortHandTiles(seat.handTiles, game.jokerTile);
-
-    // Tell everyone
-    m_userMgr.broadcastMsg("server_brc_player_pass", {
-        userId: seat.userId
-    }, seat.userId, true);
-    seat.fsmPlayerState = m_mahjong.MJ_PLAYER_STATE_IDLE;
 
     // Determine next turn
     var nextTurnIndex = -1;
@@ -946,6 +926,34 @@ exports.on_client_req_action_pass = function (a_userId) {
         // TOFIX shall remove this message
         m_userMgr.broadcastMsg("server_brc_change_turn", game.seats[game.turn].userId, game.seats[game.turn].userId, true);
     }
+}
+
+exports.on_client_req_action_pass = function (a_userId) {
+    var seat = g_seatByUserId[a_userId];
+    console.assert(seat != null);
+    var game = seat.game;
+
+    if ((seat.fsmPlayerState != m_mahjong.MJ_PLAYER_STATE_INITIAL_WAITING) &&
+        (seat.fsmPlayerState != m_mahjong.MJ_PLAYER_STATE_INITIAL_REPLACING) &&
+        (seat.fsmPlayerState != m_mahjong.MJ_PLAYER_STATE_THINKING_ON_DISCARDING_TILE) &&
+        (seat.fsmPlayerState != m_mahjong.MJ_PLAYER_STATE_THINKING_ON_CHOWING) &&
+        (seat.fsmPlayerState != m_mahjong.MJ_PLAYER_STATE_THINKING_ON_PONGING) &&
+        (seat.fsmPlayerState != m_mahjong.MJ_PLAYER_STATE_THINKING_ON_KONGING) &&
+        (seat.fsmPlayerState != m_mahjong.MJ_PLAYER_STATE_THINKING_ON_WINING)) {
+        m_userMgr.sendMsg(a_userId, "server_push_message", "Can't [Pass] on state: " + seat.fsmPlayerState);
+        return;
+    }
+
+    // Sort hand tiles
+    m_mahjong.sortHandTiles(seat.handTiles, game.jokerTile);
+
+    // Tell everyone
+    m_userMgr.broadcastMsg("server_brc_player_pass", {
+        userId: seat.userId
+    }, seat.userId, true);
+    seat.fsmPlayerState = m_mahjong.MJ_PLAYER_STATE_IDLE;
+
+    checkAnybodyThinking(a_userId);
 
     // Sync game
     for (var idxSeat = 0; idxSeat < game.seats.length; ++idxSeat) {
