@@ -80,19 +80,15 @@ cc.Class({
             return 1.0;
         } else if (action.type == MJ_ACTION_DRAW_TILE) {
             //console.log("MJ_ACTION_DRAW_TILE");
-            cc.vv.gameNetMgr.doChangeTurn(action.si);
             return 0.5;
         } else if (action.type == MJ_ACTION_CHOW) {
             //console.log("MJ_ACTION_PONG");
-            cc.vv.gameNetMgr.doChangeTurn(action.si);
             return 1.0;
         } else if (action.type == MJ_ACTION_PONG) {
             //console.log("MJ_ACTION_PONG");
-            cc.vv.gameNetMgr.doChangeTurn(action.si);
             return 1.0;
         } else if (action.type == MJ_ACTION_KONG) {
             //console.log("MJ_ACTION_KONG");
-            cc.vv.gameNetMgr.doChangeTurn(action.si);
             return 1.0;
         } else if (action.type == MJ_ACTION_WIN) {
             //console.log("MJ_ACTION_WIN");

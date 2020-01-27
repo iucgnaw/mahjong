@@ -239,10 +239,14 @@ cc.Class({
             self.dispatchEvent("event_server_push_message", data);
         });
 
-        cc.vv.net.addHandler("server_brc_change_turn", function (data) {
-            var turnUserID = data;
-            var seatIndex = self.getSeatIndexByUserId(turnUserID);
-            self.doChangeTurn(seatIndex);
+        cc.vv.net.addHandler("server_brc_change_turn", function (a_turnUserId) {
+            var seatIndex = self.getSeatIndexByUserId(a_turnUserId);
+            var previousAndNewTurn = {
+                previousTurn: self.turn,
+                turn: seatIndex,
+            }
+            self.turn = seatIndex;
+            self.dispatchEvent("event_server_brc_change_turn", previousAndNewTurn);
         });
 
         cc.vv.net.addHandler("server_brc_hand_count", function (data) {
@@ -326,15 +330,6 @@ cc.Class({
             seat: seat,
             tile: a_tile
         });
-    },
-
-    doChangeTurn: function (a_seatIndex) {
-        var previousAndNewTurn = {
-            previousTurn: this.turn,
-            turn: a_seatIndex,
-        }
-        this.turn = a_seatIndex;
-        this.dispatchEvent("event_server_brc_change_turn", previousAndNewTurn);
     },
 
     connectGameServer: function (a_data) {

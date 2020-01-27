@@ -241,10 +241,6 @@ function doGameOver(a_game, a_userId, a_forceEnd) {
         // store_game(a_game, function (a_ret) {
         //     m_db.update_game_result(room.uuid, a_game.gameIndex, dbResult);
 
-        //     //记录玩家操作
-        //     var actionListJson = JSON.stringify(a_game.actionList);
-        //     m_db.update_game_action_records(room.uuid, a_game.gameIndex, actionListJson);
-
         //     //保存游戏局数
         //     m_db.update_num_of_turns(roomId, room.gameIndex);
 
@@ -285,7 +281,7 @@ exports.setReady = function (a_userId, a_callback) {
                     return;
                 }
             }
-            //4个人到齐了，并且都准备好了，则开始新的一局
+
             exports.begin(roomId);
         }
     } else { // Exist game
@@ -370,8 +366,6 @@ exports.begin = function (a_roomId) {
         jokerTile: m_mahjong.MJ_TILE_INVALID,
 
         fsmTableState: m_mahjong.MJ_TABLE_STATE_IDLE,
-
-        actionList: [],
     };
 
     room.gameIndex++;

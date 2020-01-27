@@ -41,8 +41,8 @@
     },
     "_scale": {
       "__type__": "cc.Vec3",
-      "x": 0.5140569133280332,
-      "y": 0.5140569133280332,
+      "x": 0.5583333333333333,
+      "y": 0.5583333333333333,
       "z": 1
     },
     "_quat": {
@@ -1342,7 +1342,7 @@
       "__id__": 28
     },
     "_children": [],
-    "_active": true,
+    "_active": false,
     "_level": 0,
     "_components": [
       {
@@ -1431,7 +1431,7 @@
       "__id__": 28
     },
     "_children": [],
-    "_active": true,
+    "_active": false,
     "_level": 0,
     "_components": [
       {
@@ -1520,7 +1520,7 @@
       "__id__": 28
     },
     "_children": [],
-    "_active": true,
+    "_active": false,
     "_level": 0,
     "_components": [
       {
@@ -1609,7 +1609,7 @@
       "__id__": 28
     },
     "_children": [],
-    "_active": true,
+    "_active": false,
     "_level": 0,
     "_components": [
       {
@@ -55983,6 +55983,8 @@
       "__id__": 2
     },
     "_enabled": true,
+    "_secondCountDown": -1,
+    "_secondAlarm": -1,
     "_labelGameCount": null,
     "_animationAll": [],
     "_id": "36oB3HgoJBsaD9IboOzgTj"

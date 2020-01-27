@@ -4,6 +4,8 @@ cc.Class({
     extends: cc.Component,
 
     properties: {
+        _secondCountDown: -1,
+        _secondAlarm: -1,
         _labelGameCount: null,
         _animationAll: [],
     },
@@ -14,7 +16,6 @@ cc.Class({
         cc.vv.utils.fitCanvasWithFrame();
 
         this.addComponent("GameOver");
-        this.addComponent("TimePointer");
         this.addComponent("GameResult");
         this.addComponent("ReplayCtrl");
         this.addComponent("PopupMgr");
@@ -41,6 +42,8 @@ cc.Class({
         this._labelGameCount = nodeTable.getChildByName("nodeGameCount").getComponent(cc.Label);
         // this._labelGameCount.string = "" + cc.vv.gameNetMgr.gameIndex + "/" + cc.vv.gameNetMgr.maxHandCount + "局";
         this._labelGameCount.string = "" + cc.vv.gameNetMgr.gameIndex + "局";
+
+        nodeTable.getChildByName("nodeIndicator").getChildByName("nodeCountdown").getComponent(cc.Label).string = "0";
 
         var nodeJokerTile = nodeTable.getChildByName("nodeJokerTile");
         nodeJokerTile.active = false;
@@ -108,6 +111,12 @@ cc.Class({
         this.node.on("event_server_brc_hand_count", function (a_data) {
             // self._labelGameCount.string = "" + cc.vv.gameNetMgr.gameIndex + "/" + cc.vv.gameNetMgr.maxHandCount + "局";
             self._labelGameCount.string = "" + cc.vv.gameNetMgr.gameIndex + "局";
+        });
+
+        this.node.on("event_server_brc_change_turn", function (data) {
+            self.refreshPointer();
+            self._secondCountDown = 10;
+            self._secondAlarm = 3;
         });
 
         this.node.on("event_server_brc_action_discard", function (a_data) {
@@ -246,8 +255,20 @@ cc.Class({
             nodeSeat.active = false;
         }
 
+        this.refreshPointer();
+
         for (var idxSeat in cc.vv.gameNetMgr.seats) {
             this.refreshSeat(cc.vv.gameNetMgr.seats[idxSeat]);
+        }
+    },
+
+    refreshPointer: function () {
+        var nodeTable = this.node.getChildByName("nodeTable");
+        var nodeIndicator = nodeTable.getChildByName("nodeIndicator");
+        var nodePointer = nodeIndicator.getChildByName("nodePointer");
+        var turnLocalIndex = cc.vv.gameNetMgr.getLocalIndex(cc.vv.gameNetMgr.turn);
+        for (var idxPointer = 0; idxPointer < nodePointer.childrenCount; ++idxPointer) {
+            nodePointer.children[idxPointer].active = (idxPointer == turnLocalIndex);
         }
     },
 
@@ -526,7 +547,26 @@ cc.Class({
     },
 
     // called every frame, uncomment this function to activate update callback
-    update: function (dt) {},
+    update: function (a_deltaSecond) {
+        var nodeIndicator = this.node.getChildByName("nodeTable").getChildByName("nodeIndicator");
+
+        if (this._secondCountDown > 0) {
+            this._secondCountDown -= a_deltaSecond;
+
+            if ((this._secondAlarm > 0) &&
+                (this._secondCountDown < this._secondAlarm)) {
+                cc.vv.audioMgr.playSfx("alarm_timeup.mp3");
+                this._secondAlarm = -1;
+            }
+
+            if (this._secondCountDown < 0) {
+                this._secondCountDown = 0;
+            }
+
+            var secondCountDownCeiled = Math.ceil(this._secondCountDown);
+            nodeIndicator.getChildByName("nodeCountdown").getComponent(cc.Label).string = secondCountDownCeiled;
+        }
+    },
 
     onDestroy: function () {
         if (cc.vv) {
