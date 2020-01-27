@@ -740,7 +740,15 @@ exports.on_client_req_action = function (a_userId, a_action) {
     msgData.action = a_action;
     m_userMgr.broadcastMsg("server_brc_action", msgData, seat.userId, true);
 
-    checkAnybodyThinking(a_userId);
+    switch (a_action) {
+        case m_mahjong.MJ_ACTION_CHOW:
+        case m_mahjong.MJ_ACTION_PONG:
+        case m_mahjong.MJ_ACTION_KONG:
+        case m_mahjong.MJ_ACTION_WIN:
+        case m_mahjong.MJ_ACTION_PASS:
+            determineNextTurn(a_userId);
+            break;
+    }
 
     // Sync game
     for (var idxSeat = 0; idxSeat < game.seats.length; ++idxSeat) {
@@ -750,7 +758,20 @@ exports.on_client_req_action = function (a_userId, a_action) {
     }
 };
 
-function checkAnybodyThinking(a_userId) {
+function isAnyPlayerThinking(a_game) {
+    for (var idxSeat = 0; idxSeat < a_game.seats.length; ++idxSeat) {
+        if ((a_game.seats[idxSeat].fsmPlayerState == m_mahjong.MJ_PLAYER_STATE_THINKING_ON_DISCARDING_TILE) ||
+            (a_game.seats[idxSeat].fsmPlayerState == m_mahjong.MJ_PLAYER_STATE_THINKING_ON_CHOWING) ||
+            (a_game.seats[idxSeat].fsmPlayerState == m_mahjong.MJ_PLAYER_STATE_THINKING_ON_PONGING) ||
+            (a_game.seats[idxSeat].fsmPlayerState == m_mahjong.MJ_PLAYER_STATE_THINKING_ON_KONGING) ||
+            (a_game.seats[idxSeat].fsmPlayerState == m_mahjong.MJ_PLAYER_STATE_THINKING_ON_WINING)) {
+            return (true);
+        }
+    }
+    return false;
+}
+
+function determineNextTurn(a_userId) {
     var seat = g_seatByUserId[a_userId];
     console.assert(seat != null);
     var game = seat.game;
@@ -758,7 +779,7 @@ function checkAnybodyThinking(a_userId) {
     // Determine next turn
     var nextTurnIndex = -1;
     if (game.fsmTableState == m_mahjong.MJ_TABLE_STATE_REPLACE_HONOR_TILES) {
-        if (seat.seatIndex == game.turn) {
+        if (seat.seatIndex == game.turn) { // Turn player finished replacing honor tiles
             var nextWaitingSeatIndex = -1;
             var curSeatIndex = seat.seatIndex;
             for (var seatCount = 0; seatCount < game.seats.length - 1; seatCount++) {
@@ -775,23 +796,17 @@ function checkAnybodyThinking(a_userId) {
                 game.seats[nextTurnIndex].fsmPlayerState = m_mahjong.MJ_PLAYER_STATE_INITIAL_REPLACING;
             } else {
                 game.fsmTableState = m_mahjong.MJ_TABLE_STATE_PLAYING;
+
                 nextTurnIndex = game.dealer;
                 game.seats[nextTurnIndex].fsmPlayerState = m_mahjong.MJ_PLAYER_STATE_FULL_HAND;
             }
+        } else { // Non-turn player passed, doesn't trigger changing turn
+            // Do nothing
         }
     } else { // !(game.fsmTableState == m_mahjong.MJ_TABLE_STATE_REPLACE_HONOR_TILES)
-        var noPlayerThinking = true;
-        for (var idxSeat = 0; idxSeat < game.seats.length; ++idxSeat) {
-            if ((game.seats[idxSeat].fsmPlayerState == m_mahjong.MJ_PLAYER_STATE_THINKING_ON_DISCARDING_TILE) ||
-                (game.seats[idxSeat].fsmPlayerState == m_mahjong.MJ_PLAYER_STATE_THINKING_ON_CHOWING) ||
-                (game.seats[idxSeat].fsmPlayerState == m_mahjong.MJ_PLAYER_STATE_THINKING_ON_PONGING) ||
-                (game.seats[idxSeat].fsmPlayerState == m_mahjong.MJ_PLAYER_STATE_THINKING_ON_KONGING) ||
-                (game.seats[idxSeat].fsmPlayerState == m_mahjong.MJ_PLAYER_STATE_THINKING_ON_WINING)) {
-                noPlayerThinking = false;
-                break;
-            }
-        }
-        if (noPlayerThinking) {
+        if (isAnyPlayerThinking(game)) {
+            // Do nothing
+        } else { // isAnyPlayerThinking() == false
             for (var idxSeat = 0; idxSeat < game.seats.length; ++idxSeat) {
                 if ((game.seats[idxSeat].fsmPlayerState == m_mahjong.MJ_PLAYER_STATE_DISCARDING_TILE) ||
                     (game.seats[idxSeat].fsmPlayerState == m_mahjong.MJ_PLAYER_STATE_BEING_TARGETED)) {
@@ -949,7 +964,7 @@ exports.on_client_req_action_pass = function (a_userId) {
     }, seat.userId, true);
     seat.fsmPlayerState = m_mahjong.MJ_PLAYER_STATE_IDLE;
 
-    checkAnybodyThinking(a_userId);
+    determineNextTurn(a_userId);
 
     // Sync game
     for (var idxSeat = 0; idxSeat < game.seats.length; ++idxSeat) {
