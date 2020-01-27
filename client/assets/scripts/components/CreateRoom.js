@@ -76,15 +76,24 @@ cc.Class({
         roomConf.handNumSelection = handNumSelection;
 
         var playerNumSelection = this.getRadioGroupSelection(nodePreference.getChildByName("nodeRadioGroupPlayerNum"));
-        if (playerNumSelection == 0) {
-            roomConf.playerNum = 4;
-        } else {
-            roomConf.playerNum = 3;
+        switch (playerNumSelection) {
+            case 0:
+                roomConf.playerNum = 4;
+                break;
+            case 1:
+                roomConf.playerNum = 3;
+                break;
+            case 2:
+                roomConf.playerNum = 2;
+                break;
+            default:
+                console.assert(false);
+                break;
         }
 
         return roomConf;
     },
 
     // called every frame, uncomment this function to activate update callback
-    update: function (dt) {},
+    // update: function (dt) {},
 });

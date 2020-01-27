@@ -577,7 +577,6 @@ exports.on_client_req_action = function (a_userId, a_action) {
                 return;
             }
 
-
             doDrawTile(game);
 
             seat.fsmPlayerState = m_mahjong.MJ_PLAYER_STATE_FULL_HAND;
@@ -887,6 +886,8 @@ function determineNextTurn(a_userId) {
                     } else {
                         game.seats[nextTurnIndex].fsmPlayerState = m_mahjong.MJ_PLAYER_STATE_FULL_HAND;
                     }
+                } else if (game.seats[idxSeat].fsmPlayerState == m_mahjong.MJ_PLAYER_STATE_KONG_BACKDRAWING) {
+                    nextTurnIndex = game.seats[idxSeat].seatIndex;
                 } else if (game.seats[idxSeat].fsmPlayerState == m_mahjong.MJ_PLAYER_STATE_WINING) {
                     if (game.seats[idxSeat].seatIndex != game.turn) { // Stealing win
                         var handTile = {};
@@ -932,7 +933,8 @@ function determineNextTurn(a_userId) {
             }
         }
     }
-    if (nextTurnIndex != -1) {
+    if ((nextTurnIndex != -1) &&
+        (nextTurnIndex != game.turn)) {
         game.turn = nextTurnIndex;
         // TOFIX shall remove this message
         m_userMgr.broadcastMsg("server_brc_change_turn", game.seats[game.turn].userId, game.seats[game.turn].userId, true);
