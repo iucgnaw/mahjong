@@ -285,13 +285,6 @@ cc.Class({
             self.on_server_brc_player_pass(seatIndex);
         });
 
-        cc.vv.net.addHandler("server_brc_nobody_thinking", function (a_data) {
-            var userId = a_data.userId;
-            var tile = a_data.tile;
-            var seatIndex = self.getSeatIndexByUserId(userId);
-            self.on_server_brc_nobody_thinking(seatIndex, tile);
-        });
-
         cc.vv.net.addHandler("server_brc_action", function (a_msgData) {
             var seatIndex = self.getSeatIndexByUserId(a_msgData.userId);
 
@@ -315,12 +308,6 @@ cc.Class({
     on_server_brc_player_pass: function (a_seatIndex) {
         var seat = this.seats[a_seatIndex];
         this.dispatchEvent("event_server_brc_player_pass", seat);
-    },
-
-    // TOFIX: Seems can be deleted.
-    on_server_brc_nobody_thinking: function (seatIndex, tile) {
-        var seat = this.seats[seatIndex];
-        seat.discardedTiles.push(tile);
     },
 
     on_server_brc_action_discard: function (a_seatIndex, a_tile) {

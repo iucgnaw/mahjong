@@ -792,10 +792,6 @@ function checkAnybodyThinking(a_userId) {
             }
         }
         if (noPlayerThinking) {
-            m_userMgr.broadcastMsg("server_brc_nobody_thinking", {
-                userId: game.seats[game.turn].userId,
-            }, game.seats[game.turn].userId, true);
-
             for (var idxSeat = 0; idxSeat < game.seats.length; ++idxSeat) {
                 if ((game.seats[idxSeat].fsmPlayerState == m_mahjong.MJ_PLAYER_STATE_DISCARDING_TILE) ||
                     (game.seats[idxSeat].fsmPlayerState == m_mahjong.MJ_PLAYER_STATE_BEING_TARGETED)) {

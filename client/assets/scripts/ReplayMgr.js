@@ -67,7 +67,6 @@ cc.Class({
         var action = this.getNextAction();
         if (this._lastAction != null && this._lastAction.type == MJ_ACTION_DISCARD_TILE) {
             if (action != null && action.type != MJ_ACTION_PONG && action.type != MJ_ACTION_KONG && action.type != MJ_ACTION_WIN) {
-                cc.vv.gameNetMgr.on_server_brc_nobody_thinking(this._lastAction.si, this._lastAction.tile);
             }
         }
         this._lastAction = action;
