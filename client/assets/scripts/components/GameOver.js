@@ -11,7 +11,7 @@ cc.Class({
         //    readonly: false,    // optional, default is false
         // },
         // ...
-        _isGameEnd: false,
+        _isMatchEnd: false,
     },
 
     // use this for initialization
@@ -26,24 +26,20 @@ cc.Class({
 
         var self = this;
         this.node.on("event_server_brc_hand_end", function (a_data) {
-            self.onGameOver(a_data);
+            if (a_data.length == 0) {
+                self.node.getChildByName("nodeGameResult").active = true;
+                return;
+            }
+            self.node.getChildByName("nodeScoring").active = true;
         });
 
         this.node.on("event_server_brc_match_end", function (a_data) {
-            self._isGameEnd = true;
+            self._isMatchEnd = true;
         });
     },
 
-    onGameOver: function (a_data) {
-        if (a_data.length == 0) {
-            this.node.getChildByName("nodeGameResult").active = true;
-            return;
-        }
-        this.node.getChildByName("nodeScoring").active = true;
-    },
-
     onBtnReadyClicked: function () {
-        if (this._isGameEnd) {
+        if (this._isMatchEnd) {
             this.node.getChildByName("nodeGameResult").active = true;
         } else {
             cc.vv.net.send("client_req_prepared");
