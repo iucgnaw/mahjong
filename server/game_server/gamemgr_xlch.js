@@ -39,28 +39,19 @@ function copyGameForClient(a_gameForClient, a_game, a_userId) {
     }
 }
 
-function drawTile(a_game, a_seatIndex) {
+function drawTile(a_game, a_seatIndex, a_direction) {
     if (a_game.tilewall.length <= 0) { // No more tile in Tiles Wall
         return m_mahjong.MJ_TILE_INVALID;
     }
 
-    var tile = a_game.tilewall.shift();
-    var seat = a_game.seats[a_seatIndex];
-    var handTile = {};
-    handTile.tile = tile;
-    handTile.pose = "standing";
-    handTile.face = "front";
-    seat.handTiles.push(handTile);
-
-    return tile;
-}
-
-function backdrawTile(a_game, a_seatIndex) {
-    if (a_game.tilewall.length <= 0) { // No more tile in Tiles Wall
-        return m_mahjong.MJ_TILE_INVALID;
+    var tile;
+    if (a_direction == "forward") {
+        tile = a_game.tilewall.shift();
+    } else if (a_direction == "backward") {
+        tile = a_game.tilewall.pop();
+    } else {
+        console.assert(false);
     }
-
-    var tile = a_game.tilewall.pop();
     var seat = a_game.seats[a_seatIndex];
     var handTile = {};
     handTile.tile = tile;
@@ -75,10 +66,10 @@ function dealTiles(a_game) {
     var seatIndex = a_game.dealer;
 
     for (var idxRound = 0; idxRound < (a_game.seats.length * 3); ++idxRound) {
-        drawTile(a_game, seatIndex);
-        drawTile(a_game, seatIndex);
-        drawTile(a_game, seatIndex);
-        drawTile(a_game, seatIndex);
+        drawTile(a_game, seatIndex, "forward");
+        drawTile(a_game, seatIndex, "forward");
+        drawTile(a_game, seatIndex, "forward");
+        drawTile(a_game, seatIndex, "forward");
 
         // Move to next player
         seatIndex++;
@@ -86,14 +77,14 @@ function dealTiles(a_game) {
     }
     // Each player draw 1 more tile (to get 13rd tile)
     for (var idxRound = 0; idxRound < a_game.seats.length; ++idxRound) {
-        drawTile(a_game, seatIndex);
+        drawTile(a_game, seatIndex, "forward");
 
         // Move to next player
         seatIndex++;
         seatIndex %= a_game.seats.length;
     }
     // Dealer draw 1 more tile (to get 14th tile)
-    drawTile(a_game, a_game.dealer);
+    drawTile(a_game, a_game.dealer, "forward");
     a_game.turn = a_game.dealer;
 
     var jokerTile;
@@ -118,44 +109,6 @@ function getNextSeatIndex(a_seatIndex, a_playerNum) {
     return nextSeatIndex;
 }
 
-function doDrawTile(a_game) {
-    var seatTurn = a_game.seats[a_game.turn];
-    var tile = drawTile(a_game, a_game.turn);
-    if (tile == -1) {
-        doGameOver(a_game, seatTurn.userId);
-        return;
-    }
-
-    seatTurn.fsmPlayerState = m_mahjong.MJ_PLAYER_STATE_FULL_HAND;
-
-    var game = a_game;
-    // Sync game
-    for (var idxSeat = 0; idxSeat < game.seats.length; ++idxSeat) {
-        var gameForClient = {};
-        copyGameForClient(gameForClient, game, game.seats[idxSeat].userId);
-        m_userMgr.sendMsg(game.seats[idxSeat].userId, "server_push_game_sync", gameForClient);
-    }
-}
-
-function doBackdrawTile(a_game) {
-    var seatTurn = a_game.seats[a_game.turn];
-    var tile = backdrawTile(a_game, a_game.turn);
-    if (tile == -1) {
-        doGameOver(a_game, seatTurn.userId);
-        return;
-    }
-
-    // seatTurn.fsmPlayerState = m_mahjong.MJ_PLAYER_STATE_FULL_HAND;
-
-    var game = a_game;
-    // Sync game
-    for (var idxSeat = 0; idxSeat < game.seats.length; ++idxSeat) {
-        var gameForClient = {};
-        copyGameForClient(gameForClient, game, game.seats[idxSeat].userId);
-        m_userMgr.sendMsg(game.seats[idxSeat].userId, "server_push_game_sync", gameForClient);
-    }
-}
-
 function doGameOver(a_game, a_userId, a_forceEnd) {
     var roomId = m_roomMgr.getRoomIdByUserId(a_userId);
     if (roomId == null) {
@@ -173,8 +126,8 @@ function doGameOver(a_game, a_userId, a_forceEnd) {
         var endInfo = null;
         if (a_isEnd) {
             endInfo = [];
-            for (var i = 0; i < room.seats.length; ++i) {
-                var seat = room.seats[i];
+            for (var idxSeat = 0; idxSeat < room.seats.length; ++idxSeat) {
+                var seat = room.seats[idxSeat];
                 endInfo.push({});
             }
         }
@@ -209,9 +162,9 @@ function doGameOver(a_game, a_userId, a_forceEnd) {
         }
         m_db.update_next_dealer(roomId, room.nextDealer);
 
-        for (var i = 0; i < room.seats.length; ++i) {
-            var roomSeat = room.seats[i];
-            var gameSeat = a_game.seats[i];
+        for (var idxSeat = 0; idxSeat < room.seats.length; ++idxSeat) {
+            var roomSeat = room.seats[idxSeat];
+            var gameSeat = a_game.seats[idxSeat];
 
             roomSeat.ready = false;
             roomSeat.score += gameSeat.score
@@ -227,7 +180,7 @@ function doGameOver(a_game, a_userId, a_forceEnd) {
                 jingouhu: gameSeat.isJinGouHu,
             }
 
-            dbResult[i] = gameSeat.score;
+            dbResult[idxSeat] = gameSeat.score;
             delete g_seatByUserId[gameSeat.userId]; // TODO: ?
         }
         delete g_games[roomId]; // TODO: ?
@@ -556,11 +509,13 @@ exports.on_client_req_action = function (a_userId, a_action) {
                 return;
             }
 
-            // Sort hand tiles
             m_mahjong.sortHandTiles(seat.handTiles, game.jokerTile);
 
-            doBackdrawTile(game);
-
+            var tile = drawTile(game, seat.seatIndex, "backward");
+            if (tile == m_mahjong.MJ_TILE_INVALID) {
+                doGameOver(game, seat.userId);
+            }
+        
             if ((seat.melds.length * 3 + seat.handTiles.length) >= 14) {
                 if ((seat.fsmPlayerState == m_mahjong.MJ_PLAYER_STATE_INITIAL_REPLACING) ||
                     (seat.fsmPlayerState == m_mahjong.MJ_PLAYER_STATE_FULL_HAND)) {
@@ -577,8 +532,11 @@ exports.on_client_req_action = function (a_userId, a_action) {
                 return;
             }
 
-            doDrawTile(game);
-
+            var tile = drawTile(game, seat.seatIndex, "forward");
+            if (tile == m_mahjong.MJ_TILE_INVALID) {
+                doGameOver(game, seat.userId);
+            }
+        
             seat.fsmPlayerState = m_mahjong.MJ_PLAYER_STATE_FULL_HAND;
             break;
 

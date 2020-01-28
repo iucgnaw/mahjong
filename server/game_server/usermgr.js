@@ -30,7 +30,10 @@ exports.getOnlineCount = function () {
 exports.sendMsg = function (a_userId, a_event, a_data) {
     console.log("sendMsg(), a_userId: " + a_userId + ", a_event: " + a_event + ", a_data: " + a_data);
     var socket = g_userSockets[a_userId];
-    console.assert(socket != null);
+    if (socket == null) {
+        console.error("********socket == null");
+        return;
+    }
 
     socket.emit(a_event, a_data);
 };

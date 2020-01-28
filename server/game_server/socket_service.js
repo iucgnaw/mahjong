@@ -168,7 +168,10 @@ exports.start = function (a_config, a_mgr) {
 
 		// Action: Chow, Pong, Kong, Win, Set Aside, Backdraw, Draw
 		a_socket.on("client_req_action", function (a_data) {
-			console.assert(a_socket.userId != null);
+			if (a_socket.userId == null) {
+				console.error("********a_socket.userId == null");
+				return;
+			}
 			console.assert(a_data != null);
 
 			var action = a_data;
