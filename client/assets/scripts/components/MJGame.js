@@ -127,13 +127,6 @@ cc.Class({
             cc.vv.audioMgr.playSfx(cc.vv.mahjongmgr.getAudioUrlByTile(a_data.tile));
         });
 
-        this.node.on("event_server_brc_player_pass", function (a_seat) {
-            var seat = a_seat;
-            var localIndex = cc.vv.gameNetMgr.getLocalIndex(seat.seatIndex);
-            self.playActionAnimation(localIndex, "action_pass");
-            cc.vv.audioMgr.playSfx("mahjong/action/action_pass.mp3");
-        });
-
         this.node.on("event_server_brc_action", function (a_eventData) {
             var actionName = null;
             var effectName = null;
@@ -490,7 +483,7 @@ cc.Class({
                 break;
 
             case "nodeActionPass":
-                cc.vv.net.send("client_req_action_pass");
+                cc.vv.net.send("client_req_action", m_mahjong.MJ_ACTION_PASS);
                 break;
 
             case "nodeActionReject":

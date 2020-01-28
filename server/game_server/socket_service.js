@@ -179,14 +179,6 @@ exports.start = function (a_config, a_mgr) {
 			a_socket.gameMgr.on_client_req_action(a_socket.userId, action);
 		});
 
-		//过
-		a_socket.on("client_req_action_pass", function (a_data) {
-			if (a_socket.userId == null) {
-				return;
-			}
-			a_socket.gameMgr.on_client_req_action_pass(a_socket.userId);
-		});
-
 		//退出房间
 		a_socket.on("client_req_exit_room", function (a_data) {
 			var userId = a_socket.userId;
