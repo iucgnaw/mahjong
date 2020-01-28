@@ -6,8 +6,11 @@ cc.Class({
     properties: {
         _secondCountDown: -1,
         _secondAlarm: -1,
+
         _labelGameCount: null,
         _animationAll: [],
+
+        _isMatchEnd: false,
     },
 
     onLoad: function () {
@@ -15,7 +18,6 @@ cc.Class({
 
         cc.vv.utils.fitCanvasWithFrame();
 
-        this.addComponent("GameOver");
         this.addComponent("GameResult");
         this.addComponent("ReplayCtrl");
         this.addComponent("PopupMgr");
@@ -175,6 +177,18 @@ cc.Class({
             self.playActionAnimation(cc.vv.gameNetMgr.getLocalIndex(a_eventData.seatIndex), actionName);
             cc.vv.audioMgr.playSfx("mahjong/action/" + actionName + ".mp3");
             cc.vv.audioMgr.playSfx("mahjong/effect/" + effectName + ".mp3");
+        });
+
+        this.node.on("event_server_brc_hand_end", function (a_data) {
+            if (a_data.length == 0) {
+                self.node.getChildByName("nodeGameResult").active = true;
+                return;
+            }
+            self.node.getChildByName("nodeScoring").active = true;
+        });
+
+        this.node.on("event_server_brc_match_end", function (a_data) {
+            self._isMatchEnd = true;
         });
     },
 
@@ -537,6 +551,15 @@ cc.Class({
 
     onBtnSettingClicked: function () {
         cc.vv.popupMgr.showSettings();
+    },
+
+    onButtonSubmitClicked: function () {
+        if (this._isMatchEnd) {
+            this.node.getChildByName("nodeGameResult").active = true;
+        } else {
+            cc.vv.net.send("client_req_prepared");
+        }
+        this.node.getChildByName("nodeScoring").active = false;
     },
 
     // called every frame, uncomment this function to activate update callback
