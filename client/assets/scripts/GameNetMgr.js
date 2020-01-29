@@ -4,7 +4,8 @@ cc.Class({
     extends: cc.Component,
 
     properties: {
-        dataEventHandler: null,
+        eventHandlerNode: null,
+
         roomId: null,
         maxHandCount: 0,
         gameIndex: 0,
@@ -16,6 +17,7 @@ cc.Class({
         jokerTile: -1,
 
         seats: [],
+        scoreBoard: [],
 
         isOver: false,
         dissoveData: null,
@@ -45,13 +47,11 @@ cc.Class({
 
             this.seats[idxSeat].fsmPlayerState = m_mahjong.MJ_PLAYER_STATE_IDLE;
             this.seats[idxSeat].score = 0;
-
-            this.seats[idxSeat].ready = false;
         }
     },
 
     clear: function () {
-        this.dataEventHandler = null;
+        this.eventHandlerNode = null;
         if (this.isOver == null) {
             this.seats = null;
             this.roomId = null;
@@ -61,8 +61,8 @@ cc.Class({
     },
 
     dispatchEvent(a_event, a_data) {
-        if (this.dataEventHandler) {
-            this.dataEventHandler.emit(a_event, a_data);
+        if (this.eventHandlerNode) {
+            this.eventHandlerNode.emit(a_event, a_data);
         }
     },
 
@@ -207,31 +207,34 @@ cc.Class({
             self.dispatchEvent("event_update_seat_status", seat);
         });
 
-        cc.vv.net.addHandler("server_brc_player_ready", function (data) {
-            var userId = data.userId;
-            var seat = self.getSeatByID(userId);
-            seat.ready = data.ready;
-            self.dispatchEvent("event_update_seat_status", seat);
-        });
+        // TOFIX: can be deleted?
+        // cc.vv.net.addHandler("server_brc_player_ready", function (data) {
+        //     var userId = data.userId;
+        //     var seat = self.getSeatByID(userId);
+        //     self.dispatchEvent("event_update_seat_status", seat);
+        // });
 
-        cc.vv.net.addHandler("server_push_game_sync", function (a_data) {
-            self.tilewallRemaining = a_data.tilewallRemaining;
-            self.dealer = a_data.dealer;
-            self.turn = a_data.turn;
-            self.jokerTile = a_data.jokerTile;
-            self.fsmTableState = a_data.fsmTableState;
+        cc.vv.net.addHandler("server_push_game_sync", function (a_gameForClient) {
+            self.tilewallRemaining = a_gameForClient.tilewallRemaining;
+            self.dealer = a_gameForClient.dealer;
+            self.turn = a_gameForClient.turn;
+            self.jokerTile = a_gameForClient.jokerTile;
+            self.fsmTableState = a_gameForClient.fsmTableState;
 
-            for (var idxSeat = 0; idxSeat < a_data.seats.length; ++idxSeat) {
-                var dataSeat = a_data.seats[idxSeat];
+            for (var idxSeat = 0; idxSeat < a_gameForClient.seats.length; ++idxSeat) {
+                var gameSeatForClient = a_gameForClient.seats[idxSeat];
 
-                self.seats[idxSeat].handTiles = dataSeat.handTiles;
-                self.seats[idxSeat].honorTiles = dataSeat.honorTiles;
-                self.seats[idxSeat].discardedTiles = dataSeat.discardedTiles;
-                self.seats[idxSeat].melds = dataSeat.melds;
+                self.seats[idxSeat].handTiles = gameSeatForClient.handTiles;
+                self.seats[idxSeat].honorTiles = gameSeatForClient.honorTiles;
+                self.seats[idxSeat].discardedTiles = gameSeatForClient.discardedTiles;
+                self.seats[idxSeat].melds = gameSeatForClient.melds;
 
-                self.seats[idxSeat].fsmPlayerState = dataSeat.fsmPlayerState;
-                self.seats[idxSeat].score = dataSeat.score;
+                self.seats[idxSeat].fsmPlayerState = gameSeatForClient.fsmPlayerState;
+                self.seats[idxSeat].score = gameSeatForClient.score;
             }
+
+            self.scoreBoard = a_gameForClient.scoreBoard;
+
             self.dispatchEvent("event_server_push_game_sync");
         });
 
@@ -254,22 +257,18 @@ cc.Class({
             self.dispatchEvent("event_server_brc_hand_count", data);
         });
 
-        cc.vv.net.addHandler("server_brc_hand_end", function (a_data) {
-            var results = a_data.results;
-            for (var idxSeat = 0; idxSeat < self.seats.length; ++idxSeat) {
-                self.seats[idxSeat].score = results.length == 0 ? 0 : results[idxSeat].totalscore;
-            }
-            self.dispatchEvent("event_server_brc_hand_end", results);
+        cc.vv.net.addHandler("server_brc_hand_end", function (a_endinfo) {
+            self.dispatchEvent("event_server_brc_hand_end", null);
 
-            if (a_data.endinfo) {
-                self.isOver = true;
-                self.dispatchEvent("event_server_brc_match_end", a_data.endinfo);
-            }
+            // if (a_endinfo) {
+            //     self.isOver = true;
+            //     self.dispatchEvent("event_server_brc_match_end", a_endinfo);
+            // }
 
-            self.reset();
-            for (var idxSeat = 0; idxSeat < self.seats.length; ++idxSeat) {
-                self.dispatchEvent("event_update_seat_status", self.seats[idxSeat]);
-            }
+            // self.reset();
+            // for (var idxSeat = 0; idxSeat < self.seats.length; ++idxSeat) {
+            //     self.dispatchEvent("event_update_seat_status", self.seats[idxSeat]);
+            // }
         });
 
         cc.vv.net.addHandler("server_brc_action_discard", function (a_data) {

@@ -84,6 +84,7 @@ exports.MJ_PLAYER_STATE_THINKING_ON_KONGING = "应对杠牌";
 exports.MJ_PLAYER_STATE_WINING = "胡中";
 exports.MJ_PLAYER_STATE_THINKING_ON_WINING = "应对胡牌";
 exports.MJ_PLAYER_STATE_WON = "胡牌";
+exports.MJ_PLAYER_STATE_SCORING = "对账中";
 
 exports.MJ_ACTION_BACKDRAW = "Backdraw";
 exports.MJ_ACTION_CHOW = "Chow";

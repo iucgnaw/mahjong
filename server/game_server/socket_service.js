@@ -138,18 +138,6 @@ exports.start = function (a_config, a_mgr) {
 			}
 		});
 
-		a_socket.on("client_req_prepared", function (a_data) {
-			var userId = a_socket.userId;
-			if (userId == null) {
-				return;
-			}
-			m_userMgr.broadcastMsg("server_brc_player_ready", {
-				userId: userId,
-				ready: true
-			}, userId, true);
-			a_socket.gameMgr.setReady(userId);
-		});
-
 		a_socket.on("client_req_sync_handtiles", function (a_data) {
 			if (a_socket.userId == null) {
 				return;
@@ -166,10 +154,8 @@ exports.start = function (a_config, a_mgr) {
 			a_socket.gameMgr.on_client_req_action_discard_tile(a_socket.userId, tile);
 		});
 
-		// Action: Chow, Pong, Kong, Win, Set Aside, Backdraw, Draw
 		a_socket.on("client_req_action", function (a_data) {
 			if (a_socket.userId == null) {
-				console.error("********a_socket.userId == null");
 				return;
 			}
 			console.assert(a_data != null);
@@ -177,6 +163,14 @@ exports.start = function (a_config, a_mgr) {
 			var action = a_data;
 
 			a_socket.gameMgr.on_client_req_action(a_socket.userId, action);
+		});
+
+		a_socket.on("client_req_sync_score", function (a_arrayPayScore) {
+			if (a_socket.userId == null) {
+				return;
+			}
+			var arrayPayScore = JSON.parse(a_arrayPayScore);
+			a_socket.gameMgr.on_client_req_sync_score(a_socket.userId, arrayPayScore);
 		});
 
 		//退出房间

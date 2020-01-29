@@ -8,14 +8,15 @@ var m_crypto = require("../utils/crypto");
 var g_games = {};
 var g_seatByUserId = {};
 
-function copyGameForClient(a_gameForClient, a_game, a_userId) {
-    a_gameForClient.tilewallRemaining = a_game.tilewall.length;
-    a_gameForClient.dealer = a_game.dealer;
-    a_gameForClient.turn = a_game.turn;
-    a_gameForClient.jokerTile = a_game.jokerTile;
-    a_gameForClient.fsmTableState = a_game.fsmTableState;
+function syncGameToClient(a_game, a_userId) {
+    var gameForClient = {};
+    gameForClient.tilewallRemaining = a_game.tilewall.length;
+    gameForClient.dealer = a_game.dealer;
+    gameForClient.turn = a_game.turn;
+    gameForClient.jokerTile = a_game.jokerTile;
+    gameForClient.fsmTableState = a_game.fsmTableState;
 
-    a_gameForClient.seats = [];
+    gameForClient.seats = [];
     for (var idxSeat = 0; idxSeat < a_game.seats.length; ++idxSeat) {
         var seat = {};
 
@@ -35,7 +36,17 @@ function copyGameForClient(a_gameForClient, a_game, a_userId) {
         seat.fsmPlayerState = a_game.seats[idxSeat].fsmPlayerState;
         seat.score = a_game.seats[idxSeat].score;
 
-        a_gameForClient.seats.push(seat);
+        gameForClient.seats.push(seat);
+    }
+
+    gameForClient.scoreBoard = a_game.scoreBoard;
+
+    m_userMgr.sendMsg(a_userId, "server_push_game_sync", gameForClient);
+}
+
+function syncGameToAllClients(a_game) {
+    for (var idxSeat = 0; idxSeat < a_game.seats.length; ++idxSeat) {
+        syncGameToClient(a_game, a_game.seats[idxSeat].userId);
     }
 }
 
@@ -119,23 +130,16 @@ function doGameOver(a_game, a_userId, a_forceEnd) {
         return;
     }
 
-    var results = [1, 1, 1, 1]; // TOFIX, [].length is wrong!!!
-    var dbResult = [0, 0, 0, 0];
-
     var fnNotifyResult = function (a_isEnd) {
         var endInfo = null;
         if (a_isEnd) {
-            endInfo = [];
+            endInfo = []; // TOFIX
             for (var idxSeat = 0; idxSeat < room.seats.length; ++idxSeat) {
-                var seat = room.seats[idxSeat];
                 endInfo.push({});
             }
         }
 
-        m_userMgr.broadcastMsg("server_brc_hand_end", {
-            results: results,
-            endinfo: endInfo
-        }, a_userId, true);
+        // m_userMgr.broadcastMsg("server_brc_hand_end", endInfo, a_userId, true);
 
         //如果局数已够，则进行整体结算，并关闭房间
         if (a_isEnd) {
@@ -151,13 +155,14 @@ function doGameOver(a_game, a_userId, a_forceEnd) {
     }
 
     if (a_game != null) {
-        var winnerSeatIndex = -1;
-        for (idxSeat = 0; idxSeat < a_game.seats.length; idxSeat++) {
-            if (a_game.seats[idxSeat].fsmPlayerState == m_mahjong.MJ_PLAYER_STATE_WON) {
-                winnerSeatIndex = idxSeat;
-            }
-        }
-        if (winnerSeatIndex != a_game.dealer) { // winner is not dealer, change dealer
+        // var winnerSeatIndex = -1;
+        // for (var idxSeat = 0; idxSeat < a_game.seats.length; idxSeat++) {
+        //     if (a_game.seats[idxSeat].fsmPlayerState == m_mahjong.MJ_PLAYER_STATE_WON) {
+        //         winnerSeatIndex = idxSeat;
+        //     }
+        // }
+        // if (winnerSeatIndex != a_game.dealer) { // winner is not dealer, change dealer
+        if (a_game.turn != a_game.dealer) { // winner is not dealer, change dealer
             room.nextDealer = (a_game.dealer + 1) % a_game.seats.length;
         }
         m_db.update_next_dealer(roomId, room.nextDealer);
@@ -167,20 +172,9 @@ function doGameOver(a_game, a_userId, a_forceEnd) {
             var gameSeat = a_game.seats[idxSeat];
 
             roomSeat.ready = false;
-            roomSeat.score += gameSeat.score
+            roomSeat.score += gameSeat.score;
+            roomSeat.score += 100;
 
-            var userResult = {
-                userId: gameSeat.userId,
-                actions: [],
-                melds: gameSeat.melds,
-                handTiles: gameSeat.handTiles,
-                score: gameSeat.score,
-                totalscore: roomSeat.score,
-                qingyise: gameSeat.qingyise,
-                jingouhu: gameSeat.isJinGouHu,
-            }
-
-            dbResult[idxSeat] = gameSeat.score;
             delete g_seatByUserId[gameSeat.userId]; // TODO: ?
         }
         delete g_games[roomId]; // TODO: ?
@@ -190,25 +184,6 @@ function doGameOver(a_game, a_userId, a_forceEnd) {
         fnNotifyResult(true);
     } else {
         fnNotifyResult(false);
-        //保存游戏
-        // store_game(a_game, function (a_ret) {
-        //     m_db.update_game_result(room.uuid, a_game.gameIndex, dbResult);
-
-        //     //保存游戏局数
-        //     m_db.update_num_of_turns(roomId, room.gameIndex);
-
-        //     //如果是第一次，则扣除房卡
-        //     if (room.gameIndex == 1) {
-        //         var cost = 2;
-        //         if (room.conf.maxHandCount == 8) {
-        //             cost = 3;
-        //         }
-        //         m_db.cost_gems(a_game.seats[0].userId, cost);
-        //     }
-
-        //     var isEnd = (room.gameIndex >= room.conf.maxHandCount);
-        //     fnNotifyResult(isEnd);
-        // });
     }
 }
 
@@ -238,9 +213,7 @@ exports.setReady = function (a_userId, a_callback) {
             exports.begin(roomId);
         }
     } else { // Exist game
-        var gameForClient = {};
-        copyGameForClient(gameForClient, game, a_userId);
-        m_userMgr.sendMsg(a_userId, "server_push_game_sync", gameForClient);
+        syncGameToClient(game, a_userId);
     }
 }
 
@@ -314,6 +287,8 @@ exports.begin = function (a_roomId) {
 
         seats: [],
 
+        scoreBoard: [],
+
         turn: 0,
 
         jokerTile: m_mahjong.MJ_TILE_INVALID,
@@ -336,11 +311,22 @@ exports.begin = function (a_roomId) {
         seat.discardedTiles = [];
         seat.melds = [];
 
-        seat.score = 0;
+        seat.score = room.seats[idxSeat].score;
 
         g_seatByUserId[seat.userId] = seat;
     }
     g_games[a_roomId] = game;
+
+    for (var idxTransferTo = 0; idxTransferTo < game.seats.length; ++idxTransferTo) {
+        for (var idxTransferFrom = 0; idxTransferFrom < game.seats.length - 1; ++idxTransferFrom) {
+            var transaction = {};
+            transaction.transferFrom = (idxTransferTo + idxTransferFrom + 1) % game.seats.length;
+            transaction.transferTo = idxTransferTo;
+            transaction.value = -1;
+            transaction.confirmed = false;
+            game.scoreBoard.push(transaction);
+        }
+    }
 
     //洗牌
     m_mahjong.shuffleTilewall(game.tilewall);
@@ -363,12 +349,7 @@ exports.begin = function (a_roomId) {
     // m_userMgr.broadcastMsg("server_brc_change_turn", game.seats[game.turn].userId, game.seats[game.turn].userId, true);
     game.seats[game.turn].fsmPlayerState = m_mahjong.MJ_PLAYER_STATE_INITIAL_REPLACING;
 
-    // Sync game
-    for (var idxSeat = 0; idxSeat < game.seats.length; ++idxSeat) {
-        var gameForClient = {};
-        copyGameForClient(gameForClient, game, game.seats[idxSeat].userId);
-        m_userMgr.sendMsg(game.seats[idxSeat].userId, "server_push_game_sync", gameForClient);
-    }
+    syncGameToAllClients(game);
 };
 
 exports.on_client_req_sync_handtiles = function (a_userId, a_handTiles) {
@@ -378,12 +359,7 @@ exports.on_client_req_sync_handtiles = function (a_userId, a_handTiles) {
 
     seat.handTiles = a_handTiles;
 
-    // Sync game
-    for (var idxSeat = 0; idxSeat < game.seats.length; ++idxSeat) {
-        var gameForClient = {};
-        copyGameForClient(gameForClient, game, game.seats[idxSeat].userId);
-        m_userMgr.sendMsg(game.seats[idxSeat].userId, "server_push_game_sync", gameForClient);
-    }
+    syncGameToAllClients(game);
 };
 
 exports.on_client_req_action_discard_tile = function (a_userId, a_tile) {
@@ -435,12 +411,7 @@ exports.on_client_req_action_discard_tile = function (a_userId, a_tile) {
         game.seats[i].fsmPlayerState = m_mahjong.MJ_PLAYER_STATE_THINKING_ON_DISCARDING_TILE;
     }
 
-    // Sync game
-    for (var idxSeat = 0; idxSeat < game.seats.length; ++idxSeat) {
-        var gameForClient = {};
-        copyGameForClient(gameForClient, game, game.seats[idxSeat].userId);
-        m_userMgr.sendMsg(game.seats[idxSeat].userId, "server_push_game_sync", gameForClient);
-    }
+    syncGameToAllClients(game);
 };
 
 exports.on_client_req_action = function (a_userId, a_action) {
@@ -725,12 +696,7 @@ exports.on_client_req_action = function (a_userId, a_action) {
             break;
     }
 
-    // Sync game
-    for (var idxSeat = 0; idxSeat < game.seats.length; ++idxSeat) {
-        var gameForClient = {};
-        copyGameForClient(gameForClient, game, game.seats[idxSeat].userId);
-        m_userMgr.sendMsg(game.seats[idxSeat].userId, "server_push_game_sync", gameForClient);
-    }
+    syncGameToAllClients(game);
 };
 
 function isAnyPlayerThinking(a_game) {
@@ -887,19 +853,18 @@ function determineNextTurn(a_userId) {
                     // Change all seats' hand tiles to lying
                     // TOFIX make it a function to avoid idxSeat2
                     for (var idxSeat2 = 0; idxSeat2 < game.seats.length; ++idxSeat2) {
+                        game.seats[idxSeat2].fsmPlayerState = m_mahjong.MJ_PLAYER_STATE_SCORING;
                         for (var idxTile = 0; idxTile < game.seats[idxSeat2].handTiles.length; idxTile++) {
                             game.seats[idxSeat2].handTiles[idxTile].pose = "lying";
                         }
                     }
 
                     nextTurnIndex = game.seats[idxSeat].seatIndex;
-                    game.seats[nextTurnIndex].fsmPlayerState = m_mahjong.MJ_PLAYER_STATE_WON;
+                    // game.seats[nextTurnIndex].fsmPlayerState = m_mahjong.MJ_PLAYER_STATE_SCORING;
 
                     game.fsmTableState = m_mahjong.MJ_TABLE_STATE_SCORING;
-
-                    if (game.fsmTableState == m_mahjong.MJ_TABLE_STATE_SCORING) {
-                        doGameOver(game, game.seats[nextTurnIndex].userId);
-                    }
+                    // doGameOver(game, game.seats[nextTurnIndex].userId);
+                    m_userMgr.broadcastMsg("server_brc_hand_end", null, a_userId, true);
                 }
             }
 
@@ -916,6 +881,68 @@ function determineNextTurn(a_userId) {
         m_userMgr.broadcastMsg("server_brc_change_turn", game.seats[game.turn].userId, game.seats[game.turn].userId, true);
     }
 }
+
+exports.on_client_req_sync_score = function (a_userId, a_arrayTransaction) {
+    var seat = g_seatByUserId[a_userId];
+    console.assert(seat != null);
+    var game = seat.game;
+
+    if (a_arrayTransaction[0].confirmed == true) {
+        seat.fsmPlayerState = m_mahjong.MJ_PLAYER_STATE_IDLE;
+    }
+
+    for (var idxTransaction = 0; idxTransaction < a_arrayTransaction.length; idxTransaction++) {
+        for (var idxScoreBoard = 0; idxScoreBoard < game.scoreBoard.length; idxScoreBoard++) {
+            if ((game.scoreBoard[idxScoreBoard].transferFrom == a_arrayTransaction[idxTransaction].transferFrom) &&
+                (game.scoreBoard[idxScoreBoard].transferTo == a_arrayTransaction[idxTransaction].transferTo)) {
+                game.scoreBoard[idxScoreBoard].value = a_arrayTransaction[idxTransaction].value;
+                game.scoreBoard[idxScoreBoard].confirmed = a_arrayTransaction[idxTransaction].confirmed;
+                break;
+            }
+        }
+    }
+
+    // Sync game
+    syncGameToAllClients(game);
+
+    var allConfirmed = true;
+    for (var idxScoreBoard = 0; idxScoreBoard < game.scoreBoard.length; idxScoreBoard++) {
+        if (game.scoreBoard[idxScoreBoard].confirmed == false) {
+            allConfirmed = false;
+            break;
+        }
+    }
+    if (allConfirmed) {
+        var roomId = m_roomMgr.getRoomIdByUserId(a_userId);
+        console.assert(roomId != null);
+        var room = m_roomMgr.getRoomById(roomId);
+        console.assert(room != null);
+
+        // determine next turn
+        if (game.turn != game.dealer) { // winner is not dealer, change dealer
+            room.nextDealer = (game.dealer + 1) % game.seats.length;
+        }
+        m_db.update_next_dealer(roomId, room.nextDealer);
+
+        for (var idxSeat = 0; idxSeat < room.seats.length; ++idxSeat) {
+            var roomSeat = room.seats[idxSeat];
+            var gameSeat = game.seats[idxSeat];
+
+            var score = 0;
+            for (var idxScoreBoard = 0; idxScoreBoard < game.scoreBoard.length; idxScoreBoard++) {
+                if (game.scoreBoard[idxScoreBoard].transferTo == idxSeat) {
+                    score += game.scoreBoard[idxScoreBoard].value;
+                }
+            }
+            roomSeat.score += score;
+
+            delete g_seatByUserId[gameSeat.userId]; // TOFIX
+        }
+        delete g_games[roomId]; // TOFIX
+    }
+
+    this.setReady(a_userId);
+};
 
 exports.hasBegan = function (a_roomId) {
     var game = g_games[a_roomId];

@@ -41,8 +41,8 @@ cc.Class({
 
         //初始化网络事件监听器
         var self = this;
-        this.node.on("event_server_brc_match_end", function (data) {
-            self.onGameEnd(data);
+        this.node.on("event_server_brc_match_end", function (a_endinfo) {
+            self.onGameEnd(a_endinfo);
         });
     },
 
@@ -57,13 +57,13 @@ cc.Class({
         // seat.node.getChildByName("chajiaocishu").getComponent(cc.Label).string = info.numchadajiao;
     },
 
-    onGameEnd: function (endinfo) {
+    onGameEnd: function (a_endinfo) {
         var seats = cc.vv.gameNetMgr.seats;
         var maxscore = -1;
         var maxdianpao = 0;
         var dianpaogaoshou = -1;
-        for (var i = 0; i < seats.length; ++i) {
-            var seat = seats[i];
+        for (var idxSeat = 0; idxSeat < seats.length; ++idxSeat) {
+            var seat = seats[idxSeat];
             if (seat.score > maxscore) {
                 maxscore = seat.score;
             }
@@ -73,16 +73,16 @@ cc.Class({
             // }
         }
 
-        for (var i = 0; i < seats.length; ++i) {
-            var seat = seats[i];
+        for (var idxSeat = 0; idxSeat < seats.length; ++idxSeat) {
+            var seat = seats[idxSeat];
             var isBigwin = false;
             if (seat.score > 0) {
                 isBigwin = seat.score == maxscore;
             }
-            this._scriptGameResultSeats[i].setUser_Name_Score(seat.name, seat.score);
-            this._scriptGameResultSeats[i].setUser_Id_Image(seat.userId);
-            var isZuiJiaPaoShou = dianpaogaoshou == i;
-            this.showResult(this._scriptGameResultSeats[i], endinfo[i], isZuiJiaPaoShou);
+            this._scriptGameResultSeats[idxSeat].setUser_Name_Score(seat.name, seat.score);
+            this._scriptGameResultSeats[idxSeat].setUser_Id_Image(seat.userId);
+            var isZuiJiaPaoShou = dianpaogaoshou == idxSeat;
+            this.showResult(this._scriptGameResultSeats[idxSeat], a_endinfo[idxSeat], isZuiJiaPaoShou);
         }
     },
 

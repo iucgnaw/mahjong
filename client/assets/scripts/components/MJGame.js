@@ -93,7 +93,7 @@ cc.Class({
     start: function () {},
 
     initEventHandlers: function () {
-        cc.vv.gameNetMgr.dataEventHandler = this.node;
+        cc.vv.gameNetMgr.eventHandlerNode = this.node;
 
         //初始化事件监听器
         var self = this;
@@ -179,15 +179,13 @@ cc.Class({
             cc.vv.audioMgr.playSfx("mahjong/effect/" + effectName + ".mp3");
         });
 
-        this.node.on("event_server_brc_hand_end", function (a_data) {
-            if (a_data.length == 0) {
-                self.node.getChildByName("nodeGameResult").active = true;
-                return;
-            }
-            self.node.getChildByName("nodeScoring").active = true;
+        this.node.on("event_server_brc_hand_end", function (a_ignore) {
+            var nodeScoring = self.node.getChildByName("nodeScoring");
+            nodeScoring.active = true;
+            console.log("******** activate in this.node.on(event_server_brc_hand_end, function (a_ignore)");
         });
 
-        this.node.on("event_server_brc_match_end", function (a_data) {
+        this.node.on("event_server_brc_match_end", function (a_ignore) {
             self._isMatchEnd = true;
         });
     },
@@ -217,7 +215,6 @@ cc.Class({
         } else {
             nodeTable.getChildByName("nodeTableState").getComponent(cc.Label).string = "null";
         }
-
 
         var sideNames = ["nodeSideBottom", "nodeSideRight", "nodeSideTop", "nodeSideLeft"];
         // Hide and reset all tiles
@@ -266,6 +263,42 @@ cc.Class({
 
         for (var idxSeat in cc.vv.gameNetMgr.seats) {
             this.refreshSeat(cc.vv.gameNetMgr.seats[idxSeat]);
+        }
+
+        // Sync score board
+        var nodeScoring = this.node.getChildByName("nodeScoring");
+        if (cc.vv.gameNetMgr.seats[cc.vv.gameNetMgr.seatIndex].fsmPlayerState == m_mahjong.MJ_PLAYER_STATE_SCORING) {
+            nodeScoring.active = true;
+            console.log("******** activate in on_event_server_push_game_sync: function ()");
+        } else {
+            nodeScoring.active = false;
+        }
+        var nodeScoreBoard = nodeScoring.getChildByName("nodeScoreBoard");
+        var buttonSubmit = nodeScoring.getChildByName("buttonSubmit").getComponent(cc.Button);
+        buttonSubmit.interactable = true; // Enable first, and will be disabled if any mismatch
+        for (var idxNode = 0; idxNode < nodeScoreBoard.childrenCount; ++idxNode) {
+            var nodeSeat = nodeScoreBoard.getChildByName("nodeSeat" + (idxNode + 1));
+            if ((idxNode + 1) < cc.vv.gameNetMgr.seats.length) {
+                nodeSeat.active = true;
+                var editboxReceivable = nodeSeat.getChildByName("editboxReceivable").getComponent(cc.EditBox);
+                var labelPayable = nodeSeat.getChildByName("labelPayable").getComponent(cc.Label);
+
+                var transferFrom = cc.vv.gameNetMgr.seatIndex
+                var transferTo = cc.vv.gameNetMgr.getNatualIndex(idxNode + 1);
+                for (var idxTransaction = 0; idxTransaction < cc.vv.gameNetMgr.scoreBoard.length; idxTransaction++) {
+                    if ((cc.vv.gameNetMgr.scoreBoard[idxTransaction].transferFrom == transferFrom) &&
+                        (cc.vv.gameNetMgr.scoreBoard[idxTransaction].transferTo == transferTo)) {
+                        labelPayable.string = cc.vv.gameNetMgr.scoreBoard[idxTransaction].value != null ? cc.vv.gameNetMgr.scoreBoard[idxTransaction].value : "null";
+                        break;
+                    }
+                }
+
+                if (parseInt(editboxReceivable.string) != -parseInt(labelPayable.string)) {
+                    buttonSubmit.interactable = false;
+                }
+            } else {
+                nodeSeat.active = false;
+            }
         }
     },
 
@@ -553,13 +586,37 @@ cc.Class({
         cc.vv.popupMgr.showSettings();
     },
 
-    onButtonSubmitClicked: function () {
-        if (this._isMatchEnd) {
-            this.node.getChildByName("nodeGameResult").active = true;
-        } else {
-            cc.vv.net.send("client_req_prepared");
+    collectTransactions: function (a_confirmed) {
+        var arrayEditboxPayable = [];
+        var nodeScoring = this.node.getChildByName("nodeScoring");
+        var nodeScoreBoard = nodeScoring.getChildByName("nodeScoreBoard");
+        for (var idxNode = 0; idxNode < nodeScoreBoard.childrenCount; ++idxNode) {
+            var nodeSeat = nodeScoreBoard.getChildByName("nodeSeat" + (idxNode + 1));
+            var editboxReceivable = nodeSeat.getChildByName("editboxReceivable").getComponent(cc.EditBox);
+            arrayEditboxPayable.push(editboxReceivable);
         }
-        this.node.getChildByName("nodeScoring").active = false;
+
+        var arrayTransaction = [];
+        for (var idxSeat = 1; idxSeat < cc.vv.gameNetMgr.seats.length; idxSeat++) {
+            var transaction = {};
+            transaction.transferFrom = cc.vv.gameNetMgr.getNatualIndex(idxSeat);
+            transaction.transferTo = cc.vv.gameNetMgr.seatIndex;
+            transaction.value = parseInt(arrayEditboxPayable[idxSeat - 1].string);
+            transaction.confirmed = a_confirmed;
+            arrayTransaction.push(transaction);
+        }
+
+        return arrayTransaction;
+    },
+
+    onTextBoxTextChanged: function (a_text, a_editbox, a_customEventData) {
+        cc.vv.net.send("client_req_sync_score", this.collectTransactions(false));
+    },
+
+    onButtonSubmitClicked: function () {
+        cc.vv.net.send("client_req_sync_score", this.collectTransactions(true));
+        var nodeScoring = this.node.getChildByName("nodeScoring");
+        nodeScoring.active = false;
     },
 
     // called every frame, uncomment this function to activate update callback
