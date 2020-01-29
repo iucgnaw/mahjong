@@ -38,6 +38,7 @@ cc.Class({
         console.log("createrole scene, CreateRole.js, onLoad()");
 
         cc.vv.utils.fitCanvasWithFrame();
+        // this.inputName.enabled = false;
         this.onRandomBtnClicked();
     },
 

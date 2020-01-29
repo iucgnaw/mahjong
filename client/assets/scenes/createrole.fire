@@ -41,8 +41,8 @@
     },
     "_scale": {
       "__type__": "cc.Vec3",
-      "x": 0.4733072916666667,
-      "y": 0.4733072916666667,
+      "x": 0.5583333333333333,
+      "y": 0.5583333333333333,
       "z": 1
     },
     "_quat": {
@@ -806,8 +806,8 @@
     "_srcBlendFactor": 1,
     "_dstBlendFactor": 771,
     "_useOriginalSize": true,
-    "_string": "Lucy",
-    "_N$string": "Lucy",
+    "_string": "选手名字",
+    "_N$string": "选手名字",
     "_fontSize": 60,
     "_lineHeight": 70,
     "_enableWrapText": false,
@@ -850,7 +850,7 @@
       "b": 255,
       "a": 255
     },
-    "_N$placeholder": "Lucy",
+    "_N$placeholder": "选手名字",
     "_N$placeholderFontSize": 60,
     "_N$placeholderFontColor": {
       "__type__": "cc.Color",
