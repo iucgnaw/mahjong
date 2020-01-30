@@ -2,7 +2,7 @@ cc.Class({
     extends: cc.Component,
 
     properties: {
-        inputName: cc.EditBox,
+        editboxPlayerName: cc.EditBox,
         // foo: {
         //    default: null,
         //    url: cc.Texture2D,  // optional, default is typeof default
@@ -30,7 +30,7 @@ cc.Class({
         ];
 
         var idx = Math.floor(Math.random() * (names.length - 1));
-        this.inputName.string = names[idx];
+        this.editboxPlayerName.string = names[idx];
     },
 
     // use this for initialization
@@ -38,12 +38,12 @@ cc.Class({
         console.log("createrole scene, CreateRole.js, onLoad()");
 
         cc.vv.utils.fitCanvasWithFrame();
-        // this.inputName.enabled = false;
+        // this.editboxPlayerName.enabled = false;
         this.onRandomBtnClicked();
     },
 
     onBtnConfirmClicked: function () {
-        var name = this.inputName.string;
+        var name = this.editboxPlayerName.string;
         if (name == "") {
             console.log("invalid name.");
             return;
