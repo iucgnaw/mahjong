@@ -1,56 +1,49 @@
-var crypto = require("../utils/crypto");
-var express = require("express");
-var db = require("../utils/db");
-var http = require("../utils/http");
+var m_express = require("express");
+var m_db = require("../utils/db");
+var m_http = require("../utils/http");
 
-var app = express();
-
-function send(res, ret) {
-	var str = JSON.stringify(ret);
-	res.send(str)
-}
-
+var g_express_dealer_api = m_express();
 
 exports.start = function (config) {
-	app.listen(config.DEALDER_API_PORT, config.DEALDER_API_IP);
+	g_express_dealer_api.listen(config.DEALDER_API_PORT, config.DEALDER_API_IP);
 	console.log("dealer api is listening on " + config.DEALDER_API_IP + ":" + config.DEALDER_API_PORT);
 };
 
 //设置跨域访问
-app.all("*", function (req, res, next) {
-	res.header("Access-Control-Allow-Origin", "*");
-	res.header("Access-Control-Allow-Headers", "X-Requested-With");
-	res.header("Access-Control-Allow-Methods", "PUT,POST,GET,DELETE,OPTIONS");
-	res.header("X-Powered-By", " 3.2.1")
-	res.header("Content-Type", "application/json;charset=utf-8");
-	next();
+g_express_dealer_api.all("*", function (a_request, a_response, a_fnNext) {
+	a_response.header("Access-Control-Allow-Origin", "*");
+	a_response.header("Access-Control-Allow-Headers", "X-Requested-With");
+	a_response.header("Access-Control-Allow-Methods", "PUT,POST,GET,DELETE,OPTIONS");
+	a_response.header("X-Powered-By", " 3.2.1")
+	a_response.header("Content-Type", "application/json;charset=utf-8");
+	a_fnNext();
 });
 
-app.get("/get_user_info", function (req, res) {
-	var userId = req.query.userId;
-	db.get_user_data_by_userid(userId, function (data) {
-		if (data) {
+g_express_dealer_api.get("/get_user_profile", function (a_request, a_response) {
+	var userId = a_request.query.userId;
+	m_db.get_user_profile_by_user_id(userId, function (a_profile) {
+		if (a_profile) {
 			var ret = {
 				userId: userId,
-				name: data.name,
-				gems: data.gems,
-				headimg: data.headimg
+				name: a_profile.name,
+				gems: a_profile.gems,
+				headimg: a_profile.headimg
 			}
-			http.send(res, 0, "ok", ret);
+			m_http.send(a_response, 0, "Ok.", ret);
 		} else {
-			http.send(res, 1, "null");
+			m_http.send(a_response, 1, "Get user profile fail.");
 		}
 	});
 });
 
-app.get("/add_user_gems", function (req, res) {
-	var userId = req.query.userId;
-	var gems = req.query.gems;
-	db.add_user_gems(userId, gems, function (suc) {
-		if (suc) {
-			http.send(res, 0, "ok");
+g_express_dealer_api.get("/add_user_gems", function (a_request, a_response) {
+	var userId = a_request.query.userId;
+	var gems = a_request.query.gems;
+	m_db.add_user_gems(userId, gems, function (a_success) {
+		if (a_success) {
+			m_http.send(a_response, 0, "Ok.");
 		} else {
-			http.send(res, 1, "failed");
+			m_http.send(a_response, 1, "Add user gems fail.");
 		}
 	});
 });

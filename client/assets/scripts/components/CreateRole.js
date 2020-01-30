@@ -35,9 +35,10 @@ cc.Class({
 
     // use this for initialization
     onLoad: function () {
-        console.log("createrole scene, CreateRole.js, onLoad()");
-
         cc.vv.utils.fitCanvasWithFrame();
+
+        var editboxPlayerName = this.node.getChildByName("editboxPlayerName").getComponent(cc.EditBox);
+        editboxPlayerName.enabled = false;
         // this.editboxPlayerName.enabled = false;
         this.onRandomBtnClicked();
     },
@@ -45,14 +46,14 @@ cc.Class({
     onBtnConfirmClicked: function () {
         var name = this.editboxPlayerName.string;
         if (name == "") {
-            console.log("invalid name.");
+            alert("选手姓名不能为空！");
             return;
         }
-        // console.log(name);
+
         cc.vv.userMgr.create(name);
     }
+
     // called every frame, uncomment this function to activate update callback
     // update: function (dt) {
-
     // },
 });

@@ -1,131 +1,10 @@
-var crypto = require("../utils/crypto");
-var express = require("express");
-var db = require("../utils/db");
-var http = require("../utils/http");
-var fibers = require("fibers");
+var m_crypto = require("../utils/crypto");
+var m_express = require("express");
+var m_db = require("../utils/db");
+var m_http = require("../utils/http");
+var m_fibers = require("fibers");
 
-var app = express();
-var hallAddr = "";
-
-function send(res, ret) {
-	var str = JSON.stringify(ret);
-	res.send(str)
-}
-
-var config = null;
-
-exports.start = function (cfg) {
-	config = cfg;
-	hallAddr = config.HALL_IP + ":" + config.HALL_CLIENT_PORT;
-	app.listen(config.CLIENT_PORT);
-	console.log("account server is listening on " + config.CLIENT_PORT);
-}
-
-
-
-
-
-//设置跨域访问
-app.all("*", function (req, res, next) {
-	res.header("Access-Control-Allow-Origin", "*");
-	res.header("Access-Control-Allow-Headers", "X-Requested-With");
-	res.header("Access-Control-Allow-Methods", "PUT,POST,GET,DELETE,OPTIONS");
-	res.header("X-Powered-By", " 3.2.1")
-	res.header("Content-Type", "application/json;charset=utf-8");
-	fibers(function () {
-		next();
-	}).run();
-});
-
-app.get("/register", function (req, res) {
-	var account = req.query.account;
-	var password = req.query.password;
-
-	var fnFailed = function () {
-		send(res, {
-			errcode: 1,
-			errmsg: "account has been used."
-		});
-	};
-
-	var fnSucceed = function () {
-		send(res, {
-			errcode: 0,
-			errmsg: "ok"
-		});
-	};
-
-	db.is_user_exist(account, function (exist) {
-		if (exist) {
-			db.create_account(account, password, function (ret) {
-				if (ret) {
-					fnSucceed();
-				} else {
-					fnFailed();
-				}
-			});
-		} else {
-			fnFailed();
-			// console.log("account has been used.");
-		}
-	});
-});
-
-app.get("/get_version", function (req, res) {
-	var ret = {
-		version: config.VERSION,
-	}
-	send(res, ret);
-});
-
-app.get("/get_serverinfo", function (req, res) {
-	var ret = {
-		version: config.VERSION,
-		hall: hallAddr,
-		appweb: config.APP_WEB,
-	}
-	send(res, ret);
-});
-
-app.get("/guest", function (req, res) {
-	var account = "guest_" + req.query.account;
-	var sign = crypto.md5(account + req.ip + config.ACCOUNT_PRI_KEY);
-	var ret = {
-		errcode: 0,
-		errmsg: "ok",
-		account: account,
-		halladdr: hallAddr,
-		sign: sign
-	}
-	send(res, ret);
-});
-
-app.get("/auth", function (req, res) {
-	var account = req.query.account;
-	var password = req.query.password;
-
-	db.get_account_info(account, password, function (info) {
-		if (info == null) {
-			send(res, {
-				errcode: 1,
-				errmsg: "invalid account"
-			});
-			return;
-		}
-
-		var account = "vivi_" + req.query.account;
-		var sign = get_md5(account + req.ip + config.ACCOUNT_PRI_KEY);
-		var ret = {
-			errcode: 0,
-			errmsg: "ok",
-			account: account,
-			sign: sign
-		}
-		send(res, ret);
-	});
-});
-
-var appInfo = {
+var g_arrayAppInfo = {
 	Android: {
 		appid: "wxe39f08522d35c80c",
 		secret: "fa88e3a3ca5a11b06499902cea4b9c01",
@@ -136,123 +15,241 @@ var appInfo = {
 	}
 };
 
-function get_access_token(code, os, callback) {
-	var info = appInfo[os];
-	if (info == null) {
-		callback(false, null);
+var g_express_account_server = m_express();
+var g_config = null;
+var g_urlHall = "";
+
+exports.start = function (a_config) {
+	g_config = a_config;
+	g_urlHall = g_config.HALL_IP + ":" + g_config.HALL_CLIENT_PORT;
+	g_express_account_server.listen(g_config.CLIENT_PORT);
+	console.log("account server is listening on " + g_config.CLIENT_PORT);
+}
+
+//设置跨域访问
+g_express_account_server.all("*", function (a_request, a_response, a_fnNext) {
+	a_response.header("Access-Control-Allow-Origin", "*");
+	a_response.header("Access-Control-Allow-Headers", "X-Requested-With");
+	a_response.header("Access-Control-Allow-Methods", "PUT,POST,GET,DELETE,OPTIONS");
+	a_response.header("X-Powered-By", " 3.2.1")
+	a_response.header("Content-Type", "application/json;charset=utf-8");
+	m_fibers(function () {
+		a_fnNext();
+	}).run();
+});
+
+// Not used
+g_express_account_server.get("/get_server_version", function (a_request, a_response) {
+	var version = {
+		version: g_config.VERSION,
 	}
+	a_response.send(JSON.stringify(version))
+});
+
+g_express_account_server.get("/get_server_info", function (a_request, a_response) {
+	var serverInfo = {
+		version: g_config.VERSION,
+		urlHall: g_urlHall,
+		appweb: g_config.APP_WEB,
+	}
+	a_response.send(JSON.stringify(serverInfo))
+});
+
+// Not used
+g_express_account_server.get("/register_account", function (a_request, a_response) {
+	var account = a_request.query.account;
+	var password = a_request.query.password;
+
+	var fnFail = function () {
+		var ret = {
+			errcode: 1,
+			errmsg: "Account has been used."
+		};
+		a_response.send(JSON.stringify(ret))
+	};
+
+	var fnSucceed = function () {
+		var ret = {
+			errcode: 0,
+			errmsg: "Ok."
+		};
+		a_response.send(JSON.stringify(ret))
+	};
+
+	// If user exists, then create account accordingly
+	m_db.is_user_exist(account, function (a_exist) {
+		if (a_exist) {
+			m_db.create_account(account, password, function (a_ret) {
+				if (a_ret) {
+					fnSucceed();
+				} else {
+					fnFail();
+				}
+			});
+		} else {
+			fnFail();
+		}
+	});
+});
+
+g_express_account_server.get("/register_guest", function (a_request, a_response) {
+	var account = "guest_" + a_request.query.account;
+	var sign = m_crypto.md5(account + a_request.ip + g_config.ACCOUNT_PRI_KEY);
+	var ret = {
+		errcode: 0,
+		errmsg: "Ok.",
+		account: account,
+		urlHall: g_urlHall,
+		sign: sign
+	}
+	a_response.send(JSON.stringify(ret))
+});
+
+// Not used
+g_express_account_server.get("/auth", function (a_request, a_response) {
+	var account = a_request.query.account;
+	var password = a_request.query.password;
+
+	m_db.get_account_info(account, password, function (a_info) {
+		if (a_info == null) {
+			var ret = {
+				errcode: 1,
+				errmsg: "Invalid account."
+			};
+			a_response.send(JSON.stringify(ret))
+			return;
+		}
+
+		var account = "vivi_" + a_request.query.account;
+		var sign = get_md5(account + a_request.ip + g_config.ACCOUNT_PRI_KEY);
+		var ret = {
+			errcode: 0,
+			errmsg: "Ok.",
+			account: account,
+			sign: sign
+		}
+		a_response.send(JSON.stringify(ret))
+	});
+});
+
+function get_access_token(a_code, a_Os, a_fnCallback) {
+	var appInfo = g_arrayAppInfo[a_Os];
+	if (appInfo == null) {
+		a_fnCallback(false, null);
+	}
+
 	var data = {
-		appid: info.appid,
-		secret: info.secret,
-		code: code,
+		appid: appInfo.appid,
+		secret: appInfo.secret,
+		code: a_code,
 		grant_type: "authorization_code"
 	};
 
-	http.get2("https://api.weixin.qq.com/sns/oauth2/access_token", data, callback, true);
+	m_http.get2("https://api.weixin.qq.com/sns/oauth2/access_token", data, a_fnCallback, true);
 }
 
-function get_state_info(access_token, openid, callback) {
+function get_state_info(a_accessToken, a_openId, a_fnCallback) {
 	var data = {
-		access_token: access_token,
-		openid: openid
+		access_token: a_accessToken,
+		openid: a_openId
 	};
 
-	http.get2("https://api.weixin.qq.com/sns/userinfo", data, callback, true);
+	m_http.get2("https://api.weixin.qq.com/sns/userinfo", data, a_fnCallback, true);
 }
 
-function create_user(account, name, sex, headimgurl, callback) {
+function create_user(a_account, a_name, a_sex, a_urlImage, a_fnCallback) {
 	var coins = 1000;
 	var gems = 1021;
-	db.is_user_exist(account, function (ret) {
-		if (!ret) {
-			db.create_user(account, name, coins, gems, sex, headimgurl, function (ret) {
-				callback();
+
+	m_db.is_user_exist(a_account, function (a_exist) {
+		if (!a_exist) {
+			m_db.create_user(a_account, a_name, coins, gems, a_sex, a_urlImage, function (a_ignore) {
+				a_fnCallback();
 			});
 		} else {
-			db.update_user_info(account, name, headimgurl, sex, function (ret) {
-				callback();
+			m_db.update_user_info(a_account, a_name, a_urlImage, a_sex, function (a_ignore) {
+				a_fnCallback();
 			});
 		}
 	});
 };
-app.get("/wechat_auth", function (req, res) {
-	var code = req.query.code;
-	var os = req.query.os;
+
+g_express_account_server.get("/wechat_auth", function (a_request, a_response) {
+	var code = a_request.query.code;
+	var os = a_request.query.os;
 	if (code == null || code == "" || os == null || os == "") {
 		return;
 	}
-	// console.log(os);
-	get_access_token(code, os, function (suc, data) {
-		if (suc) {
-			var access_token = data.access_token;
-			var openid = data.openid;
-			get_state_info(access_token, openid, function (suc2, data2) {
-				if (suc2) {
-					var openid = data2.openid;
-					var nickname = data2.nickname;
-					var sex = data2.sex;
-					var headimgurl = data2.headimgurl;
-					var account = "wx_" + openid;
-					create_user(account, nickname, sex, headimgurl, function () {
-						var sign = crypto.md5(account + req.ip + config.ACCOUNT_PRI_KEY);
+
+	get_access_token(code, os, function (a_getAccessTokenSuccess, a_accessToken_openId) {
+		if (a_getAccessTokenSuccess) {
+			var access_token = a_accessToken_openId.access_token;
+			var openid = a_accessToken_openId.openid;
+			get_state_info(access_token, openid, function (a_getStateInfoSuccess, a_stateInfo) {
+				if (a_getStateInfoSuccess) {
+					var account = "wx_" + a_stateInfo.openid;
+					var name = a_stateInfo.nickname;
+					var sex = a_stateInfo.sex;
+					var urlImage = a_stateInfo.headimgurl;
+					create_user(account, name, sex, urlImage, function () {
+						var sign = m_crypto.md5(account + a_request.ip + g_config.ACCOUNT_PRI_KEY);
 						var ret = {
 							errcode: 0,
-							errmsg: "ok",
+							errmsg: "Ok.",
 							account: account,
-							halladdr: hallAddr,
+							urlHall: g_urlHall,
 							sign: sign
 						};
-						send(res, ret);
+						a_response.send(JSON.stringify(ret))
 					});
 				}
 			});
 		} else {
-			send(res, {
+			var ret = {
 				errcode: -1,
-				errmsg: "unkown err."
-			});
+				errmsg: "Unkown error."
+			};
+			a_response.send(JSON.stringify(ret))
 		}
 	});
 });
 
-app.get("/base_info", function (req, res) {
-	var userId = req.query.userId;
-	db.get_user_base_info(userId, function (data) {
+g_express_account_server.get("/profile", function (a_request, a_response) {
+	var userId = a_request.query.userId;
+	m_db.get_user_profile(userId, function (a_profile) {
 		var ret = {
 			errcode: 0,
-			errmsg: "ok",
-			name: data.name,
-			sex: data.sex,
-			headimgurl: data.headimg
+			errmsg: "Ok.",
+			name: a_profile.name,
+			sex: a_profile.sex,
+			urlImage: a_profile.headimg
 		};
-		send(res, ret);
+		a_response.send(JSON.stringify(ret))
 	});
 });
 
-app.get("/image", function (req, res) {
-	var url = req.query.url;
+g_express_account_server.get("/image", function (a_request, a_response) {
+	var url = a_request.query.url;
 	if (!url) {
-		http.send(res, 1, "invalid url", {});
+		m_http.send(a_response, 1, "Null URL.", {});
 		return;
 	}
 	if (url.search("http://") != 0 && url.search("https://") != 0) {
-		http.send(res, 1, "invalid url", {});
+		m_http.send(a_response, 1, "URL not begin with http:// or https://.", {});
 		return;
 	}
 
 	url = url.split(".jpg")[0];
 
-
-	var safe = url.search("https://") == 0;
-	// console.log(url);
-	var ret = http.getSync(url, null, safe, "binary");
+	var isHttps = url.search("https://") == 0;
+	var ret = m_http.getSync(url, null, isHttps, "binary");
 	if (!ret.type || !ret.data) {
-		http.send(res, 1, "invalid url", true);
+		m_http.send(a_response, 1, "HTTP sync failed.", true);
 		return;
 	}
-	res.writeHead(200, {
+	a_response.writeHead(200, {
 		"Content-Type": ret.type
 	});
-	res.write(ret.data, "binary");
-	res.end();
+	a_response.write(ret.data, "binary");
+	a_response.end();
 });

@@ -166,7 +166,7 @@ exports.get_user_data = function (a_account, a_callback) {
     });
 };
 
-exports.get_user_data_by_userid = function (a_userId, a_callback) {
+exports.get_user_profile_by_user_id = function (a_userId, a_callback) {
     a_callback = a_callback == null ? nop : a_callback;
     if (a_userId == null) {
         a_callback(null);
@@ -383,7 +383,7 @@ exports.update_user_info = function (a_userId, a_name, a_headImg, a_sex, a_callb
     });
 };
 
-exports.get_user_base_info = function (a_userId, a_callback) {
+exports.get_user_profile = function (a_userId, a_callback) {
     a_callback = a_callback == null ? nop : a_callback;
     if (a_userId == null) {
         a_callback(null);

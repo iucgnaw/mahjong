@@ -43,12 +43,12 @@ function getBaseInfo(a_userId, a_fnCallback) {
     if (cc.vv.baseInfoMap[a_userId] != null) {
         a_fnCallback(a_userId, cc.vv.baseInfoMap[a_userId]);
     } else {
-        cc.vv.http.sendRequest("/base_info", {
+        cc.vv.http.sendRequest("/profile", {
             userId: a_userId
         }, function (a_ret) {
             var url = null;
-            if (a_ret.headimgurl) {
-                url = cc.vv.http.g_masterUrl + "/image?url=" + encodeURIComponent(a_ret.headimgurl) + ".jpg";
+            if (a_ret.urlImage) {
+                url = cc.vv.http.g_urlMaster + "/image?url=" + encodeURIComponent(a_ret.urlImage) + ".jpg";
             }
             var info = {
                 name: a_ret.name,
@@ -58,7 +58,7 @@ function getBaseInfo(a_userId, a_fnCallback) {
             cc.vv.baseInfoMap[a_userId] = info;
             a_fnCallback(a_userId, info);
 
-        }, cc.vv.http.g_masterUrl);
+        }, cc.vv.http.g_urlMaster);
     }
 };
 

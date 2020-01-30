@@ -4,20 +4,30 @@ var m_db = require("../utils/db");
 var m_http = require("../utils/http");
 var g_room_service = require("./room_service");
 
-var g_app = m_express();
+var g_express_client_service = m_express();
 var g_config = null;
 
-function check_account(req, res) {
-	var account = req.query.account;
-	var sign = req.query.sign;
-	if (account == null || sign == null) {
-		m_http.send(res, 1, "unknown error");
+exports.start = function (a_config) {
+	g_config = a_config;
+	g_express_client_service.listen(g_config.CLEINT_PORT);
+	console.log("client service is listening on port " + g_config.CLEINT_PORT);
+};
+
+function check_account(a_request, a_response) {
+	var account = a_request.query.account;
+	var sign = a_request.query.sign;
+	if (account == null) {
+		m_http.send(a_response, 1, "Account is null.");
+		return false;
+	}
+	if (sign == null) {
+		m_http.send(a_response, 1, "Sign is null.");
 		return false;
 	}
 	/*
-	var serverSign = crypto.md5(account + req.ip + config.ACCOUNT_PRI_KEY);
-	if(serverSign != sign){
-		http.send(res,2,"login failed.");
+	var serverSign = crypto.md5(account + a_request.ip + g_config.ACCOUNT_PRI_KEY);
+	if (serverSign != sign) {
+		http.send(a_response, 2, "Client Sign doesn't match Server Sign.");
 		return false;
 	}
 	*/
@@ -25,90 +35,90 @@ function check_account(req, res) {
 }
 
 //设置跨域访问
-g_app.all("*", function (req, res, next) {
-	res.header("Access-Control-Allow-Origin", "*");
-	res.header("Access-Control-Allow-Headers", "X-Requested-With");
-	res.header("Access-Control-Allow-Methods", "PUT,POST,GET,DELETE,OPTIONS");
-	res.header("X-Powered-By", " 3.2.1");
-	res.header("Content-Type", "application/json;charset=utf-8");
-	next();
+g_express_client_service.all("*", function (a_request, a_response, a_fnNext) {
+	a_response.header("Access-Control-Allow-Origin", "*");
+	a_response.header("Access-Control-Allow-Headers", "X-Requested-With");
+	a_response.header("Access-Control-Allow-Methods", "PUT,POST,GET,DELETE,OPTIONS");
+	a_response.header("X-Powered-By", " 3.2.1");
+	a_response.header("Content-Type", "application/json;charset=utf-8");
+	a_fnNext();
 });
 
-g_app.get("/login", function (req, res) {
-	if (!check_account(req, res)) {
+g_express_client_service.get("/login_as_guest", function (a_request, a_response) {
+	if (!check_account(a_request, a_response)) {
 		return;
 	}
 
-	var ip = req.ip;
-	if (ip.indexOf("::ffff:") != -1) {
-		ip = ip.substr(7);
+	var ip = a_request.ip;
+	if (ip.indexOf("::ffff:") != -1) { // IPv6 address
+		ip = ip.substr(7); // Get IPv4 part
 	}
 
-	var account = req.query.account;
-	m_db.get_user_data(account, function (data) {
-		if (data == null) {
-			m_http.send(res, 0, "ok");
+	var account = a_request.query.account;
+	m_db.get_user_data(account, function (a_user) {
+		if (a_user == null) {
+			m_http.send(a_response, 0, "ok");
 			return;
 		}
 
-		var ret = {
-			account: data.account,
-			userId: data.userId,
-			name: data.name,
-			lv: data.lv,
-			exp: data.exp,
-			coins: data.coins,
-			gems: data.gems,
+		var user = {
+			account: a_user.account,
+			userId: a_user.userId,
+			name: a_user.name,
+			lv: a_user.lv,
+			exp: a_user.exp,
+			coins: a_user.coins,
+			gems: a_user.gems,
 			ip: ip,
-			sex: data.sex,
+			sex: a_user.sex,
 		};
 
-		m_db.get_room_id_of_user(data.userId, function (roomId) {
+		m_db.get_room_id_of_user(a_user.userId, function (a_roomId) {
 			//如果用户处于房间中，则需要对其房间进行检查。 如果房间还在，则通知用户进入
-			if (roomId != null) {
+			if (a_roomId != null) {
 				//检查房间是否存在于数据库中
-				m_db.is_room_exist(roomId, function (retval) {
-					if (retval) {
-						ret.roomId = roomId;
+				m_db.is_room_exist(a_roomId, function (a_exist) {
+					if (a_exist) {
+						user.roomId = a_roomId;
 					} else {
 						//如果房间不在了，表示信息不同步，清除掉用户记录
-						m_db.set_room_id_of_user(data.userId, null);
+						m_db.set_room_id_of_user(a_user.userId, null);
 					}
-					m_http.send(res, 0, "ok", ret);
+					m_http.send(a_response, 0, "Ok.", user);
 				});
 			} else {
-				m_http.send(res, 0, "ok", ret);
+				m_http.send(a_response, 0, "Ok.", user);
 			}
 		});
 	});
 });
 
-g_app.get("/create_user", function (req, res) {
-	if (!check_account(req, res)) {
+g_express_client_service.get("/create_user", function (a_request, a_response) {
+	if (!check_account(a_request, a_response)) {
 		return;
 	}
-	var account = req.query.account;
-	var name = req.query.name;
+	var account = a_request.query.account;
+	var name = a_request.query.name;
 	var coins = 1000;
 	var gems = 1021;
 	// console.log(name);
 
-	m_db.is_user_exist(account, function (ret) {
-		if (!ret) {
-			m_db.create_user(account, name, coins, gems, 0, null, function (ret) {
-				if (ret == null) {
-					m_http.send(res, 2, "system error.");
+	m_db.is_user_exist(account, function (a_exist) {
+		if (!a_exist) {
+			m_db.create_user(account, name, coins, gems, 0, null, function (a_ret) {
+				if (a_ret == null) {
+					m_http.send(a_response, 2, "Create user fail.");
 				} else {
-					m_http.send(res, 0, "ok");
+					m_http.send(a_response, 0, "Ok.");
 				}
 			});
 		} else {
-			m_http.send(res, 1, "account have already exist.");
+			m_http.send(a_response, 1, "User already exist.");
 		}
 	});
 });
 
-g_app.get("/create_private_room", function (a_request, a_response) {
+g_express_client_service.get("/create_private_room", function (a_request, a_response) {
 	//验证参数合法性
 	var query = a_request.query;
 	//验证玩家身份
@@ -121,18 +131,18 @@ g_app.get("/create_private_room", function (a_request, a_response) {
 
 	query.account = null;
 	query.sign = null;
-	
-	m_db.get_user_data(account, function (a_data) {
-		if (a_data == null) {
-			m_http.send(a_response, 1, "system error");
+
+	m_db.get_user_data(account, function (a_user) {
+		if (a_user == null) {
+			m_http.send(a_response, 1, "Get user data fail.");
 			return;
 		}
-		var userId = a_data.userId;
-		var name = a_data.name;
+		var userId = a_user.userId;
+		var name = a_user.name;
 		//验证玩家状态
-		m_db.get_room_id_of_user(userId, function (roomId) {
-			if (roomId != null) {
-				m_http.send(a_response, -1, "user is playing in room now.");
+		m_db.get_room_id_of_user(userId, function (a_roomId) {
+			if (a_roomId != null) {
+				m_http.send(a_response, -1, "User is already playing in room.");
 				return;
 			}
 			//创建房间
@@ -150,157 +160,151 @@ g_app.get("/create_private_room", function (a_request, a_response) {
 							ret.sign = m_crypto.md5(ret.roomId + ret.token + ret.time + g_config.ROOM_PRI_KEY);
 							m_http.send(a_response, 0, "ok", ret);
 						} else {
-							m_http.send(a_response, a_errCode, "room does not exist.");
+							m_http.send(a_response, a_errCode, "Room does not exist.");
 						}
 					});
 				} else {
-					m_http.send(a_response, a_err, "create failed.");
+					m_http.send(a_response, a_err, "Create room fail.");
 				}
 			});
 		});
 	});
 });
 
-g_app.get("/enter_private_room", function (req, res) {
-	var data = req.query;
+g_express_client_service.get("/enter_private_room", function (a_request, a_response) {
+	var data = a_request.query;
 	var roomId = data.roomId;
 	if (roomId == null) {
-		m_http.send(res, -1, "parameters don not match api requirements.");
+		m_http.send(a_response, -1, "Parameters do not match api requirements.");
 		return;
 	}
-	if (!check_account(req, res)) {
+	if (!check_account(a_request, a_response)) {
 		return;
 	}
 
 	var account = data.account;
 
-	m_db.get_user_data(account, function (data) {
-		if (data == null) {
-			m_http.send(res, -1, "system error");
+	m_db.get_user_data(account, function (a_user) {
+		if (a_user == null) {
+			m_http.send(a_response, -1, "Get user data fail.");
 			return;
 		}
-		var userId = data.userId;
-		var name = data.name;
+		var userId = a_user.userId;
+		var name = a_user.name;
 
 		//验证玩家状态
 		//todo
 		//进入房间
-		g_room_service.enterRoom(userId, name, roomId, function (errcode, enterInfo) {
-			if (enterInfo) {
+		g_room_service.enterRoom(userId, name, roomId, function (a_errcode, a_enterInfo) {
+			if (a_enterInfo) {
 				var ret = {
 					roomId: roomId,
-					ip: enterInfo.ip,
-					port: enterInfo.port,
-					token: enterInfo.token,
+					ip: a_enterInfo.ip,
+					port: a_enterInfo.port,
+					token: a_enterInfo.token,
 					time: Date.now()
 				};
 				ret.sign = m_crypto.md5(roomId + ret.token + ret.time + g_config.ROOM_PRI_KEY);
-				m_http.send(res, 0, "ok", ret);
+				m_http.send(a_response, 0, "ok", ret);
 			} else {
-				m_http.send(res, errcode, "enter room failed.");
+				m_http.send(a_response, a_errcode, "Enter room fail.");
 			}
 		});
 	});
 });
 
-g_app.get("/get_history_list", function (req, res) {
-	var data = req.query;
-	if (!check_account(req, res)) {
+g_express_client_service.get("/get_history_list", function (a_request, a_response) {
+	var data = a_request.query;
+	if (!check_account(a_request, a_response)) {
 		return;
 	}
 	var account = data.account;
 	m_db.get_user_data(account, function (data) {
 		if (data == null) {
-			m_http.send(res, -1, "system error");
+			m_http.send(a_response, -1, "Get user data fail.");
 			return;
 		}
 		var userId = data.userId;
 		m_db.get_user_history(userId, function (history) {
-			m_http.send(res, 0, "ok", {
+			m_http.send(a_response, 0, "Ok.", {
 				history: history
 			});
 		});
 	});
 });
 
-g_app.get("/get_games_of_room", function (req, res) {
-	var data = req.query;
+g_express_client_service.get("/get_games_of_room", function (a_request, a_response) {
+	var data = a_request.query;
 	var uuid = data.uuid;
 	if (uuid == null) {
-		m_http.send(res, -1, "parameters don not match api requirements.");
+		m_http.send(a_response, -1, "Parameters do not match api requirements.");
 		return;
 	}
-	if (!check_account(req, res)) {
+	if (!check_account(a_request, a_response)) {
 		return;
 	}
 	m_db.get_games_of_room(uuid, function (data) {
 		// console.log(data);
-		m_http.send(res, 0, "ok", {
+		m_http.send(a_response, 0, "Ok.", {
 			data: data
 		});
 	});
 });
 
-g_app.get("/get_detail_of_game", function (req, res) {
-	var data = req.query;
+g_express_client_service.get("/get_detail_of_game", function (a_request, a_response) {
+	var data = a_request.query;
 	var uuid = data.uuid;
 	var index = data.index;
 	if (uuid == null || index == null) {
-		m_http.send(res, -1, "parameters don not match api requirements.");
+		m_http.send(a_response, -1, "Parameters do not match api requirements.");
 		return;
 	}
-	if (!check_account(req, res)) {
+	if (!check_account(a_request, a_response)) {
 		return;
 	}
 	m_db.get_detail_of_game(uuid, index, function (data) {
-		m_http.send(res, 0, "ok", {
+		m_http.send(a_response, 0, "Ok.", {
 			data: data
 		});
 	});
 });
 
-g_app.get("/get_user_status", function (req, res) {
-	if (!check_account(req, res)) {
+g_express_client_service.get("/get_user_status", function (a_request, a_response) {
+	if (!check_account(a_request, a_response)) {
 		return;
 	}
-	var account = req.query.account;
+	var account = a_request.query.account;
 	m_db.get_gems(account, function (data) {
 		if (data != null) {
-			m_http.send(res, 0, "ok", {
+			m_http.send(a_response, 0, "Ok.", {
 				gems: data.gems
 			});
 		} else {
-			m_http.send(res, 1, "get gems failed.");
+			m_http.send(a_response, 1, "Get gems fail.");
 		}
 	});
 });
 
-g_app.get("/get_message", function (a_req, a_res) {
-	if (!check_account(a_req, a_res)) {
+g_express_client_service.get("/get_message", function (a_request, a_response) {
+	if (!check_account(a_request, a_response)) {
 		return;
 	}
-	var type = a_req.query.type;
+	var type = a_request.query.type;
 
 	if (type == null) {
-		m_http.send(a_res, -1, "parameters don not match api requirements.");
+		m_http.send(a_response, -1, "Parameters do not match api requirements.");
 		return;
 	}
 
-	var version = a_req.query.version;
-	m_db.get_message(type, version, function (a_data) {
-		if (a_data != null) {
-			m_http.send(a_res, 0, "ok", {
-				msg: a_data.msg,
-				version: a_data.version
+	var version = a_request.query.version;
+	m_db.get_message(type, version, function (a_msg) {
+		if (a_msg != null) {
+			m_http.send(a_response, 0, "Ok.", {
+				msg: a_msg.msg,
+				version: a_msg.version
 			});
 		} else {
-			m_http.send(a_res, 1, "get message failed.");
+			m_http.send(a_response, 1, "Get message fail.");
 		}
 	});
 });
-
-exports.start = function ($config) {
-	g_config = $config;
-	g_app.listen(g_config.CLEINT_PORT);
-	console.log("client service is listening on port " + g_config.CLEINT_PORT);
-};

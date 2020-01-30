@@ -1,33 +1,26 @@
-var g_defaultUrl = "http://game.iucgnaw.com:11114";
-
-exports.g_masterUrl = null;
-exports.g_currentUrl = null;
-exports.token = null;
+exports.g_urlMaster = null;
+exports.g_urlHall = null;
+exports.g_token = null;
 
 init();
 
 function init() {
-    exports.g_masterUrl = g_defaultUrl;
-    exports.g_currentUrl = g_defaultUrl;
+    exports.g_urlMaster = "http://game.iucgnaw.com:11114";
+    exports.g_urlHall = exports.g_urlMaster;
 }
 
-function setUrl(a_url) {
-    g_defaultUrl = a_url;
-    init();
-};
-
-function sendRequest(a_path, a_data, a_handler, a_extraUrl) {
+function sendRequest(a_path, a_data, a_handler, a_urlExtra) {
     var xmlHttpRequest = cc.loader.getXMLHttpRequest();
     xmlHttpRequest.timeout = 5000;
 
     if (a_data == null) {
         a_data = {};
     }
-    if (exports.token) {
-        a_data.token = exports.token;
+    if (exports.g_token) {
+        a_data.token = exports.g_token;
     }
-    if (a_extraUrl == null) {
-        a_extraUrl = exports.g_currentUrl;
+    if (a_urlExtra == null) {
+        a_urlExtra = exports.g_urlHall;
     }
 
     //解析请求路由以及格式化请求参数
@@ -41,7 +34,7 @@ function sendRequest(a_path, a_data, a_handler, a_extraUrl) {
     }
 
     //组装完整的URL
-    var requestUrl = a_extraUrl + sendPath + encodeURI(sendText);
+    var requestUrl = a_urlExtra + sendPath + encodeURI(sendText);
 
     //发送请求
     // console.log("xmlHttpRequest.open(Get), requestUrl: " + requestUrl);
@@ -59,7 +52,7 @@ function sendRequest(a_path, a_data, a_handler, a_extraUrl) {
     }, 5000);
 
     var retryFunc = function () {
-        sendRequest(a_path, a_data, a_handler, a_extraUrl);
+        sendRequest(a_path, a_data, a_handler, a_urlExtra);
     };
 
     xmlHttpRequest.onreadystatechange = function () {
@@ -113,4 +106,3 @@ function sendRequest(a_path, a_data, a_handler, a_extraUrl) {
 }
 
 exports.sendRequest = sendRequest;
-exports.setUrl = setUrl;

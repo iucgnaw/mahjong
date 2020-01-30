@@ -93,8 +93,8 @@ cc.Class({
             cc.vv.serverInfo = a_serverInfo;
 
             if (cc.sys.isNative) {
-                var url = cc.url.raw("resources/ver/cv.txt");
-                cc.loader.load(url, function (a_err, a_version) {
+                var urlCurrentVersion = cc.url.raw("resources/ver/cv.txt");
+                cc.loader.load(urlCurrentVersion, function (a_err, a_version) {
                     cc.VERSION = a_version;
                     if (a_serverInfo.version == null) {
                         console.error("a_serverInfo.version == null");
@@ -116,7 +116,7 @@ cc.Class({
         var fnGetServerInfo = function () {
             cc.find("Canvas/nodeConnectionStatus").getComponent(cc.Label).string = "正在连接账户服务器...";
 
-            xmlHttpRequest = cc.vv.http.sendRequest("/get_serverinfo", null, function (a_serverInfo) {
+            xmlHttpRequest = cc.vv.http.sendRequest("/get_server_info", null, function (a_serverInfo) {
                 xmlHttpRequest = null;
                 connected = true;
                 fnGetVersion(a_serverInfo);

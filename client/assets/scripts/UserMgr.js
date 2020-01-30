@@ -27,7 +27,7 @@ cc.Class({
             cc.sys.localStorage.setItem("account", account);
         }
 
-        cc.vv.http.sendRequest("/guest", {
+        cc.vv.http.sendRequest("/register_guest", {
             account: account
         }, this.onAuth);
     },
@@ -39,7 +39,7 @@ cc.Class({
         } else {
             self.account = a_ret.account;
             self.sign = a_ret.sign;
-            cc.vv.http.g_currentUrl = "http://" + cc.vv.serverInfo.hall;
+            cc.vv.http.g_urlHall = "http://" + cc.vv.serverInfo.urlHall;
             self.login();
         }
     },
@@ -51,10 +51,9 @@ cc.Class({
                 console.error(ret.errmsg);
             } else {
                 if (!ret.userId) {
-                    //jump to register user info.
+                    // Jump to register user info.
                     cc.director.loadScene("createrole");
                 } else {
-                    // console.log(ret);
                     self.account = ret.account;
                     self.userId = ret.userId;
                     self.userName = ret.name;
@@ -69,8 +68,9 @@ cc.Class({
                 }
             }
         };
+
         cc.vv.wc.show("正在登录游戏大厅");
-        cc.vv.http.sendRequest("/login", {
+        cc.vv.http.sendRequest("/login_as_guest", {
             account: this.account,
             sign: this.sign
         }, onLogin);
