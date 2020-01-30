@@ -561,8 +561,17 @@ cc.Class({
                         alert("客户端消息：\r\n如果是暗杠，请选择4张手牌。如果是碰转杠，请选择1张手牌。");
                         return;
                     } else if (selectedTiles.length == 1) {
-                        if (seat.melds.length <= 0) {
-                            alert("客户端消息：\r\n没有组牌，不能碰转杠！");
+                        var pongMeld = null;
+                        for (var idxMeld = 0; idxMeld < seat.melds.length; idxMeld++) {
+                            if (seat.melds[idxMeld].type == "meld_pong") {
+                                if (seat.melds[idxMeld].tiles[0] == selectedTiles[0]) {
+                                    pongMeld = seat.melds[idxMeld];
+                                    break;
+                                }
+                            }
+                        }
+                        if (pongMeld == null) {
+                            alert("客户端消息：\r\n没有合适的碰牌，不能碰转杠！");
                             return;
                         }
                     }
